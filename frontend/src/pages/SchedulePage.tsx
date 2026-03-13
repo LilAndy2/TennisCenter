@@ -2,18 +2,18 @@ import { Paper, Typography } from "@mui/material";
 import styled from "styled-components";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 
-function FeedPage() {
+function SchedulePage() {
     return (
         <AuthenticatedLayout>
             <ContentCard>
-                <PageTitle>Feed</PageTitle>
-                <PageDescription>This will become your main feed page.</PageDescription>
+                <PageTitle>Schedule</PageTitle>
+                <PageDescription>This page will contain the schedule.</PageDescription>
             </ContentCard>
         </AuthenticatedLayout>
     );
 }
 
-export default FeedPage;
+export default SchedulePage;
 
 const ContentCard = styled(Paper)`
   padding: 2rem;

@@ -2,18 +2,18 @@ import { Paper, Typography } from "@mui/material";
 import styled from "styled-components";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 
-function FeedPage() {
+function H2HPage() {
     return (
         <AuthenticatedLayout>
             <ContentCard>
-                <PageTitle>Feed</PageTitle>
-                <PageDescription>This will become your main feed page.</PageDescription>
+                <PageTitle>H2H</PageTitle>
+                <PageDescription>This page will contain H2H.</PageDescription>
             </ContentCard>
         </AuthenticatedLayout>
     );
 }
 
-export default FeedPage;
+export default H2HPage;
 
 const ContentCard = styled(Paper)`
   padding: 2rem;

@@ -2,18 +2,18 @@ import { Paper, Typography } from "@mui/material";
 import styled from "styled-components";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 
-function FeedPage() {
+function TournamentsPage() {
     return (
         <AuthenticatedLayout>
             <ContentCard>
-                <PageTitle>Feed</PageTitle>
-                <PageDescription>This will become your main feed page.</PageDescription>
+                <PageTitle>Tournaments</PageTitle>
+                <PageDescription>This page will contain tournaments.</PageDescription>
             </ContentCard>
         </AuthenticatedLayout>
     );
 }
 
-export default FeedPage;
+export default TournamentsPage;
 
 const ContentCard = styled(Paper)`
   padding: 2rem;
