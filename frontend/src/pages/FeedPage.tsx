@@ -1,45 +1,28 @@
 import { Box } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
+import axiosInstance from "../api/axiosInstance";
 import CreatePostModal from "../components/feed/CreatePostModal";
 import FeedHero from "../components/feed/FeedHero";
 import PostCard, { type FeedPostType } from "../components/feed/PostCard";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 
-const initialMockPosts: FeedPostType[] = [
-    {
-        id: 1,
-        authorName: "Andrei Manea",
-        authorRole: "PLAYER",
-        content:
-            "Really excited for the next local tournament this weekend. Good luck to everyone and let’s keep the matches competitive and fair.",
-        imageUrl:
-            "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?auto=format&fit=crop&w=1200&q=80",
-        createdAt: "2 hours ago",
-        likesCount: 18,
-        commentsCount: 6,
-    },
-    {
-        id: 2,
-        authorName: "Tournament Admin",
-        authorRole: "ADMIN",
-        content:
-            "Important announcement: registrations for the Spring Open close on Friday at 18:00. Please make sure your profile information is complete before registering.",
-        createdAt: "5 hours ago",
-        likesCount: 11,
-        commentsCount: 3,
-    },
-];
-
-type StoredUser = {
-    username: string;
-    email: string;
-    role: string;
-};
-
 function FeedPage() {
-    const [posts, setPosts] = useState<FeedPostType[]>(initialMockPosts);
+    const [posts, setPosts] = useState<FeedPostType[]>([]);
     const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
+
+    const loadPosts = async () => {
+        try {
+            const response = await axiosInstance.get<FeedPostType[]>("/player/feed/posts");
+            setPosts(response.data);
+        } catch (error) {
+            console.error("Failed to load posts", error);
+        }
+    };
+
+    useEffect(() => {
+        loadPosts();
+    }, []);
 
     const handleOpenCreatePostModal = () => {
         setIsCreatePostModalOpen(true);
@@ -49,27 +32,42 @@ function FeedPage() {
         setIsCreatePostModalOpen(false);
     };
 
-    const handleCreatePost = (postData: {
+    const handleCreatePost = async (postData: {
         content: string;
         imageFile: File | null;
     }) => {
-        const storedUser = localStorage.getItem("user");
-        const parsedUser: StoredUser | null = storedUser ? JSON.parse(storedUser) : null;
+        try {
+            const formData = new FormData();
 
-        const newPost: FeedPostType = {
-            id: Date.now(),
-            authorName: parsedUser?.username ?? "Player",
-            authorRole: parsedUser?.role ?? "USER",
-            content: postData.content,
-            imageUrl: postData.imageFile
-                ? URL.createObjectURL(postData.imageFile)
-                : undefined,
-            createdAt: "Just now",
-            likesCount: 0,
-            commentsCount: 0,
-        };
+            if (postData.content) {
+                formData.append("content", postData.content);
+            }
 
-        setPosts((previousPosts) => [newPost, ...previousPosts]);
+            if (postData.imageFile) {
+                formData.append("image", postData.imageFile);
+            }
+
+            const response = await axiosInstance.post<FeedPostType>(
+                "/player/feed/posts",
+                formData
+            );
+
+            setPosts((previousPosts) => [response.data, ...previousPosts]);
+        } catch (error) {
+            console.error("Failed to create post", error);
+            throw error;
+        }
+    };
+
+    const handleDeletePost = async (postId: number) => {
+        try {
+            await axiosInstance.delete(`/player/feed/posts/${postId}`);
+            setPosts((previousPosts) =>
+                previousPosts.filter((post) => post.id !== postId)
+            );
+        } catch (error) {
+            console.error("Failed to delete post", error);
+        }
     };
 
     return (
@@ -80,7 +78,7 @@ function FeedPage() {
 
                     <PostsSection>
                         {posts.map((post) => (
-                            <PostCard key={post.id} post={post} />
+                            <PostCard key={post.id} post={post} onDelete={handleDeletePost} />
                         ))}
                     </PostsSection>
                 </FeedCenterColumn>

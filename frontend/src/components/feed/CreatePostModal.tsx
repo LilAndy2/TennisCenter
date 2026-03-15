@@ -24,7 +24,7 @@ type StoredUser = {
 type CreatePostModalProps = {
     open: boolean;
     onClose: () => void;
-    onSubmit: (postData: { content: string; imageFile: File | null }) => void;
+    onSubmit: (postData: { content: string; imageFile: File | null }) => Promise<void>;
 };
 
 function CreatePostModal({ open, onClose, onSubmit }: CreatePostModalProps) {
@@ -77,18 +77,22 @@ function CreatePostModal({ open, onClose, onSubmit }: CreatePostModalProps) {
         }
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!content.trim() && !imageFile) {
             return;
         }
 
-        onSubmit({
-            content: content.trim(),
-            imageFile,
-        });
+        try {
+            await onSubmit({
+                content: content.trim(),
+                imageFile,
+            });
 
-        resetForm();
-        onClose();
+            resetForm();
+            onClose();
+        } catch (error) {
+            console.error("Create post failed", error);
+        }
     };
 
     return (
