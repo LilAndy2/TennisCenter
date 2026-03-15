@@ -67,6 +67,22 @@ public class FeedPostService {
         feedPostRepository.delete(post);
     }
 
+    public FeedPostResponse updatePost(Long postId, String content, User currentUser) {
+        FeedPost post = feedPostRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found"));
+
+        if (!post.getAuthor().getId().equals(currentUser.getId())) {
+            throw new UnauthorizedActionException("You cannot edit this post");
+        }
+
+        post.setContent(content);
+        post.setUpdatedAt(LocalDateTime.now());
+
+        FeedPost updatedPost = feedPostRepository.save(post);
+
+        return mapToResponse(updatedPost, currentUser);
+    }
+
     private FeedPostResponse mapToResponse(FeedPost post, User currentUser) {
         return FeedPostResponse.builder()
                 .id(post.getId())

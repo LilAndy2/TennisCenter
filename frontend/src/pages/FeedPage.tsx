@@ -10,6 +10,7 @@ import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 function FeedPage() {
     const [posts, setPosts] = useState<FeedPostType[]>([]);
     const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
+    const [editingPost, setEditingPost] = useState<FeedPostType | null>(null);
 
     const loadPosts = async () => {
         try {
@@ -70,6 +71,41 @@ function FeedPage() {
         }
     };
 
+    const handleEditPost = (post: FeedPostType) => {
+        setEditingPost(post)
+        setIsCreatePostModalOpen(true)
+    };
+
+    const handleUpdatePost = async (postData: {
+        content: string;
+        imageFile: File | null;
+    }) => {
+
+        if (!editingPost) return;
+
+        try {
+            const formData = new FormData();
+            formData.append("content", postData.content);
+
+            const response = await axiosInstance.put<FeedPostType>(
+                `/player/feed/posts/${editingPost.id}`,
+                formData
+            );
+
+            setPosts((prevPosts) =>
+                prevPosts.map((p) =>
+                    p.id === editingPost.id ? response.data : p
+                )
+            );
+
+            setEditingPost(null);
+            setIsCreatePostModalOpen(false);
+
+        } catch (error) {
+            console.error("Failed to update post", error);
+        }
+    };
+
     return (
         <AuthenticatedLayout>
             <FeedPageWrapper>
@@ -78,7 +114,12 @@ function FeedPage() {
 
                     <PostsSection>
                         {posts.map((post) => (
-                            <PostCard key={post.id} post={post} onDelete={handleDeletePost} />
+                            <PostCard
+                                key={post.id}
+                                post={post}
+                                onDelete={handleDeletePost}
+                                onEdit={handleEditPost}
+                            />
                         ))}
                     </PostsSection>
                 </FeedCenterColumn>
@@ -87,7 +128,9 @@ function FeedPage() {
             <CreatePostModal
                 open={isCreatePostModalOpen}
                 onClose={handleCloseCreatePostModal}
-                onSubmit={handleCreatePost}
+                onSubmit={editingPost ? handleUpdatePost : handleCreatePost}
+                initialContent={editingPost?.content}
+                mode={editingPost ? "edit" : "create"}
             />
         </AuthenticatedLayout>
     );

@@ -2,8 +2,23 @@ import {
     ChatBubbleOutline,
     DeleteOutline,
     FavoriteBorder,
+    MoreVert,
+    EditOutlined,
 } from "@mui/icons-material";
-import { Avatar, Box, IconButton, Typography } from "@mui/material";
+import {
+    Avatar,
+    Box,
+    IconButton,
+    Typography,
+    Menu,
+    MenuItem,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
+} from "@mui/material";
+import { useState } from "react";
 import styled from "styled-components";
 
 export type FeedPostType = {
@@ -19,9 +34,31 @@ export type FeedPostType = {
 type PostCardProps = {
     post: FeedPostType;
     onDelete: (postId: number) => void;
+    onEdit: (post: FeedPostType) => void;
 };
 
-function PostCard({ post, onDelete }: PostCardProps) {
+function PostCard({ post, onDelete, onEdit }: PostCardProps) {
+    const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
+    const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+
+    const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setMenuAnchor(event.currentTarget);
+    };
+
+    const handleCloseMenu = () => {
+        setMenuAnchor(null);
+    };
+
+    const handleDeleteClick = () => {
+        handleCloseMenu();
+        setConfirmDeleteOpen(true);
+    };
+
+    const handleConfirmDelete = () => {
+        onDelete(post.id);
+        setConfirmDeleteOpen(false);
+    };
+
     return (
         <CardWrapper>
             <PostHeader>
@@ -36,9 +73,32 @@ function PostCard({ post, onDelete }: PostCardProps) {
                 </PostHeaderLeft>
 
                 {post.owner ? (
-                    <IconButton onClick={() => onDelete(post.id)}>
-                        <DeleteOutline />
-                    </IconButton>
+                    <>
+                        <IconButton onClick={handleOpenMenu}>
+                            <MoreVert />
+                        </IconButton>
+
+                        <Menu
+                            anchorEl={menuAnchor}
+                            open={Boolean(menuAnchor)}
+                            onClose={handleCloseMenu}
+                        >
+                            <MenuItem
+                                onClick={() => {
+                                    handleCloseMenu();
+                                    onEdit(post);
+                                }}
+                            >
+                                <EditOutlined sx={{ mr: 1 }} />
+                                Edit
+                            </MenuItem>
+
+                            <MenuItem onClick={handleDeleteClick} sx={{ color: "#dc2626" }}>
+                                <DeleteOutline sx={{ mr: 1 }} />
+                                Delete
+                            </MenuItem>
+                        </Menu>
+                    </>
                 ) : null}
             </PostHeader>
 
@@ -57,6 +117,33 @@ function PostCard({ post, onDelete }: PostCardProps) {
                     <span>Comment</span>
                 </ActionButton>
             </PostActions>
+
+            <Dialog
+                open={confirmDeleteOpen}
+                onClose={() => setConfirmDeleteOpen(false)}
+            >
+                <DialogTitle>Delete post</DialogTitle>
+
+                <DialogContent>
+                    <Typography>
+                        Are you sure you want to permanently delete this post?
+                    </Typography>
+                </DialogContent>
+
+                <DialogActions>
+                    <Button onClick={() => setConfirmDeleteOpen(false)}>
+                        Cancel
+                    </Button>
+
+                    <Button
+                        color="error"
+                        variant="contained"
+                        onClick={handleConfirmDelete}
+                    >
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </CardWrapper>
     );
 }

@@ -11,7 +11,7 @@ import {
     IconButton,
     Typography,
 } from "@mui/material";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import styled from "styled-components";
 
 type StoredUser = {
@@ -25,9 +25,11 @@ type CreatePostModalProps = {
     open: boolean;
     onClose: () => void;
     onSubmit: (postData: { content: string; imageFile: File | null }) => Promise<void>;
+    initialContent?: string;
+    mode?: "create" | "edit";
 };
 
-function CreatePostModal({ open, onClose, onSubmit }: CreatePostModalProps) {
+function CreatePostModal({ open, onClose, onSubmit, initialContent, mode }: CreatePostModalProps) {
     const storedUser = localStorage.getItem("user");
     const parsedUser: StoredUser | null = useMemo(
         () => (storedUser ? JSON.parse(storedUser) : null),
@@ -36,9 +38,15 @@ function CreatePostModal({ open, onClose, onSubmit }: CreatePostModalProps) {
 
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-    const [content, setContent] = useState("");
+    const [content, setContent] = useState(initialContent ?? "");
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreviewUrl, setImagePreviewUrl] = useState<string>("");
+
+    useEffect(() => {
+        if (open) {
+            setContent(initialContent ?? "");
+        }
+    }, [initialContent, open]);
 
     const resetForm = () => {
         setContent("");
@@ -99,7 +107,9 @@ function CreatePostModal({ open, onClose, onSubmit }: CreatePostModalProps) {
         <StyledDialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
             <DialogContentWrapper>
                 <HeaderRow>
-                    <HeaderTitle>Create post</HeaderTitle>
+                    <HeaderTitle>
+                        {mode === "edit" ? "Edit post" : "Create post"}
+                    </HeaderTitle>
 
                     <IconButton onClick={handleClose}>
                         <Close />
@@ -161,7 +171,7 @@ function CreatePostModal({ open, onClose, onSubmit }: CreatePostModalProps) {
                             onClick={handleSubmit}
                             disabled={!content.trim() && !imageFile}
                         >
-                            Post
+                            {mode === "edit" ? "Save" : "Post"}
                         </PostButton>
                     </RightActions>
                 </BottomRow>
