@@ -7,6 +7,7 @@ import com.TennisCenter.model.FeedPost;
 import com.TennisCenter.model.User;
 import com.TennisCenter.repository.CommentRepository;
 import com.TennisCenter.repository.FeedPostRepository;
+import com.TennisCenter.repository.PostLikeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class FeedPostService {
 
     private final FeedPostRepository feedPostRepository;
     private final CommentRepository commentRepository;
+    private final PostLikeRepository postLikeRepository;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -85,6 +87,10 @@ public class FeedPostService {
         return mapToResponse(updatedPost, currentUser);
     }
 
+    public FeedPostResponse getPostResponse(FeedPost post, User currentUser) {
+        return mapToResponse(post, currentUser);
+    }
+
     private FeedPostResponse mapToResponse(FeedPost post, User currentUser) {
         return FeedPostResponse.builder()
                 .id(post.getId())
@@ -95,6 +101,8 @@ public class FeedPostService {
                 .createdAt(post.getCreatedAt().toString())
                 .owner(post.getAuthor().getId().equals(currentUser.getId()))
                 .commentsCount((int) commentRepository.countByPostId(post.getId()))
+                .likesCount((int) postLikeRepository.countByPostId(post.getId()))
+                .likedByCurrentUser(postLikeRepository.existsByPostIdAndUserId(post.getId(), currentUser.getId()))
                 .build();
     }
 

@@ -4,6 +4,7 @@ import {
     FavoriteBorder,
     MoreVert,
     EditOutlined,
+    Favorite,
 } from "@mui/icons-material";
 import {
     Avatar,
@@ -21,6 +22,7 @@ import {
 import { useState } from "react";
 import styled from "styled-components";
 import PostComments from "./PostComments.tsx";
+import { motion } from "framer-motion"
 
 export type FeedPostType = {
     id: number;
@@ -31,6 +33,8 @@ export type FeedPostType = {
     createdAt: string;
     owner: boolean;
     commentsCount: number;
+    likesCount: number;
+    likedByCurrentUser: boolean;
 };
 
 type PostCardProps = {
@@ -38,12 +42,16 @@ type PostCardProps = {
     onDelete: (postId: number) => void;
     onEdit: (post: FeedPostType) => void;
     onCommentAdded: (postId: number) => void;
+    onToggleLike: (postId: number) => void;
 };
 
-function PostCard({ post, onDelete, onEdit, onCommentAdded }: PostCardProps) {
+const MotionIconWrapper = motion.span;
+
+function PostCard({ post, onDelete, onEdit, onCommentAdded, onToggleLike }: PostCardProps) {
     const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
     const [showComments, setShowComments] = useState(false);
+    const [isLikeAnimation, setIsLikeAnimation] = useState(false);
 
     const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
         setMenuAnchor(event.currentTarget);
@@ -62,6 +70,15 @@ function PostCard({ post, onDelete, onEdit, onCommentAdded }: PostCardProps) {
         onDelete(post.id);
         setConfirmDeleteOpen(false);
     };
+
+    const handleLikeClick = async () => {
+        setIsLikeAnimation(true);
+        onToggleLike(post.id);
+
+        setTimeout(() => {
+            setIsLikeAnimation(false);
+        }, 300)
+    }
 
     return (
         <CardWrapper>
@@ -111,16 +128,37 @@ function PostCard({ post, onDelete, onEdit, onCommentAdded }: PostCardProps) {
             {post.imageUrl ? <PostImage src={`http://localhost:8080${post.imageUrl}`} alt="Post" /> : null}
 
             <PostActions>
-                <ActionButton>
-                    <FavoriteBorder sx={{ fontSize: 20 }} />
-                    <span>Like</span>
+                <ActionButton onClick={handleLikeClick}>
+                    <MotionIconWrapper
+                        animate={
+                            isLikeAnimation
+                                ? { scale: [1, 1.35, 0.95, 1] }
+                                : { scale: 1 }
+                        }
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                        style={{ display: "flex", alignItems: "center" }}
+                    >
+                        {post.likedByCurrentUser ? (
+                            <Favorite sx={{ fontSize: 20, color: "#059669" }} />
+                        ) : (
+                            <FavoriteBorder sx={{ fontSize: 20, color: "#64748b" }} />
+                        )}
+                    </MotionIconWrapper>
+
+                    <span>
+                        {post.likedByCurrentUser ? "Unlike" : "Like"}
+                    </span>
+
+                    {post.likesCount > 0 ? (
+                        <CountBadge>{post.likesCount}</CountBadge>
+                    ) : null}
                 </ActionButton>
 
                 <ActionButton onClick={() => setShowComments((prev) => !prev)}>
                     <ChatBubbleOutline sx={{ fontSize: 20 }} />
                     <span>Comment</span>
                     {!showComments && post.commentsCount > 0 ? (
-                        <CommentCountBadge>{post.commentsCount}</CommentCountBadge>
+                        <CountBadge>{post.commentsCount}</CountBadge>
                     ) : null}
                 </ActionButton>
             </PostActions>
@@ -250,7 +288,7 @@ const ActionButton = styled.button`
     }
 `;
 
-const CommentCountBadge = styled.span`
+const CountBadge = styled.span`
     min-width: 1.35rem;
     height: 1.35rem;
     padding: 0 0.35rem;

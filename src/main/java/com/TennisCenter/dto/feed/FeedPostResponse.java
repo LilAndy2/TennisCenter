@@ -14,4 +14,6 @@ public class FeedPostResponse {
     private String createdAt;
     private boolean owner;
     private int commentsCount;
+    private int likesCount;
+    private boolean likedByCurrentUser;
 }

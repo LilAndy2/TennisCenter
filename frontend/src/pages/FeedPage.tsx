@@ -106,6 +106,22 @@ function FeedPage() {
         }
     };
 
+    const handleToggleLike = async (postId: number) => {
+        try {
+            const response = await axiosInstance.post<FeedPostType>(
+                `/player/feed/posts/${postId}/like`
+            );
+
+            setPosts((previousPosts) =>
+                previousPosts.map((post) =>
+                    post.id === postId ? response.data : post
+                )
+            );
+        } catch (error) {
+            console.error("Failed to toggle like", error);
+        }
+    };
+
     return (
         <AuthenticatedLayout>
             <FeedPageWrapper>
@@ -128,6 +144,7 @@ function FeedPage() {
                                         )
                                     )
                                 }
+                                onToggleLike={handleToggleLike}
                             />
                         ))}
                     </PostsSection>
