@@ -119,6 +119,15 @@ function FeedPage() {
                                 post={post}
                                 onDelete={handleDeletePost}
                                 onEdit={handleEditPost}
+                                onCommentAdded={(postId) =>
+                                    setPosts((previousPost) =>
+                                        previousPost.map((post) =>
+                                            post.id === postId
+                                                ? { ...post, commentsCount: post.commentsCount + 1}
+                                                : post
+                                        )
+                                    )
+                                }
                             />
                         ))}
                     </PostsSection>

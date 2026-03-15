@@ -5,6 +5,7 @@ import com.TennisCenter.exception.ResourceNotFoundException;
 import com.TennisCenter.exception.UnauthorizedActionException;
 import com.TennisCenter.model.FeedPost;
 import com.TennisCenter.model.User;
+import com.TennisCenter.repository.CommentRepository;
 import com.TennisCenter.repository.FeedPostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,7 @@ import java.util.UUID;
 public class FeedPostService {
 
     private final FeedPostRepository feedPostRepository;
+    private final CommentRepository commentRepository;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -92,6 +94,7 @@ public class FeedPostService {
                 .imageUrl(post.getImageUrl())
                 .createdAt(post.getCreatedAt().toString())
                 .owner(post.getAuthor().getId().equals(currentUser.getId()))
+                .commentsCount((int) commentRepository.countByPostId(post.getId()))
                 .build();
     }
 

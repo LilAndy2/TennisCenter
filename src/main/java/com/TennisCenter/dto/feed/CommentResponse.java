@@ -1,17 +1,13 @@
 package com.TennisCenter.dto.feed;
 
-import lombok.Builder;
 import lombok.Data;
+import lombok.Builder;
 
 @Data
 @Builder
-public class FeedPostResponse {
+public class CommentResponse {
     private Long id;
     private String authorName;
-    private String authorRole;
     private String content;
-    private String imageUrl;
     private String createdAt;
-    private boolean owner;
-    private int commentsCount;
 }

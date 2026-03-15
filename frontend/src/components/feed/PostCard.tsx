@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import styled from "styled-components";
+import PostComments from "./PostComments.tsx";
 
 export type FeedPostType = {
     id: number;
@@ -29,17 +30,20 @@ export type FeedPostType = {
     imageUrl?: string;
     createdAt: string;
     owner: boolean;
+    commentsCount: number;
 };
 
 type PostCardProps = {
     post: FeedPostType;
     onDelete: (postId: number) => void;
     onEdit: (post: FeedPostType) => void;
+    onCommentAdded: (postId: number) => void;
 };
 
-function PostCard({ post, onDelete, onEdit }: PostCardProps) {
+function PostCard({ post, onDelete, onEdit, onCommentAdded }: PostCardProps) {
     const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+    const [showComments, setShowComments] = useState(false);
 
     const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
         setMenuAnchor(event.currentTarget);
@@ -112,11 +116,21 @@ function PostCard({ post, onDelete, onEdit }: PostCardProps) {
                     <span>Like</span>
                 </ActionButton>
 
-                <ActionButton>
+                <ActionButton onClick={() => setShowComments((prev) => !prev)}>
                     <ChatBubbleOutline sx={{ fontSize: 20 }} />
                     <span>Comment</span>
+                    {!showComments && post.commentsCount > 0 ? (
+                        <CommentCountBadge>{post.commentsCount}</CommentCountBadge>
+                    ) : null}
                 </ActionButton>
             </PostActions>
+
+            {showComments && (
+                <PostComments
+                    postId={post.id}
+                    onCommentAdded={() => onCommentAdded(post.id)}
+                />
+            )}
 
             <Dialog
                 open={confirmDeleteOpen}
@@ -234,4 +248,18 @@ const ActionButton = styled.button`
     &:hover {
         background: #eef2f7;
     }
+`;
+
+const CommentCountBadge = styled.span`
+    min-width: 1.35rem;
+    height: 1.35rem;
+    padding: 0 0.35rem;
+    border-radius: 999px;
+    background: #e2e8f0;
+    color: #334155;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 `;
