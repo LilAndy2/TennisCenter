@@ -23,6 +23,7 @@ import { useState } from "react";
 import styled from "styled-components";
 import PostComments from "./PostComments.tsx";
 import { motion } from "framer-motion"
+import { formatTimeAgo } from "../../utils/formatTimeAgo.ts";
 
 export type FeedPostType = {
     id: number;
@@ -88,7 +89,7 @@ function PostCard({ post, onDelete, onEdit, onCommentAdded, onToggleLike }: Post
                     <AuthorInfo>
                         <AuthorName>{post.authorName}</AuthorName>
                         <AuthorMeta>
-                            {post.authorRole} • {new Date(post.createdAt).toLocaleString()}
+                            {post.authorRole} • {formatTimeAgo(post.createdAt)}
                         </AuthorMeta>
                     </AuthorInfo>
                 </PostHeaderLeft>

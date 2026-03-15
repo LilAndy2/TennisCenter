@@ -94,8 +94,8 @@ public class FeedPostService {
     private FeedPostResponse mapToResponse(FeedPost post, User currentUser) {
         return FeedPostResponse.builder()
                 .id(post.getId())
-                .authorName(post.getAuthor().getUsername())
-                .authorRole(post.getAuthor().getRole().name())
+                .authorName(post.getAuthor().getFirstName() + " " + post.getAuthor().getLastName())
+                .authorRole(post.getAuthor().getRole().getDisplayName())
                 .content(post.getContent())
                 .imageUrl(post.getImageUrl())
                 .createdAt(post.getCreatedAt().toString())

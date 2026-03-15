@@ -46,7 +46,7 @@ public class CommentService {
     private CommentResponse mapToResponse(Comment comment) {
         return CommentResponse.builder()
                 .id(comment.getId())
-                .authorName(comment.getAuthor().getUsername())
+                .authorName(comment.getAuthor().getFirstName() + " " + comment.getAuthor().getLastName())
                 .content(comment.getContent())
                 .createdAt(comment.getCreatedAt().toString())
                 .build();
