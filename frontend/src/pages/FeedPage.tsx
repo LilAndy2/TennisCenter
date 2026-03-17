@@ -26,11 +26,13 @@ function FeedPage() {
     }, []);
 
     const handleOpenCreatePostModal = () => {
+        setEditingPost(null);
         setIsCreatePostModalOpen(true);
     };
 
     const handleCloseCreatePostModal = () => {
         setIsCreatePostModalOpen(false);
+        setEditingPost(null);
     };
 
     const handleCreatePost = async (postData: {

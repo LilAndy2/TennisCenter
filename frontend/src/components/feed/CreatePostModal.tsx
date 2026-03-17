@@ -11,7 +11,7 @@ import {
     IconButton,
     Typography,
 } from "@mui/material";
-import { useMemo, useRef, useState, useEffect } from "react";
+import {useMemo, useRef, useState, useEffect} from "react";
 import styled from "styled-components";
 
 type StoredUser = {
@@ -29,7 +29,7 @@ type CreatePostModalProps = {
     mode?: "create" | "edit";
 };
 
-function CreatePostModal({ open, onClose, onSubmit, initialContent, mode }: CreatePostModalProps) {
+function CreatePostModal({open, onClose, onSubmit, initialContent, mode}: CreatePostModalProps) {
     const storedUser = localStorage.getItem("user");
     const parsedUser: StoredUser | null = useMemo(
         () => (storedUser ? JSON.parse(storedUser) : null),
@@ -45,6 +45,12 @@ function CreatePostModal({ open, onClose, onSubmit, initialContent, mode }: Crea
     useEffect(() => {
         if (open) {
             setContent(initialContent ?? "");
+            setImageFile(null);
+            setImagePreviewUrl("");
+
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
         }
     }, [initialContent, open]);
 
@@ -112,15 +118,15 @@ function CreatePostModal({ open, onClose, onSubmit, initialContent, mode }: Crea
                     </HeaderTitle>
 
                     <IconButton onClick={handleClose}>
-                        <Close />
+                        <Close/>
                     </IconButton>
                 </HeaderRow>
 
                 <UserRow>
                     {parsedUser?.profileImageUrl ? (
-                        <StyledAvatar src={parsedUser.profileImageUrl} alt="Profile" />
+                        <StyledAvatar src={parsedUser.profileImageUrl} alt="Profile"/>
                     ) : (
-                        <StyledAvatar />
+                        <StyledAvatar/>
                     )}
 
                     <UserInfo>
@@ -135,30 +141,35 @@ function CreatePostModal({ open, onClose, onSubmit, initialContent, mode }: Crea
                     onChange={(event) => setContent(event.target.value)}
                 />
 
-                {imagePreviewUrl ? (
+                {mode !== "edit" && imagePreviewUrl ? (
                     <ImagePreviewSection>
-                        <PreviewImage src={imagePreviewUrl} alt="Selected post preview" />
+                        <PreviewImage src={imagePreviewUrl} alt="Selected post preview"/>
 
                         <RemoveImageButton onClick={handleRemoveImage}>
-                            <DeleteOutline sx={{ fontSize: 18 }} />
+                            <DeleteOutline sx={{fontSize: 18}}/>
                             <span>Remove image</span>
                         </RemoveImageButton>
                     </ImagePreviewSection>
                 ) : null}
 
-                <HiddenInput
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                />
+                {mode !== "edit" ? (
+                    <HiddenInput
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                    />
+                ) : null}
 
-                <BottomRow>
+                <BottomRow $isEditMode={mode === "edit"}>
                     <LeftActions>
-                        <UploadImageButton type="button" onClick={handleOpenFilePicker}>
-                            <AddPhotoAlternateOutlined sx={{ fontSize: 20 }} />
-                            <span>Add photo</span>
-                        </UploadImageButton>
+                        {mode !== "edit" ? (
+                            <UploadImageButton type="button" onClick={handleOpenFilePicker}>
+                                <AddPhotoAlternateOutlined sx={{fontSize: 20}}/>
+                                <span>Add photo</span>
+                            </UploadImageButton>
+                        ) : null}
+
                     </LeftActions>
 
                     <RightActions>
@@ -183,213 +194,214 @@ function CreatePostModal({ open, onClose, onSubmit, initialContent, mode }: Crea
 export default CreatePostModal;
 
 const StyledDialog = styled(Dialog)`
-  .MuiPaper-root {
-    border-radius: 1.25rem;
-    box-shadow: 0 1.25rem 3.75rem rgba(15, 23, 42, 0.18);
-  }
+    .MuiPaper-root {
+        border-radius: 1.25rem;
+        box-shadow: 0 1.25rem 3.75rem rgba(15, 23, 42, 0.18);
+    }
 `;
 
 const DialogContentWrapper = styled(DialogContent)`
-  padding: 1.25rem !important;
+    padding: 1.25rem !important;
 `;
 
 const HeaderRow = styled(Box)`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
 `;
 
 const HeaderTitle = styled(Typography)`
-  font-size: 1.25rem !important;
-  font-weight: 800 !important;
-  color: #111827;
+    font-size: 1.25rem !important;
+    font-weight: 800 !important;
+    color: #111827;
 `;
 
 const UserRow = styled(Box)`
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 1rem;
 `;
 
 const StyledAvatar = styled(Avatar)`
-  width: 3rem !important;
-  height: 3rem !important;
-  background: #e2e8f0 !important;
+    width: 3rem !important;
+    height: 3rem !important;
+    background: #e2e8f0 !important;
 `;
 
 const UserInfo = styled(Box)`
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 `;
 
 const UserName = styled(Typography)`
-  font-size: 0.96rem !important;
-  font-weight: 700 !important;
-  color: #111827;
+    font-size: 0.96rem !important;
+    font-weight: 700 !important;
+    color: #111827;
 `;
 
 const UserMeta = styled(Typography)`
-  font-size: 0.82rem !important;
-  color: #64748b;
+    font-size: 0.82rem !important;
+    color: #64748b;
 `;
 
 const StyledTextArea = styled.textarea`
-  width: 95%;
-  min-height: 9rem;
-  resize: none;
-  border: 1px solid #e5e7eb;
-  border-radius: 1rem;
-  padding: 1rem;
-  font-family: Inter, Arial, sans-serif;
-  font-size: 0.98rem;
-  color: #111827;
-  outline: none;
-  transition: 0.2s ease;
-  background: #ffffff;
+    width: 95%;
+    min-height: 9rem;
+    resize: none;
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    padding: 1rem;
+    font-family: Inter, Arial, sans-serif;
+    font-size: 0.98rem;
+    color: #111827;
+    outline: none;
+    transition: 0.2s ease;
+    background: #ffffff;
 
-  &:focus {
-    border-color: #10b981;
-    box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.12);
-  }
+    &:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.12);
+    }
 
-  &::placeholder {
-    color: #94a3b8;
-  }
+    &::placeholder {
+        color: #94a3b8;
+    }
 `;
 
 const HiddenInput = styled.input`
-  display: none;
+    display: none;
 `;
 
 const ImagePreviewSection = styled(Box)`
-  margin-top: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 `;
 
 const PreviewImage = styled.img`
-  width: 100%;
-  max-height: 22rem;
-  object-fit: cover;
-  border-radius: 1rem;
-  border: 1px solid #e5e7eb;
+    width: 100%;
+    max-height: 22rem;
+    object-fit: cover;
+    border-radius: 1rem;
+    border: 1px solid #e5e7eb;
 `;
 
 const RemoveImageButton = styled.button`
-  width: fit-content;
-  height: 2.5rem;
-  padding: 0 0.95rem;
-  border: none;
-  border-radius: 999px;
-  background: #fef2f2;
-  color: #dc2626;
-  font-size: 0.9rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  cursor: pointer;
-  transition: 0.2s ease;
+    width: fit-content;
+    height: 2.5rem;
+    padding: 0 0.95rem;
+    border: none;
+    border-radius: 999px;
+    background: #fef2f2;
+    color: #dc2626;
+    font-size: 0.9rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    cursor: pointer;
+    transition: 0.2s ease;
 
-  &:hover {
-    background: #fee2e2;
-  }
+    &:hover {
+        background: #fee2e2;
+    }
 `;
 
-const BottomRow = styled(Box)`
-  margin-top: 1.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+const BottomRow = styled(Box)<{ $isEditMode?: boolean }>`
+    margin-top: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: ${({$isEditMode}) =>
+            $isEditMode ? "flex-end" : "space-between"};
+    gap: 1rem;
 
-  @media (max-width: 40rem) {
-    flex-direction: column;
-    align-items: stretch;
-  }
+    @media (max-width: 40rem) {
+        flex-direction: column;
+        align-items: stretch;
+    }
 `;
 
 const LeftActions = styled(Box)`
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 `;
 
 const RightActions = styled(Box)`
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 
-  @media (max-width: 40rem) {
-    width: 100%;
-  }
+    @media (max-width: 40rem) {
+        width: 100%;
+    }
 `;
 
 const UploadImageButton = styled.button`
-  height: 2.8rem;
-  padding: 0 1rem;
-  border: none;
-  border-radius: 999px;
-  background: #ecfdf5;
-  color: #059669;
-  font-size: 0.92rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  cursor: pointer;
-  transition: 0.2s ease;
+    height: 2.8rem;
+    padding: 0 1rem;
+    border: none;
+    border-radius: 999px;
+    background: #ecfdf5;
+    color: #059669;
+    font-size: 0.92rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    cursor: pointer;
+    transition: 0.2s ease;
 
-  &:hover {
-    background: #d1fae5;
-  }
+    &:hover {
+        background: #d1fae5;
+    }
 `;
 
 const CancelButton = styled.button`
-  height: 2.8rem;
-  padding: 0 1rem;
-  border: none;
-  border-radius: 999px;
-  background: #f1f5f9;
-  color: #334155;
-  font-size: 0.92rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.2s ease;
+    height: 2.8rem;
+    padding: 0 1rem;
+    border: none;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s ease;
 
-  &:hover {
-    background: #e2e8f0;
-  }
+    &:hover {
+        background: #e2e8f0;
+    }
 
-  @media (max-width: 40rem) {
-    flex: 1;
-  }
+    @media (max-width: 40rem) {
+        flex: 1;
+    }
 `;
 
 const PostButton = styled.button`
-  height: 2.8rem;
-  padding: 0 1.1rem;
-  border: none;
-  border-radius: 999px;
-  background: #10b981;
-  color: white;
-  font-size: 0.92rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.2s ease;
+    height: 2.8rem;
+    padding: 0 1.1rem;
+    border: none;
+    border-radius: 999px;
+    background: #10b981;
+    color: white;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s ease;
 
-  &:hover:not(:disabled) {
-    background: #059669;
-  }
+    &:hover:not(:disabled) {
+        background: #059669;
+    }
 
-  &:disabled {
-    background: #cbd5e1;
-    cursor: not-allowed;
-  }
+    &:disabled {
+        background: #cbd5e1;
+        cursor: not-allowed;
+    }
 
-  @media (max-width: 40rem) {
-    flex: 1;
-  }
+    @media (max-width: 40rem) {
+        flex: 1;
+    }
 `;

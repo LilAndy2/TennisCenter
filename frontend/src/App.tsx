@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import FeedPage from "./pages/FeedPage";
 import TournamentsPage from "./pages/TournamentsPage";
+import TournamentDetailsPage from "./pages/TournamentDetailsPage.tsx";
 import SchedulePage from "./pages/SchedulePage";
 import H2HPage from "./pages/H2HPage";
 import AboutUsPage from "./pages/AboutUsPage";
@@ -35,6 +36,15 @@ function AnimatedRoutes() {
                     element={
                         <PrivateRoute>
                             <TournamentsPage />
+                        </PrivateRoute>
+                    }
+                />
+
+                <Route
+                    path="/tournaments/:id"
+                    element={
+                        <PrivateRoute>
+                            <TournamentDetailsPage />
                         </PrivateRoute>
                     }
                 />
