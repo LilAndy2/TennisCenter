@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
 import styled from "styled-components";
-import type { TournamentLevel } from "../../data/mockTournaments.ts";
+import type { TournamentLevel } from "../../types/tournament.ts";
 
 type TournamentLevelBadgeProps = {
     level: TournamentLevel;
@@ -21,17 +21,17 @@ const BadgeWrapper = styled(Typography)<{ $level: TournamentLevel} >`
     letter-spacing: 0.02em;
     background: ${({ $level }) => {
         switch ($level) {
-            case "ENTRY":
+            case "Entry":
                 return "#ecfeff";
-            case "STARTER":
+            case "Starter":
                 return "#f0fdf4";
-            case "MEDIUM":
+            case "Medium":
                 return "#eff6ff";
-            case "MASTER":
+            case "Master":
                 return "#faf5ff";
-            case "EXPERT":
+            case "Expert":
                 return "#fff7ed";
-            case "STELAR":
+            case "Stellar":
                 return "#fef2f2";
             default:
                 return "#f8fafc";
@@ -39,17 +39,17 @@ const BadgeWrapper = styled(Typography)<{ $level: TournamentLevel} >`
     }};
     color: ${({ $level }) => {
         switch ($level) {
-            case "ENTRY":
+            case "Entry":
                 return "#0f766e";
-            case "STARTER":
+            case "Starter":
                 return "#15803d";
-            case "MEDIUM":
+            case "Medium":
                 return "#1d4ed8";
-            case "MASTER":
+            case "Master":
                 return "#7e22ce";
-            case "EXPERT":
+            case "Expert":
                 return "#c2410c";
-            case "STELAR":
+            case "Stellar":
                 return "#b91c1c";
             default:
                 return "#334155";

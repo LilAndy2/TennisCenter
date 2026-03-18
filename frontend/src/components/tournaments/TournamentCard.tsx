@@ -2,7 +2,7 @@ import { CalendarMonth, Group, LocationOn, SportsTennis } from "@mui/icons-mater
 import { Box, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import type { TournamentType } from "../../data/mockTournaments";
+import type { TournamentType } from "../../types/tournament.ts";
 import { formatTournamentDateRange } from "../../utils/formatTournamentDateRange";
 import TournamentLevelBadge from "./TournamentLevelBadge";
 
@@ -19,7 +19,10 @@ function TournamentCard({ tournament }: TournamentCardProps) {
                 <TournamentLevelBadge level={tournament.level} />
 
                 <RightBadges>
-                    <StatusBadge $status={tournament.status}>{tournament.status}</StatusBadge>
+                    <StatusBadge $status={tournament.status}>
+                        {tournament.status}
+                    </StatusBadge>
+
                     {tournament.status === "Upcoming" && tournament.isFull ? (
                         <FullBadge>Full</FullBadge>
                     ) : null}
@@ -40,7 +43,7 @@ function TournamentCard({ tournament }: TournamentCardProps) {
                 <DetailItem>
                     <Group sx={{ fontSize: 18 }} />
                     <DetailText>
-                        {tournament.currentPlayers}/{tournament.maxPlayers} players
+                        Max {tournament.maxPlayers} players
                     </DetailText>
                 </DetailItem>
 

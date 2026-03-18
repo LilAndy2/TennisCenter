@@ -7,13 +7,14 @@ import {
     SportsScore,
     SportsTennis,
 } from "@mui/icons-material";
-import { Box, Typography } from "@mui/material";
-import { useMemo } from "react";
+import { Box, CircularProgress, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
+import axiosInstance from "../api/axiosInstance";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 import TournamentLevelBadge from "../components/tournaments/TournamentLevelBadge";
-import { mockTournaments } from "../data/mockTournaments";
+import type { TournamentType } from "../types/tournament";
 import { formatTournamentDate } from "../utils/formatTournamentDate";
 import { formatTournamentDateRange } from "../utils/formatTournamentDateRange";
 
@@ -21,10 +22,36 @@ function TournamentDetailsPage() {
     const navigate = useNavigate();
     const { id } = useParams();
 
-    const tournament = useMemo(
-        () => mockTournaments.find((item) => item.id === Number(id)),
-        [id]
-    );
+    const [tournament, setTournament] = useState<TournamentType | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const loadTournament = async () => {
+            try {
+                const response = await axiosInstance.get<TournamentType>(`/player/tournaments/${id}`);
+                setTournament(response.data);
+            } catch (error) {
+                console.error("Failed to load tournament", error);
+                setTournament(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadTournament();
+    }, [id]);
+
+    if (loading) {
+        return (
+            <AuthenticatedLayout>
+                <PageWrapper>
+                    <LoadingWrapper>
+                        <CircularProgress />
+                    </LoadingWrapper>
+                </PageWrapper>
+            </AuthenticatedLayout>
+        );
+    }
 
     if (!tournament) {
         return (
@@ -93,8 +120,7 @@ function TournamentDetailsPage() {
                             <InfoTextBlock>
                                 <InfoLabel>Players</InfoLabel>
                                 <InfoValue>
-                                    {tournament.currentPlayers}/{tournament.maxPlayers} accepted
-                                    players
+                                    Max {tournament.maxPlayers} accepted players
                                 </InfoValue>
                             </InfoTextBlock>
                         </InfoItem>
@@ -147,24 +173,21 @@ function TournamentDetailsPage() {
                     <SectionCard>
                         <SectionTitle>Participants</SectionTitle>
                         <SectionText>
-                            This section will display the players registered in the
-                            tournament.
+                            This section will display the players registered in the tournament.
                         </SectionText>
                     </SectionCard>
 
                     <SectionCard>
                         <SectionTitle>Bracket</SectionTitle>
                         <SectionText>
-                            This section will contain the tournament bracket and match
-                            progression.
+                            This section will contain the tournament bracket and match progression.
                         </SectionText>
                     </SectionCard>
 
                     <SectionCard $fullWidth>
                         <SectionTitle>Matches & Scores</SectionTitle>
                         <SectionText>
-                            This section will show scheduled matches, results, and score
-                            updates.
+                            This section will show scheduled matches, results, and score updates.
                         </SectionText>
                     </SectionCard>
                 </BottomSectionsGrid>
@@ -176,209 +199,215 @@ function TournamentDetailsPage() {
 export default TournamentDetailsPage;
 
 const PageWrapper = styled(Box)`
-  width: 100%;
-  max-width: 72rem;
-  margin: 0 auto;
+    width: 100%;
+    max-width: 72rem;
+    margin: 0 auto;
 `;
 
 const BackButton = styled.button`
-  height: 2.8rem;
-  padding: 0 1rem;
-  border: none;
-  border-radius: 999px;
-  background: #f1f5f9;
-  color: #334155;
-  font-size: 0.92rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  cursor: pointer;
-  margin-bottom: 1rem;
-  transition: 0.2s ease;
+    height: 2.8rem;
+    padding: 0 1rem;
+    border: none;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 0.92rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    transition: 0.2s ease;
 
-  &:hover {
-    background: #e2e8f0;
-  }
+    &:hover {
+        background: #e2e8f0;
+    }
 `;
 
 const HeroCard = styled(Box)`
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 1.4rem;
-  padding: 1.6rem;
-  box-shadow: 0 0.75rem 2rem rgba(15, 23, 42, 0.05);
-  margin-bottom: 1.2rem;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 1.4rem;
+    padding: 1.6rem;
+    box-shadow: 0 0.75rem 2rem rgba(15, 23, 42, 0.05);
+    margin-bottom: 1.2rem;
 `;
 
 const TopBadgesRow = styled(Box)`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
 `;
 
 const LeftBadges = styled(Box)`
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.55rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.55rem;
 `;
 
 const StatusBadge = styled(Typography)<{ $status: string }>`
-  width: fit-content;
-  padding: 0.35rem 0.8rem;
-  border-radius: 999px;
-  font-size: 0.78rem !important;
-  font-weight: 800 !important;
-  background: ${({ $status }) => {
-    switch ($status) {
-        case "Upcoming":
-            return "#eff6ff";
-        case "Ongoing":
-            return "#ecfdf5";
-        case "Finished":
-            return "#f1f5f9";
-        default:
-            return "#f8fafc";
-    }
-}};
-  color: ${({ $status }) => {
-    switch ($status) {
-        case "Upcoming":
-            return "#1d4ed8";
-        case "Ongoing":
-            return "#059669";
-        case "Finished":
-            return "#64748b";
-        default:
-            return "#334155";
-    }
-}};
+    width: fit-content;
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.78rem !important;
+    font-weight: 800 !important;
+    background: ${({ $status }) => {
+        switch ($status) {
+            case "Upcoming":
+                return "#eff6ff";
+            case "Ongoing":
+                return "#ecfdf5";
+            case "Finished":
+                return "#f1f5f9";
+            default:
+                return "#f8fafc";
+        }
+    }};
+    color: ${({ $status }) => {
+        switch ($status) {
+            case "Upcoming":
+                return "#1d4ed8";
+            case "Ongoing":
+                return "#059669";
+            case "Finished":
+                return "#64748b";
+            default:
+                return "#334155";
+        }
+    }};
 `;
 
 const FullBadge = styled(Typography)`
-  width: fit-content;
-  padding: 0.35rem 0.8rem;
-  border-radius: 999px;
-  font-size: 0.78rem !important;
-  font-weight: 800 !important;
-  background: #fee2e2;
-  color: #b91c1c;
+    width: fit-content;
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.78rem !important;
+    font-weight: 800 !important;
+    background: #fee2e2;
+    color: #b91c1c;
 `;
 
 const TournamentTitle = styled(Typography)`
-  font-size: 2rem !important;
-  font-weight: 800 !important;
-  color: #111827;
-  margin-bottom: 0.55rem !important;
+    font-size: 2rem !important;
+    font-weight: 800 !important;
+    color: #111827;
+    margin-bottom: 0.55rem !important;
 `;
 
 const TournamentDescription = styled(Typography)`
-  font-size: 1rem !important;
-  color: #64748b;
-  line-height: 1.7 !important;
-  margin-bottom: 1.3rem !important;
-  max-width: 52rem;
+    font-size: 1rem !important;
+    color: #64748b;
+    line-height: 1.7 !important;
+    margin-bottom: 1.3rem !important;
+    max-width: 52rem;
 `;
 
 const InfoGrid = styled(Box)`
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
 
-  @media (max-width: 56rem) {
-    grid-template-columns: 1fr;
-  }
+    @media (max-width: 56rem) {
+        grid-template-columns: 1fr;
+    }
 `;
 
 const InfoItem = styled(Box)`
-  display: flex;
-  align-items: flex-start;
-  gap: 0.8rem;
-  padding: 0.95rem 1rem;
-  border-radius: 1rem;
-  background: #f8fafc;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    padding: 0.95rem 1rem;
+    border-radius: 1rem;
+    background: #f8fafc;
 `;
 
 const InfoIconWrapper = styled(Box)`
-  width: 2.4rem;
-  height: 2.4rem;
-  border-radius: 0.8rem;
-  background: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #475569;
-  flex-shrink: 0;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 0.8rem;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #475569;
+    flex-shrink: 0;
 `;
 
 const InfoTextBlock = styled(Box)`
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
 `;
 
 const InfoLabel = styled(Typography)`
-  font-size: 0.8rem !important;
-  font-weight: 700 !important;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 `;
 
 const InfoValue = styled(Typography)`
-  font-size: 0.96rem !important;
-  font-weight: 600 !important;
-  color: #111827;
-  line-height: 1.5 !important;
+    font-size: 0.96rem !important;
+    font-weight: 600 !important;
+    color: #111827;
+    line-height: 1.5 !important;
 `;
 
 const BottomSectionsGrid = styled(Box)`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
 
-  @media (max-width: 64rem) {
-    grid-template-columns: 1fr;
-  }
+    @media (max-width: 64rem) {
+        grid-template-columns: 1fr;
+    }
 `;
 
 const SectionCard = styled(Box)<{ $fullWidth?: boolean }>`
-  grid-column: ${({ $fullWidth }) => ($fullWidth ? "1 / -1" : "auto")};
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 1.2rem;
-  padding: 1.3rem;
-  box-shadow: 0 0.75rem 2rem rgba(15, 23, 42, 0.04);
+    grid-column: ${({ $fullWidth }) => ($fullWidth ? "1 / -1" : "auto")};
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 1.2rem;
+    padding: 1.3rem;
+    box-shadow: 0 0.75rem 2rem rgba(15, 23, 42, 0.04);
 `;
 
 const SectionTitle = styled(Typography)`
-  font-size: 1.1rem !important;
-  font-weight: 800 !important;
-  color: #111827;
-  margin-bottom: 0.45rem !important;
+    font-size: 1.1rem !important;
+    font-weight: 800 !important;
+    color: #111827;
+    margin-bottom: 0.45rem !important;
 `;
 
 const SectionText = styled(Typography)`
-  color: #64748b;
-  line-height: 1.65 !important;
+    color: #64748b;
+    line-height: 1.65 !important;
 `;
 
 const NotFoundCard = styled(Box)`
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 1.25rem;
-  padding: 1.5rem;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 1.25rem;
+    padding: 1.5rem;
 `;
 
 const NotFoundTitle = styled(Typography)`
-  font-size: 1.4rem !important;
-  font-weight: 800 !important;
-  color: #111827;
-  margin-bottom: 0.4rem !important;
+    font-size: 1.4rem !important;
+    font-weight: 800 !important;
+    color: #111827;
+    margin-bottom: 0.4rem !important;
 `;
 
 const NotFoundText = styled(Typography)`
-  color: #64748b;
+    color: #64748b;
+`;
+
+const LoadingWrapper = styled(Box)`
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
 `;

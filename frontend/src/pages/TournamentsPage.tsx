@@ -1,22 +1,40 @@
-import { Box, Typography } from "@mui/material";
-import { useMemo, useState } from "react";
+import { Box, CircularProgress, Typography } from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
+import axiosInstance from "../api/axiosInstance";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 import TournamentCard from "../components/tournaments/TournamentCard";
-import { mockTournaments, type TournamentStatus } from "../data/mockTournaments";
+import type { TournamentStatus, TournamentType } from "../types/tournament";
 
 type FilterOption = TournamentStatus;
 
-const filterOptions: FilterOption[] = ["Ongoing","Upcoming", "Finished"];
+const filterOptions: FilterOption[] = ["Ongoing", "Upcoming", "Finished"];
 
 function TournamentsPage() {
     const [selectedFilter, setSelectedFilter] = useState<FilterOption>("Ongoing");
+    const [tournaments, setTournaments] = useState<TournamentType[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const loadTournaments = async () => {
+            try {
+                const response = await axiosInstance.get<TournamentType[]>("/player/tournaments");
+                setTournaments(response.data);
+            } catch (error) {
+                console.error("Failed to load tournaments", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadTournaments();
+    }, []);
 
     const filteredTournaments = useMemo(() => {
-        return mockTournaments.filter(
+        return tournaments.filter(
             (tournament) => tournament.status === selectedFilter
         );
-    }, [selectedFilter]);
+    }, [selectedFilter, tournaments]);
 
     return (
         <AuthenticatedLayout>
@@ -40,11 +58,17 @@ function TournamentsPage() {
                     ))}
                 </FiltersRow>
 
-                <CardsGrid>
-                    {filteredTournaments.map((tournament) => (
-                        <TournamentCard key={tournament.id} tournament={tournament} />
-                    ))}
-                </CardsGrid>
+                {loading ? (
+                    <LoadingWrapper>
+                        <CircularProgress />
+                    </LoadingWrapper>
+                ) : (
+                    <CardsGrid>
+                        {filteredTournaments.map((tournament) => (
+                            <TournamentCard key={tournament.id} tournament={tournament} />
+                        ))}
+                    </CardsGrid>
+                )}
             </PageWrapper>
         </AuthenticatedLayout>
     );
@@ -53,13 +77,13 @@ function TournamentsPage() {
 export default TournamentsPage;
 
 const PageWrapper = styled(Box)`
-  width: 100%;
-  max-width: 72rem;
-  margin: 0 auto;
+    width: 100%;
+    max-width: 72rem;
+    margin: 0 auto;
 `;
 
 const PageHeader = styled(Box)`
-  margin-bottom: 1.2rem;
+    margin-bottom: 1.2rem;
 `;
 
 const PageTitle = styled(Typography)`
@@ -107,4 +131,10 @@ const CardsGrid = styled(Box)`
     @media (max-width: 64rem) {
         grid-template-columns: 1fr;
     }
+`;
+
+const LoadingWrapper = styled(Box)`
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
 `;

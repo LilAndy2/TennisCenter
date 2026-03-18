@@ -1,0 +1,31 @@
+export type TournamentLevel =
+    | "Entry"
+    | "Starter"
+    | "Medium"
+    | "Master"
+    | "Expert"
+    | "Stellar";
+
+export type TournamentStatus =
+    | "Upcoming"
+    | "Ongoing"
+    | "Finished";
+
+export type TournamentSurface =
+    | "Clay"
+    | "Hard"
+    | "Grass";
+
+export type TournamentType = {
+    id: number;
+    name: string;
+    level: TournamentLevel;
+    status: TournamentStatus;
+    surface: TournamentSurface;
+    startDate: string;
+    endDate: string;
+    maxPlayers: number;
+    location: string;
+    description: string;
+    isFull: boolean;
+};
