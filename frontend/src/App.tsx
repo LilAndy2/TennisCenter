@@ -11,6 +11,7 @@ import AboutUsPage from "./pages/AboutUsPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import PrivateRoute from "./routes/PrivateRoute";
+import AdminDashboardPage from "./pages/AdminDashboardPage.tsx";
 
 function AnimatedRoutes() {
     const location = useLocation();
@@ -90,6 +91,15 @@ function AnimatedRoutes() {
                     element={
                         <PrivateRoute>
                             <SettingsPage />
+                        </PrivateRoute>
+                    }
+                />
+
+                <Route
+                    path="/admin"
+                    element={
+                        <PrivateRoute>
+                            <AdminDashboardPage />
                         </PrivateRoute>
                     }
                 />

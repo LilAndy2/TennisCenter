@@ -8,6 +8,7 @@ import {
     Schedule,
     Settings,
     SportsTennis,
+    AdminPanelSettings,
 } from "@mui/icons-material";
 import {
     Avatar,
@@ -109,6 +110,15 @@ function TopNavbar() {
                                 <NavItemText>About us</NavItemText>
                             </NavItemContent>
                         </StyledNavLink>
+
+                        {parsedUser?.role === "ADMIN" || parsedUser?.role === "Admin" ? (
+                            <StyledNavLink to="/admin">
+                                <NavItemContent>
+                                    <AdminPanelSettings sx={{ fontSize: 18 }} />
+                                    <NavItemText>Admin Dashboard</NavItemText>
+                                </NavItemContent>
+                            </StyledNavLink>
+                        ) : null}
                     </NavItems>
                 </LeftSection>
 
