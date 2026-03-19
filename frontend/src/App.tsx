@@ -10,8 +10,9 @@ import H2HPage from "./pages/H2HPage";
 import AboutUsPage from "./pages/AboutUsPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
-import PrivateRoute from "./routes/PrivateRoute";
 import AdminDashboardPage from "./pages/AdminDashboardPage.tsx";
+import AdminTournamentDetailsPage from "./pages/AdminTournamentDetailsPage.tsx";
+import PrivateRoute from "./routes/PrivateRoute";
 
 function AnimatedRoutes() {
     const location = useLocation();
@@ -100,6 +101,15 @@ function AnimatedRoutes() {
                     element={
                         <PrivateRoute>
                             <AdminDashboardPage />
+                        </PrivateRoute>
+                    }
+                />
+
+                <Route
+                    path="/admin/tournaments/:id"
+                    element={
+                        <PrivateRoute>
+                            <AdminTournamentDetailsPage />
                         </PrivateRoute>
                     }
                 />

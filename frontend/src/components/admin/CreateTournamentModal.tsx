@@ -1,8 +1,7 @@
 import { Close } from "@mui/icons-material";
 import { Box, Dialog, DialogContent, IconButton, Typography } from "@mui/material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styled from "styled-components";
-// import type { TournamentType } from "../../types/tournament.ts";
 
 type CreateTournamentFormData = {
     name: string;
@@ -19,23 +18,46 @@ type CreateTournamentModalProps = {
     open: boolean;
     onClose: () => void;
     onSubmit: (data: CreateTournamentFormData) => Promise<void>;
+    initialData?: CreateTournamentFormData;
+    mode?: "create" | "edit";
 };
 
 function CreateTournamentModal({
                                    open,
                                    onClose,
                                    onSubmit,
+                                   initialData,
+                                   mode = "create",
                                }: CreateTournamentModalProps) {
-    const [formData, setFormData] = useState<CreateTournamentFormData>({
-        name: "",
-        level: "ENTRY",
-        surface: "CLAY",
-        startDate: "",
-        endDate: "",
-        maxPlayers: "16",
-        location: "",
-        description: "",
-    });
+    const [formData, setFormData] = useState<CreateTournamentFormData>(
+        initialData ?? {
+            name: "",
+            level: "ENTRY",
+            surface: "CLAY",
+            startDate: "",
+            endDate: "",
+            maxPlayers: "16",
+            location: "",
+            description: "",
+        }
+    );
+
+    useEffect(() => {
+        if (open) {
+            setFormData(
+                initialData ?? {
+                    name: "",
+                    level: "ENTRY",
+                    surface: "CLAY",
+                    startDate: "",
+                    endDate: "",
+                    maxPlayers: "16",
+                    location: "",
+                    description: "",
+                }
+            );
+        }
+    }, [initialData, open]);
 
     const handleChange = (field: keyof CreateTournamentFormData, value: string | boolean) => {
         setFormData((previous) => ({
@@ -57,7 +79,9 @@ function CreateTournamentModal({
         <StyledDialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
             <DialogContentWrapper>
                 <HeaderRow>
-                    <HeaderTitle>Create tournament</HeaderTitle>
+                    <HeaderTitle>
+                        {mode === "edit" ? "Edit tournament" : "Create tournament"}
+                    </HeaderTitle>
 
                     <IconButton onClick={handleClose}>
                         <Close />
@@ -146,7 +170,9 @@ function CreateTournamentModal({
 
                 <BottomRow>
                     <CancelButton onClick={handleClose}>Cancel</CancelButton>
-                    <SaveButton onClick={handleSubmit}>Create</SaveButton>
+                    <SaveButton onClick={handleSubmit}>
+                        {mode === "edit" ? "Save changes" : "Create"}
+                    </SaveButton>
                 </BottomRow>
             </DialogContentWrapper>
         </StyledDialog>

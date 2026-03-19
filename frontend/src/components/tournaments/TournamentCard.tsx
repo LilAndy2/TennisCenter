@@ -8,13 +8,16 @@ import TournamentLevelBadge from "./TournamentLevelBadge";
 
 type TournamentCardProps = {
     tournament: TournamentType;
+    detailsPath?: string;
 };
 
-function TournamentCard({ tournament }: TournamentCardProps) {
+function TournamentCard({ tournament, detailsPath }: TournamentCardProps) {
     const navigate = useNavigate();
 
+    const targetPath = detailsPath ?? `/tournaments/${tournament.id}`;
+
     return (
-        <CardWrapper onClick={() => navigate(`/tournaments/${tournament.id}`)}>
+        <CardWrapper onClick={() => navigate(targetPath)}>
             <TopSection>
                 <TournamentLevelBadge level={tournament.level} />
 

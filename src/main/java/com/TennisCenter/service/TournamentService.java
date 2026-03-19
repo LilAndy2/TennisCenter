@@ -61,6 +61,30 @@ public class TournamentService {
         return mapToResponse(savedTournament);
     }
 
+    public TournamentResponse updateTournament(Long id, CreateTournamentRequest request) {
+        Tournament tournament = tournamentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
+
+        tournament.setName(request.getName());
+        tournament.setLevel(TournamentLevel.valueOf(request.getLevel().toUpperCase()));
+        tournament.setSurface(TournamentSurface.valueOf(request.getSurface().toUpperCase()));
+        tournament.setStartDate(LocalDate.parse(request.getStartDate()));
+        tournament.setEndDate(LocalDate.parse(request.getEndDate()));
+        tournament.setMaxPlayers(request.getMaxPlayers());
+        tournament.setLocation(request.getLocation());
+        tournament.setDescription(request.getDescription());
+
+        Tournament updatedTournament = tournamentRepository.save(tournament);
+        return mapToResponse(updatedTournament);
+    }
+
+    public void deleteTournament(Long id) {
+        Tournament tournament = tournamentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
+
+        tournamentRepository.delete(tournament);
+    }
+
     private TournamentResponse mapToResponse(Tournament tournament) {
         return TournamentResponse.builder()
                 .id(tournament.getId())

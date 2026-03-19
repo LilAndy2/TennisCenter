@@ -35,4 +35,19 @@ public class AdminTournamentController {
     ) {
         return tournamentService.createTournament(request, currentUser);
     }
+
+    @PutMapping("/{id}")
+    public TournamentResponse updateTournament(
+            @PathVariable Long id,
+            @RequestBody CreateTournamentRequest request
+    ) {
+        return tournamentService.updateTournament(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteTournament(
+            @PathVariable Long id
+    ) {
+        tournamentService.deleteTournament(id);
+    }
 }

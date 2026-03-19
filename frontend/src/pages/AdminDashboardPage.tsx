@@ -88,7 +88,10 @@ function AdminDashboardPage() {
                             <HorizontalCardsRow>
                                 {ongoingTournaments.map((tournament) => (
                                     <HorizontalCardItem key={tournament.id}>
-                                        <TournamentCard tournament={tournament} />
+                                        <TournamentCard
+                                            tournament={tournament}
+                                            detailsPath={`/admin/tournaments/${tournament.id}`}
+                                        />
                                     </HorizontalCardItem>
                                 ))}
                             </HorizontalCardsRow>
@@ -99,7 +102,10 @@ function AdminDashboardPage() {
                             <HorizontalCardsRow>
                                 {upcomingTournaments.map((tournament) => (
                                     <HorizontalCardItem key={tournament.id}>
-                                        <TournamentCard tournament={tournament} />
+                                        <TournamentCard
+                                            tournament={tournament}
+                                            detailsPath={`/admin/tournaments/${tournament.id}`}
+                                        />
                                     </HorizontalCardItem>
                                 ))}
                             </HorizontalCardsRow>
