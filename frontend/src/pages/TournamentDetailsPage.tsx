@@ -14,7 +14,7 @@ import styled from "styled-components";
 import axiosInstance from "../api/axiosInstance";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 import TournamentLevelBadge from "../components/tournaments/TournamentLevelBadge";
-import type { TournamentType } from "../types/tournament";
+import type { TournamentType, TournamentParticipantType } from "../types/tournament";
 import { formatTournamentDate } from "../utils/formatTournamentDate";
 import { formatTournamentDateRange } from "../utils/formatTournamentDateRange";
 
@@ -24,6 +24,38 @@ function TournamentDetailsPage() {
 
     const [tournament, setTournament] = useState<TournamentType | null>(null);
     const [loading, setLoading] = useState(true);
+    const [participants, setParticipants] = useState<TournamentParticipantType[]>([]);
+    const [registering, setRegistering] = useState(false);
+
+    const loadParticipants = async () => {
+        try {
+            const response = await axiosInstance.get<TournamentParticipantType[]>(
+                `/player/tournaments/${id}/participants`
+            );
+            setParticipants(response.data);
+        } catch (error) {
+            console.error("Failed to load participants", error);
+        }
+    };
+
+    const handleRegister = async () => {
+        if (!tournament) return;
+
+        try {
+            setRegistering(true);
+
+            const response = await axiosInstance.post<TournamentType>(
+                `/player/tournaments/${tournament.id}/register`
+            );
+
+            setTournament(response.data);
+            await loadParticipants();
+        } catch (error) {
+            console.error("Failed to register to tournament", error);
+        } finally {
+            setRegistering(false);
+        }
+    };
 
     useEffect(() => {
         const loadTournament = async () => {
@@ -39,6 +71,7 @@ function TournamentDetailsPage() {
         };
 
         loadTournament();
+        loadParticipants();
     }, [id]);
 
     if (loading) {
@@ -96,6 +129,25 @@ function TournamentDetailsPage() {
 
                     <TournamentTitle>{tournament.name}</TournamentTitle>
                     <TournamentDescription>{tournament.description}</TournamentDescription>
+
+                    <ActionRow>
+                        <RegisterButton
+                            onClick={handleRegister}
+                            disabled={
+                                !tournament.registrationOpen ||
+                                tournament.registeredByCurrentUser ||
+                                registering
+                            }
+                        >
+                            {tournament.registeredByCurrentUser
+                                ? "Already registered"
+                                : tournament.isFull
+                                    ? "Tournament full"
+                                    : registering
+                                        ? "Registering..."
+                                        : "Register"}
+                        </RegisterButton>
+                    </ActionRow>
 
                     <InfoGrid>
                         <InfoItem>
@@ -172,9 +224,19 @@ function TournamentDetailsPage() {
                 <BottomSectionsGrid>
                     <SectionCard>
                         <SectionTitle>Participants</SectionTitle>
-                        <SectionText>
-                            This section will display the players registered in the tournament.
-                        </SectionText>
+
+                        {participants.length === 0 ? (
+                            <SectionText>No players registered yet.</SectionText>
+                        ) : (
+                            <ParticipantsList>
+                                {participants.map((participant) => (
+                                    <ParticipantItem key={participant.id}>
+                                        <ParticipantName>{participant.fullName}</ParticipantName>
+                                        <ParticipantEmail>{participant.email}</ParticipantEmail>
+                                    </ParticipantItem>
+                                ))}
+                            </ParticipantsList>
+                        )}
                     </SectionCard>
 
                     <SectionCard>
@@ -410,4 +472,58 @@ const LoadingWrapper = styled(Box)`
   display: flex;
   justify-content: center;
   padding: 2rem 0;
+`;
+
+const ActionRow = styled(Box)`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+`;
+
+const RegisterButton = styled.button`
+  height: 2.85rem;
+  padding: 0 1.15rem;
+  border: none;
+  border-radius: 999px;
+  background: #10b981;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: #059669;
+  }
+
+  &:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+  }
+`;
+
+const ParticipantsList = styled(Box)`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+
+const ParticipantItem = styled(Box)`
+  padding: 0.85rem 1rem;
+  border-radius: 0.9rem;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+`;
+
+const ParticipantName = styled(Typography)`
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  color: #111827;
+`;
+
+const ParticipantEmail = styled(Typography)`
+  font-size: 0.84rem !important;
+  color: #64748b;
+  margin-top: 0.15rem !important;
 `;

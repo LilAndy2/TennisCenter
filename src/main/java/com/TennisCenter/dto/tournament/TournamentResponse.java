@@ -17,4 +17,7 @@ public class TournamentResponse {
     private String location;
     private String description;
     private boolean isFull;
+    private Integer currentPlayers;
+    private boolean registeredByCurrentUser;
+    private boolean registrationOpen;
 }

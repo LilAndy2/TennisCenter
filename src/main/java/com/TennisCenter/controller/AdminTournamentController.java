@@ -19,13 +19,17 @@ public class AdminTournamentController {
     private final TournamentService tournamentService;
 
     @GetMapping("/ongoing")
-    public List<TournamentResponse> getOngoingTournaments() {
-        return tournamentService.getTournamentsByStatus(TournamentStatus.ONGOING);
+    public List<TournamentResponse> getOngoingTournaments(
+            @AuthenticationPrincipal User currentUser
+    ) {
+        return tournamentService.getTournamentsByStatus(TournamentStatus.ONGOING, currentUser);
     }
 
     @GetMapping("/upcoming")
-    public List<TournamentResponse> getUpcomingTournaments() {
-        return tournamentService.getTournamentsByStatus(TournamentStatus.UPCOMING);
+    public List<TournamentResponse> getUpcomingTournaments(
+            @AuthenticationPrincipal User currentUser
+    ) {
+        return tournamentService.getTournamentsByStatus(TournamentStatus.UPCOMING, currentUser);
     }
 
     @PostMapping
@@ -39,9 +43,10 @@ public class AdminTournamentController {
     @PutMapping("/{id}")
     public TournamentResponse updateTournament(
             @PathVariable Long id,
-            @RequestBody CreateTournamentRequest request
+            @RequestBody CreateTournamentRequest request,
+            @AuthenticationPrincipal User currentUser
     ) {
-        return tournamentService.updateTournament(id, request);
+        return tournamentService.updateTournament(id, request, currentUser);
     }
 
     @DeleteMapping("/{id}")

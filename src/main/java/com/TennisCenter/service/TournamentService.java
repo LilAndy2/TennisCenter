@@ -3,12 +3,9 @@ package com.TennisCenter.service;
 import com.TennisCenter.dto.tournament.CreateTournamentRequest;
 import com.TennisCenter.dto.tournament.TournamentResponse;
 import com.TennisCenter.exception.ResourceNotFoundException;
-import com.TennisCenter.model.TournamentLevel;
-import com.TennisCenter.model.TournamentStatus;
-import com.TennisCenter.model.TournamentSurface;
-import com.TennisCenter.model.User;
+import com.TennisCenter.model.*;
+import com.TennisCenter.repository.TournamentRegistrationRepository;
 import com.TennisCenter.repository.TournamentRepository;
-import com.TennisCenter.model.Tournament;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,25 +17,26 @@ import java.util.List;
 public class TournamentService {
 
     private final TournamentRepository tournamentRepository;
+    private final TournamentRegistrationRepository tournamentRegistrationRepository;
 
-    public List<TournamentResponse> getAllTournaments() {
+    public List<TournamentResponse> getAllTournaments(User currentUser) {
         return tournamentRepository.findAllByOrderByStartDateAsc()
                 .stream()
-                .map(this::mapToResponse)
+                .map(tournament -> mapToResponse(tournament, currentUser))
                 .toList();
     }
 
-    public TournamentResponse getTournamentById(Long id) {
+    public TournamentResponse getTournamentById(Long id, User currentUser) {
         Tournament tournament = tournamentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
 
-        return mapToResponse(tournament);
+        return mapToResponse(tournament, currentUser);
     }
 
-    public List<TournamentResponse> getTournamentsByStatus(TournamentStatus status) {
+    public List<TournamentResponse> getTournamentsByStatus(TournamentStatus status, User currentUser) {
         return tournamentRepository.findByStatusOrderByStartDateAsc(status)
                 .stream()
-                .map(this::mapToResponse)
+                .map(tournament -> mapToResponse(tournament, currentUser))
                 .toList();
     }
 
@@ -58,10 +56,10 @@ public class TournamentService {
                 .build();
 
         Tournament savedTournament = tournamentRepository.save(tournament);
-        return mapToResponse(savedTournament);
+        return mapToResponse(savedTournament, currentUser);
     }
 
-    public TournamentResponse updateTournament(Long id, CreateTournamentRequest request) {
+    public TournamentResponse updateTournament(Long id, CreateTournamentRequest request, User currentUser) {
         Tournament tournament = tournamentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
 
@@ -74,8 +72,10 @@ public class TournamentService {
         tournament.setLocation(request.getLocation());
         tournament.setDescription(request.getDescription());
 
+        updateTournamentFullStatus(tournament);
+
         Tournament updatedTournament = tournamentRepository.save(tournament);
-        return mapToResponse(updatedTournament);
+        return mapToResponse(updatedTournament, currentUser);
     }
 
     public void deleteTournament(Long id) {
@@ -85,7 +85,25 @@ public class TournamentService {
         tournamentRepository.delete(tournament);
     }
 
-    private TournamentResponse mapToResponse(Tournament tournament) {
+    public Tournament getTournamentEntityById(Long id) {
+        return tournamentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
+    }
+
+    public void updateTournamentFullStatus(Tournament tournament) {
+        long currentPlayers = tournamentRegistrationRepository.countByTournamentId(tournament.getId());
+        tournament.setFull(currentPlayers >= tournament.getMaxPlayers());
+    }
+
+    public TournamentResponse mapToResponse(Tournament tournament, User currentUser) {
+        int currentPlayers = (int) tournamentRegistrationRepository.countByTournamentId(tournament.getId());
+
+        boolean registeredByCurrentUser = currentUser != null &&
+                tournamentRegistrationRepository.existsByPlayerIdAndTournamentId(currentUser.getId(), tournament.getId());
+
+        boolean registrationOpen =
+                tournament.getStatus() == TournamentStatus.UPCOMING && !tournament.isFull();
+
         return TournamentResponse.builder()
                 .id(tournament.getId())
                 .name(tournament.getName())
@@ -95,9 +113,12 @@ public class TournamentService {
                 .startDate(tournament.getStartDate().toString())
                 .endDate(tournament.getEndDate().toString())
                 .maxPlayers(tournament.getMaxPlayers())
+                .currentPlayers(currentPlayers)
                 .location(tournament.getLocation())
                 .description(tournament.getDescription())
                 .isFull(tournament.isFull())
+                .registeredByCurrentUser(registeredByCurrentUser)
+                .registrationOpen(registrationOpen)
                 .build();
     }
 }

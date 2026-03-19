@@ -28,4 +28,13 @@ export type TournamentType = {
     location: string;
     description: string;
     isFull: boolean;
+    registeredByCurrentUser: boolean;
+    registrationOpen: boolean;
 };
+
+export type TournamentParticipantType = {
+    id: number;
+    fullName: string;
+    email: string;
+    registeredAt: string;
+}
