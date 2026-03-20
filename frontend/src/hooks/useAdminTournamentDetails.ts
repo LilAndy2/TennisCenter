@@ -1,0 +1,149 @@
+import { useEffect, useMemo, useState } from "react";
+import axiosInstance from "../api/axiosInstance";
+import type { TournamentParticipantType, TournamentType } from "../types/tournament";
+
+export type TournamentFormData = {
+    name: string;
+    level: string;
+    surface: string;
+    startDate: string;
+    endDate: string;
+    maxPlayers: string;
+    location: string;
+    description: string;
+};
+
+function useAdminTournamentDetails(id: string | undefined) {
+    const [tournament, setTournament] = useState<TournamentType | null>(null);
+    const [participants, setParticipants] = useState<TournamentParticipantType[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [participantToRemove, setParticipantToRemove] =
+        useState<TournamentParticipantType | null>(null);
+
+    const loadTournament = async () => {
+        try {
+            const response = await axiosInstance.get<TournamentType>(
+                `/player/tournaments/${id}`
+            );
+            setTournament(response.data);
+        } catch (error) {
+            console.error("Failed to load admin tournament details", error);
+            setTournament(null);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loadParticipants = async () => {
+        try {
+            const response = await axiosInstance.get<TournamentParticipantType[]>(
+                `/player/tournaments/${id}/participants`
+            );
+            setParticipants(response.data);
+        } catch (error) {
+            console.error("Failed to load participants", error);
+        }
+    };
+
+    useEffect(() => {
+        if (!id) return;
+        loadTournament();
+        loadParticipants();
+    }, [id]);
+
+    const initialEditData = useMemo<TournamentFormData | undefined>(() => {
+        if (!tournament) return undefined;
+
+        return {
+            name: tournament.name,
+            level: tournament.level.toUpperCase(),
+            surface: tournament.surface.toUpperCase(),
+            startDate: tournament.startDate,
+            endDate: tournament.endDate,
+            maxPlayers: String(tournament.maxPlayers),
+            location: tournament.location,
+            description: tournament.description,
+        };
+    }, [tournament]);
+
+    const handleEditTournament = async (data: TournamentFormData) => {
+        try {
+            const response = await axiosInstance.put<TournamentType>(
+                `/admin/tournaments/${id}`,
+                {
+                    name: data.name,
+                    level: data.level,
+                    surface: data.surface,
+                    startDate: data.startDate,
+                    endDate: data.endDate,
+                    maxPlayers: Number(data.maxPlayers),
+                    location: data.location,
+                    description: data.description,
+                }
+            );
+
+            setTournament(response.data);
+            setIsEditModalOpen(false);
+        } catch (error) {
+            console.error("Failed to update tournament", error);
+            throw error;
+        }
+    };
+
+    const handleDeleteTournament = async (onSuccess: () => void) => {
+        try {
+            await axiosInstance.delete(`/admin/tournaments/${id}`);
+            setIsDeleteDialogOpen(false);
+            onSuccess();
+        } catch (error) {
+            console.error("Failed to delete tournament", error);
+        }
+    };
+
+    const handleOpenRemoveParticipantDialog = (
+        participant: TournamentParticipantType
+    ) => {
+        setParticipantToRemove(participant);
+    };
+
+    const handleConfirmRemoveParticipant = async () => {
+        if (!participantToRemove) return;
+
+        try {
+            await axiosInstance.delete(
+                `/admin/tournaments/${id}/participants/${participantToRemove.id}`
+            );
+
+            await loadParticipants();
+            await loadTournament();
+            setParticipantToRemove(null);
+        } catch (error) {
+            console.error("Failed to remove participant", error);
+        }
+    };
+
+    const handleCloseRemoveParticipantDialog = () => {
+        setParticipantToRemove(null);
+    };
+
+    return {
+        tournament,
+        participants,
+        loading,
+        isEditModalOpen,
+        isDeleteDialogOpen,
+        participantToRemove,
+        initialEditData,
+        setIsEditModalOpen,
+        setIsDeleteDialogOpen,
+        handleEditTournament,
+        handleDeleteTournament,
+        handleOpenRemoveParticipantDialog,
+        handleConfirmRemoveParticipant,
+        handleCloseRemoveParticipantDialog,
+    };
+}
+
+export default useAdminTournamentDetails;
