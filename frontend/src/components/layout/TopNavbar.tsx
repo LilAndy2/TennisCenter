@@ -104,6 +104,13 @@ function TopNavbar() {
                             </NavItemContent>
                         </StyledNavLink>
 
+                        <StyledNavLink to="/leaderboard">
+                            <NavItemContent>
+                                <EmojiEventsOutlined sx={{ fontSize: 18 }} />
+                                <NavItemText>Leaderboard</NavItemText>
+                            </NavItemContent>
+                        </StyledNavLink>
+
                         <StyledNavLink to="/about-us">
                             <NavItemContent>
                                 <InfoOutlined sx={{ fontSize: 18 }} />

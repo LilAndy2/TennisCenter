@@ -46,6 +46,18 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private PlayerLevel playerLevel;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer rankingPoints = 0;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer wins = 0;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer losses = 0;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));

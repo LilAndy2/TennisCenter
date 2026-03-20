@@ -13,6 +13,7 @@ import SettingsPage from "./pages/SettingsPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage.tsx";
 import AdminTournamentDetailsPage from "./pages/AdminTournamentDetailsPage.tsx";
 import PrivateRoute from "./routes/PrivateRoute";
+import LeaderboardPage from "./pages/LeaderboardPage.tsx";
 
 function AnimatedRoutes() {
     const location = useLocation();
@@ -65,6 +66,15 @@ function AnimatedRoutes() {
                     element={
                         <PrivateRoute>
                             <H2HPage />
+                        </PrivateRoute>
+                    }
+                />
+
+                <Route
+                    path="/leaderboard"
+                    element={
+                        <PrivateRoute>
+                            <LeaderboardPage />
                         </PrivateRoute>
                     }
                 />
