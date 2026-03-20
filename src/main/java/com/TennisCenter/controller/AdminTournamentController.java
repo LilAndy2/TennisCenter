@@ -67,4 +67,22 @@ public class AdminTournamentController {
     ) {
         tournamentRegistrationService.removeParticipantByAdmin(tournamentId, playerId);
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/{id}/start")
+    public TournamentResponse startTournament(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        return tournamentService.startTournament(id, currentUser);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/{id}/finish")
+    public TournamentResponse finishTournament(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        return tournamentService.finishTournament(id, currentUser);
+    }
 }

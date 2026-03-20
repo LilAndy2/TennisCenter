@@ -128,6 +128,28 @@ function useAdminTournamentDetails(id: string | undefined) {
         setParticipantToRemove(null);
     };
 
+    const handleStartTournament = async () => {
+        try {
+            const response = await axiosInstance.post<TournamentType>(
+                `/admin/tournaments/${id}/start`
+            );
+            setTournament(response.data);
+        } catch (error) {
+            console.error("Failed to start tournament", error);
+        }
+    }
+
+    const handleFinishTournament = async () => {
+        try {
+            const response = await axiosInstance.post<TournamentType>(
+                `/admin/tournaments/${id}/finish`
+            );
+            setTournament(response.data);
+        } catch (error) {
+            console.error("Failed to finish tournament", error);
+        }
+    };
+
     return {
         tournament,
         participants,
@@ -143,6 +165,8 @@ function useAdminTournamentDetails(id: string | undefined) {
         handleOpenRemoveParticipantDialog,
         handleConfirmRemoveParticipant,
         handleCloseRemoveParticipantDialog,
+        handleStartTournament,
+        handleFinishTournament
     };
 }
 

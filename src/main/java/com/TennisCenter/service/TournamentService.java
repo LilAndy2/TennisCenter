@@ -24,7 +24,12 @@ public class TournamentService {
     private final TournamentRegistrationRepository tournamentRegistrationRepository;
 
     public List<TournamentResponse> getAllTournaments(User currentUser) {
-        return tournamentRepository.findAllByOrderByStartDateAsc()
+        List<Tournament> tournaments = tournamentRepository.findAllByOrderByStartDateAsc();
+
+        tournaments.forEach(this::syncTournamentStatusWithDates);
+        tournamentRepository.saveAll(tournaments);
+
+        return tournaments
                 .stream()
                 .map(tournament -> mapToResponse(tournament, currentUser))
                 .toList();
@@ -34,12 +39,20 @@ public class TournamentService {
         Tournament tournament = tournamentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
 
+        syncTournamentStatusWithDates(tournament);
+        tournamentRepository.save(tournament);
+
         return mapToResponse(tournament, currentUser);
     }
 
     public List<TournamentResponse> getTournamentsByStatus(TournamentStatus status, User currentUser) {
-        return tournamentRepository.findByStatusOrderByStartDateAsc(status)
-                .stream()
+        List<Tournament> allTournaments = tournamentRepository.findAllByOrderByStartDateAsc();
+
+        allTournaments.forEach(this::syncTournamentStatusWithDates);
+        tournamentRepository.saveAll(allTournaments);
+
+        return allTournaments.stream()
+                .filter(tournament -> tournament.getStatus() == status)
                 .map(tournament -> mapToResponse(tournament, currentUser))
                 .toList();
     }
@@ -99,6 +112,34 @@ public class TournamentService {
         tournament.setFull(currentPlayers >= tournament.getMaxPlayers());
     }
 
+    public TournamentResponse startTournament(Long id, User currentUser) {
+        Tournament tournament = tournamentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
+
+        if (tournament.getStatus() != TournamentStatus.UPCOMING) {
+            throw new IllegalStateException("Only upcoming tournaments can be started");
+        }
+
+        tournament.setStatus(TournamentStatus.ONGOING);
+
+        Tournament updatedTournament = tournamentRepository.save(tournament);
+        return mapToResponse(updatedTournament, currentUser);
+    }
+
+    public TournamentResponse finishTournament(Long id, User currentUser) {
+        Tournament tournament = tournamentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
+
+        if (tournament.getStatus() != TournamentStatus.ONGOING) {
+            throw new IllegalStateException("Only ongoing tournaments can be finished");
+        }
+
+        tournament.setStatus(TournamentStatus.FINISHED);
+
+        Tournament updatedTournament = tournamentRepository.save(tournament);
+        return mapToResponse(updatedTournament, currentUser);
+    }
+
     public TournamentResponse mapToResponse(Tournament tournament, User currentUser) {
         int currentPlayers = (int) tournamentRegistrationRepository.countByTournamentId(tournament.getId());
 
@@ -139,5 +180,23 @@ public class TournamentService {
                 .registrationAllowedByLevel(registrationAllowedByLevel)
                 .currentUserAdmin(currentUserAdmin)
                 .build();
+    }
+
+    private void syncTournamentStatusWithDates(Tournament tournament) {
+        LocalDate today = LocalDate.now();
+
+        if (tournament.getStatus() == TournamentStatus.FINISHED) {
+            return;
+        }
+
+        if (today.isAfter(tournament.getEndDate())) {
+            tournament.setStatus(TournamentStatus.FINISHED);
+        } else if (
+                (today.isEqual(tournament.getStartDate()) || today.isAfter(tournament.getStartDate()))
+                    && today.isBefore(tournament.getEndDate().plusDays(1))
+                    && tournament.getStatus() == TournamentStatus.UPCOMING
+        ) {
+            tournament.setStatus(TournamentStatus.ONGOING);
+        }
     }
 }

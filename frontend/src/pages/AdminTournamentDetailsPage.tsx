@@ -8,6 +8,7 @@ import AdminTournamentParticipantsCard from "../components/admin/tournament-deta
 import DeleteTournamentDialog from "../components/admin/tournament-details/DeleteTournamentDialog";
 import RemoveParticipantDialog from "../components/admin/tournament-details/RemoveParticipantDialog";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
+import AdminTournamentStatusActions from "../components/admin/tournament-details/AdminTournamentStatusAction.tsx";
 import useAdminTournamentDetails from "../hooks/useAdminTournamentDetails";
 
 function AdminTournamentDetailsPage() {
@@ -29,6 +30,8 @@ function AdminTournamentDetailsPage() {
         handleOpenRemoveParticipantDialog,
         handleConfirmRemoveParticipant,
         handleCloseRemoveParticipantDialog,
+        handleStartTournament,
+        handleFinishTournament,
     } = useAdminTournamentDetails(id);
 
     if (loading) {
@@ -65,6 +68,12 @@ function AdminTournamentDetailsPage() {
                     onBack={() => navigate("/admin")}
                     onEdit={() => setIsEditModalOpen(true)}
                     onDelete={() => setIsDeleteDialogOpen(true)}
+                />
+
+                <AdminTournamentStatusActions
+                    tournament={tournament}
+                    onStart={handleStartTournament}
+                    onFinish={handleFinishTournament}
                 />
 
                 <AdminTournamentInfoCard tournament={tournament} />
