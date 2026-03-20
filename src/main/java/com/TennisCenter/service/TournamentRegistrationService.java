@@ -101,4 +101,18 @@ public class TournamentRegistrationService {
                         .build())
                 .toList();
     }
+
+    public void removeParticipantByAdmin(Long tournamentId, Long playerId) {
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new RuntimeException("Tournament not found"));
+
+        TournamentRegistration registration = tournamentRegistrationRepository
+                .findByPlayerIdAndTournamentId(playerId, tournamentId)
+                .orElseThrow(() -> new UnauthorizedActionException("Participant is not registered in this tournament"));
+
+        tournamentRegistrationRepository.delete(registration);
+
+        tournamentService.updateTournamentFullStatus(tournament);
+        tournamentRepository.save(tournament);
+    }
 }

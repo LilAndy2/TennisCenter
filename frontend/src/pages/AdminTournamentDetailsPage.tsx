@@ -25,7 +25,7 @@ import axiosInstance from "../api/axiosInstance";
 import CreateTournamentModal from "../components/admin/CreateTournamentModal";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 import TournamentLevelBadge from "../components/tournaments/TournamentLevelBadge";
-import type { TournamentType } from "../types/tournament";
+import type { TournamentType, TournamentParticipantType } from "../types/tournament";
 import { formatTournamentDate } from "../utils/formatTournamentDate";
 import { formatTournamentDateRange } from "../utils/formatTournamentDateRange";
 
@@ -48,6 +48,8 @@ function AdminTournamentDetailsPage() {
     const [loading, setLoading] = useState(true);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [participants, setParticipants] = useState<TournamentParticipantType[]>([])
+    const [participantToRemove, setParticipantToRemove] = useState<TournamentParticipantType | null>(null);
 
     const loadTournament = async () => {
         try {
@@ -63,8 +65,20 @@ function AdminTournamentDetailsPage() {
         }
     };
 
+    const loadParticipants = async () => {
+        try {
+            const response = await axiosInstance.get<TournamentParticipantType[]>(
+                `/player/tournaments/${id}/participants`
+            );
+            setParticipants(response.data);
+        } catch (error) {
+            console.error("Failed to load participants", error);
+        }
+    };
+
     useEffect(() => {
         loadTournament();
+        loadParticipants();
     }, [id]);
 
     const initialEditData = useMemo<TournamentFormData | undefined>(() => {
@@ -115,6 +129,32 @@ function AdminTournamentDetailsPage() {
             console.error("Failed to delete tournament", error);
         }
     };
+
+    const handleOpenRemoveParticipantDialog = (
+        participant: TournamentParticipantType
+    ) => {
+        setParticipantToRemove(participant);
+    }
+
+    const handleConfirmRemoveParticipant = async () => {
+        if (!participantToRemove) return;
+
+        try {
+            await axiosInstance.delete(
+                `/admin/tournaments/${id}/participants/${participantToRemove.id}`
+            );
+
+            await loadParticipants();
+            await loadTournament();
+            setParticipantToRemove(null);
+        } catch (error) {
+            console.error("Failed to remove participant", error);
+        }
+    };
+
+    const handleCloseRemoveParticipantDialog = () => {
+        setParticipantToRemove(null);
+    }
 
     if (loading) {
         return (
@@ -257,9 +297,33 @@ function AdminTournamentDetailsPage() {
                 <SectionsGrid>
                     <SectionCard>
                         <SectionTitle>Registered players</SectionTitle>
-                        <SectionText>
-                            This section will allow the admin to view and manage registered players.
-                        </SectionText>
+
+                        {participants.length === 0 ? (
+                            <SectionText>No players registered yet.</SectionText>
+                        ) : (
+                            <ParticipantsList>
+                                {participants.map((participant) => (
+                                    <ParticipantItem key={participant.id}>
+                                        <ParticipantLeftColumn>
+                                            <ParticipantName>{participant.fullName}</ParticipantName>
+                                            <ParticipantEmail>{participant.email}</ParticipantEmail>
+                                        </ParticipantLeftColumn>
+
+                                        <ParticipantRightColumn>
+                                            <ParticipantDate>
+                                                Registered on {new Date(participant.registeredAt).toLocaleDateString()}
+                                            </ParticipantDate>
+
+                                            <RemoveParticipantButton
+                                                onClick={() => handleOpenRemoveParticipantDialog(participant)}
+                                            >
+                                                Remove
+                                            </RemoveParticipantButton>
+                                        </ParticipantRightColumn>
+                                    </ParticipantItem>
+                                ))}
+                            </ParticipantsList>
+                        )}
                     </SectionCard>
 
                     <SectionCard>
@@ -305,13 +369,35 @@ function AdminTournamentDetailsPage() {
                     </DeleteConfirmButton>
                 </DialogActions>
             </Dialog>
+
+            <Dialog
+                open={Boolean(participantToRemove)}
+                onClose={handleCloseRemoveParticipantDialog}
+            >
+                <DialogTitle>Remove participant</DialogTitle>
+
+                <DialogContent>
+                    <Typography>
+                        Are you sure you want to remove{" "}
+                        <strong>{participantToRemove?.fullName}</strong> from this tournament?
+                    </Typography>
+                </DialogContent>
+
+                <DialogActions>
+                    <DialogButton onClick={handleCloseRemoveParticipantDialog}>
+                        Cancel
+                    </DialogButton>
+
+                    <DeleteConfirmButton onClick={handleConfirmRemoveParticipant}>
+                        Remove
+                    </DeleteConfirmButton>
+                </DialogActions>
+            </Dialog>
         </AuthenticatedLayout>
     );
 }
 
 export default AdminTournamentDetailsPage;
-
-// styles
 
 const PageWrapper = styled(Box)`
   width: 100%;
@@ -604,4 +690,97 @@ const DeleteConfirmButton = styled.button`
     color: white;
     font-weight: 700;
     cursor: pointer;
+`;
+
+const ParticipantsList = styled(Box)`
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    max-height: 11rem;
+    overflow-y: auto;
+    padding-right: 0.35rem;
+
+    &::-webkit-scrollbar {
+        width: 0.4rem;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 999px;
+    }
+`;
+
+const ParticipantItem = styled(Box)`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 0.9rem;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+
+  @media (max-width: 40rem) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+`;
+
+const ParticipantLeftColumn = styled(Box)`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  min-width: 0;
+`;
+
+const ParticipantRightColumn = styled(Box)`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+  flex-shrink: 0;
+
+  @media (max-width: 40rem) {
+    align-items: flex-start;
+  }
+`;
+
+const ParticipantName = styled(Typography)`
+  font-size: 0.96rem !important;
+  font-weight: 700 !important;
+  color: #111827;
+`;
+
+const ParticipantEmail = styled(Typography)`
+  font-size: 0.86rem !important;
+  color: #475569;
+`;
+
+const ParticipantDate = styled(Typography)`
+  font-size: 0.8rem !important;
+  color: #64748b;
+  text-align: right;
+
+  @media (max-width: 40rem) {
+    text-align: left;
+  }
+`;
+
+const RemoveParticipantButton = styled.button`
+  width: fit-content;
+  height: 2.2rem;
+  padding: 0 0.9rem;
+  border: none;
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+
+  &:hover {
+    background: #fecaca;
+  }
 `;

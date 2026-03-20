@@ -4,8 +4,10 @@ import com.TennisCenter.dto.tournament.CreateTournamentRequest;
 import com.TennisCenter.dto.tournament.TournamentResponse;
 import com.TennisCenter.model.enums.TournamentStatus;
 import com.TennisCenter.model.User;
+import com.TennisCenter.service.TournamentRegistrationService;
 import com.TennisCenter.service.TournamentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +19,7 @@ import java.util.List;
 public class AdminTournamentController {
 
     private final TournamentService tournamentService;
+    private final TournamentRegistrationService tournamentRegistrationService;
 
     @GetMapping("/ongoing")
     public List<TournamentResponse> getOngoingTournaments(
@@ -54,5 +57,14 @@ public class AdminTournamentController {
             @PathVariable Long id
     ) {
         tournamentService.deleteTournament(id);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{tournamentId}/participants/{playerId}")
+    public void removeParticipant(
+            @PathVariable Long tournamentId,
+            @PathVariable Long playerId
+    ) {
+        tournamentRegistrationService.removeParticipantByAdmin(tournamentId, playerId);
     }
 }

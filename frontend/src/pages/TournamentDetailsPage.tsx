@@ -525,9 +525,21 @@ const RegisterButton = styled.button`
 `;
 
 const ParticipantsList = styled(Box)`
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 10.5rem;
+    overflow-y: auto;
+    padding-right: 0.35rem;
+
+    &::-webkit-scrollbar {
+        width: 0.4rem;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 999px;
+    }
 `;
 
 const ParticipantItem = styled(Box)`
