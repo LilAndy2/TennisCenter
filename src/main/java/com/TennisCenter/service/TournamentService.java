@@ -4,6 +4,10 @@ import com.TennisCenter.dto.tournament.CreateTournamentRequest;
 import com.TennisCenter.dto.tournament.TournamentResponse;
 import com.TennisCenter.exception.ResourceNotFoundException;
 import com.TennisCenter.model.*;
+import com.TennisCenter.model.enums.Role;
+import com.TennisCenter.model.enums.TournamentLevel;
+import com.TennisCenter.model.enums.TournamentStatus;
+import com.TennisCenter.model.enums.TournamentSurface;
 import com.TennisCenter.repository.TournamentRegistrationRepository;
 import com.TennisCenter.repository.TournamentRepository;
 import lombok.RequiredArgsConstructor;
@@ -101,8 +105,21 @@ public class TournamentService {
         boolean registeredByCurrentUser = currentUser != null &&
                 tournamentRegistrationRepository.existsByPlayerIdAndTournamentId(currentUser.getId(), tournament.getId());
 
+        boolean currentUserAdmin = currentUser != null && currentUser.getRole() == Role.ADMIN;
+
+        boolean registrationAllowedByLevel = false;
+
+        if (currentUser != null
+                && currentUser.getRole() == Role.PLAYER
+                && currentUser.getPlayerLevel() != null) {
+            registrationAllowedByLevel = currentUser.getPlayerLevel().ordinal() <= tournament.getLevel().ordinal();
+        }
+
         boolean registrationOpen =
-                tournament.getStatus() == TournamentStatus.UPCOMING && !tournament.isFull();
+                tournament.getStatus() == TournamentStatus.UPCOMING
+                        && !tournament.isFull()
+                        && !currentUserAdmin
+                        && registrationAllowedByLevel;
 
         return TournamentResponse.builder()
                 .id(tournament.getId())
@@ -119,6 +136,8 @@ public class TournamentService {
                 .isFull(tournament.isFull())
                 .registeredByCurrentUser(registeredByCurrentUser)
                 .registrationOpen(registrationOpen)
+                .registrationAllowedByLevel(registrationAllowedByLevel)
+                .currentUserAdmin(currentUserAdmin)
                 .build();
     }
 }

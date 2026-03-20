@@ -1,7 +1,7 @@
 package com.TennisCenter.repository;
 
 import com.TennisCenter.model.Tournament;
-import com.TennisCenter.model.TournamentStatus;
+import com.TennisCenter.model.enums.TournamentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

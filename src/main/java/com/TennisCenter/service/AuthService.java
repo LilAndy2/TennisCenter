@@ -4,7 +4,8 @@ import com.TennisCenter.config.JwtService;
 import com.TennisCenter.dto.auth.AuthResponse;
 import com.TennisCenter.dto.auth.LoginRequest;
 import com.TennisCenter.dto.auth.RegisterRequest;
-import com.TennisCenter.model.Role;
+import com.TennisCenter.model.enums.PlayerLevel;
+import com.TennisCenter.model.enums.Role;
 import com.TennisCenter.model.User;
 import com.TennisCenter.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.PLAYER)
+                .playerLevel(PlayerLevel.valueOf(request.getPlayerLevel().toUpperCase()))
                 .build();
 
         userRepository.save(user);
@@ -49,6 +51,7 @@ public class AuthService {
                 .username(user.getDisplayUsername())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .playerLevel(user.getPlayerLevel() != null ? user.getPlayerLevel().getDisplayName() : null)
                 .build();
     }
 
@@ -71,6 +74,7 @@ public class AuthService {
                 .username(user.getDisplayUsername())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .playerLevel(user.getPlayerLevel() != null ? user.getPlayerLevel().getDisplayName() : null)
                 .build();
     }
 }

@@ -1,5 +1,8 @@
 package com.TennisCenter.model;
 
+import com.TennisCenter.model.enums.TournamentLevel;
+import com.TennisCenter.model.enums.TournamentStatus;
+import com.TennisCenter.model.enums.TournamentSurface;
 import jakarta.persistence.*;
 import lombok.*;
 

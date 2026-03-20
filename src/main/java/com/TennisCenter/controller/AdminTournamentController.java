@@ -2,7 +2,7 @@ package com.TennisCenter.controller;
 
 import com.TennisCenter.dto.tournament.CreateTournamentRequest;
 import com.TennisCenter.dto.tournament.TournamentResponse;
-import com.TennisCenter.model.TournamentStatus;
+import com.TennisCenter.model.enums.TournamentStatus;
 import com.TennisCenter.model.User;
 import com.TennisCenter.service.TournamentService;
 import lombok.RequiredArgsConstructor;

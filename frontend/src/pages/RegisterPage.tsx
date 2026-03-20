@@ -18,6 +18,7 @@ import {
     FormSubtitle,
     FormTitle,
 } from "../components/auth/AuthText";
+import styled from "styled-components";
 
 type RegisterFormData = {
     firstName: string;
@@ -26,6 +27,7 @@ type RegisterFormData = {
     email: string;
     password: string;
     confirmPassword: string;
+    playerLevel: string;
 };
 
 type AuthResponse = {
@@ -34,6 +36,7 @@ type AuthResponse = {
     username: string;
     email: string;
     role: "ADMIN" | "PLAYER";
+    playerLevel?: string | null;
 };
 
 function RegisterPage() {
@@ -46,6 +49,7 @@ function RegisterPage() {
         email: "",
         password: "",
         confirmPassword: "",
+        playerLevel: "ENTRY",
     });
 
     const [error, setError] = useState("");
@@ -76,6 +80,7 @@ function RegisterPage() {
                 username: formData.username,
                 email: formData.email,
                 password: formData.password,
+                playerLevel: formData.playerLevel,
             });
 
             localStorage.setItem("token", response.data.token);
@@ -147,6 +152,21 @@ function RegisterPage() {
                 </FieldWrapper>
 
                 <FieldWrapper>
+                    <FieldLabel>Player level</FieldLabel>
+                    <AuthSelect
+                        value={formData.playerLevel}
+                        onChange={(event) => handleChange("playerLevel", event.target.value)}
+                    >
+                        <option value="ENTRY">Entry</option>
+                        <option value="STARTER">Starter</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="MASTER">Master</option>
+                        <option value="EXPERT">Expert</option>
+                        <option value="STELLAR">Stellar</option>
+                    </AuthSelect>
+                </FieldWrapper>
+
+                <FieldWrapper>
                     <FieldLabel>Password</FieldLabel>
                     <AuthInput
                         fullWidth
@@ -198,3 +218,20 @@ function RegisterPage() {
 }
 
 export default RegisterPage;
+
+const AuthSelect = styled.select`
+    width: 100%;
+    height: 3.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    padding: 0 1rem;
+    font-size: 0.95rem;
+    background: white;
+    outline: none;
+    transition: 0.2s ease;
+
+    &:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.12);
+    }
+`;

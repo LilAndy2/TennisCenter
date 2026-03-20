@@ -57,6 +57,25 @@ function TournamentDetailsPage() {
         }
     };
 
+    const handleWithdraw = async () => {
+        if (!tournament) return;
+
+        try {
+            setRegistering(true);
+
+            const response = await axiosInstance.delete<TournamentType>(
+                `/player/tournaments/${tournament.id}/register`
+            );
+
+            setTournament(response.data);
+            await loadParticipants();
+        } catch (error) {
+            console.error("Failed to withdraw from tournament", error);
+        } finally {
+            setRegistering(false);
+        }
+    };
+
     useEffect(() => {
         const loadTournament = async () => {
             try {
@@ -131,22 +150,24 @@ function TournamentDetailsPage() {
                     <TournamentDescription>{tournament.description}</TournamentDescription>
 
                     <ActionRow>
-                        <RegisterButton
-                            onClick={handleRegister}
-                            disabled={
-                                !tournament.registrationOpen ||
-                                tournament.registeredByCurrentUser ||
-                                registering
-                            }
-                        >
-                            {tournament.registeredByCurrentUser
-                                ? "Already registered"
-                                : tournament.isFull
-                                    ? "Tournament full"
-                                    : registering
-                                        ? "Registering..."
-                                        : "Register"}
-                        </RegisterButton>
+                        {!tournament.currentUserAdmin ? (
+                            tournament.registeredByCurrentUser ? (
+                                <WithdrawButton onClick={handleWithdraw} disabled={registering}>
+                                    {registering ? "Processing..." : "Withdraw"}
+                                </WithdrawButton>
+                            ) : tournament.registrationAllowedByLevel ? (
+                                <RegisterButton
+                                    onClick={handleRegister}
+                                    disabled={!tournament.registrationOpen || registering}
+                                >
+                                    {tournament.isFull
+                                        ? "Tournament full"
+                                        : registering
+                                            ? "Registering..."
+                                            : "Register"}
+                                </RegisterButton>
+                            ) : null
+                        ) : null}
                     </ActionRow>
 
                     <InfoGrid>
@@ -526,4 +547,27 @@ const ParticipantEmail = styled(Typography)`
   font-size: 0.84rem !important;
   color: #64748b;
   margin-top: 0.15rem !important;
+`;
+
+const WithdrawButton = styled.button`
+  height: 2.85rem;
+  padding: 0 1.15rem;
+  border: none;
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: #fecaca;
+  }
+
+  &:disabled {
+    background: #cbd5e1;
+    color: white;
+    cursor: not-allowed;
+  }
 `;

@@ -1,6 +1,6 @@
 package com.TennisCenter.dto.auth;
 
-import com.TennisCenter.model.Role;
+import com.TennisCenter.model.enums.Role;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,4 +12,5 @@ public class AuthResponse {
     private String username;
     private String email;
     private Role role;
+    private String playerLevel;
 }

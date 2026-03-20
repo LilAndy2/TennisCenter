@@ -1,4 +1,4 @@
-package com.TennisCenter.model;
+package com.TennisCenter.model.enums;
 
 public enum TournamentLevel {
     ENTRY,

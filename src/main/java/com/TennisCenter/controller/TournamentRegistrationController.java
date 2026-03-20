@@ -25,6 +25,14 @@ public class TournamentRegistrationController {
         return tournamentRegistrationService.registerToTournament(id, currentUser);
     }
 
+    @DeleteMapping("/{id}/register")
+    public TournamentResponse withdrawFromTournament(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        return tournamentRegistrationService.withdrawFromTournament(id, currentUser);
+    }
+
     @GetMapping("/{id}/participants")
     public List<TournamentParticipantResponse> getParticipants(
             @PathVariable Long id

@@ -3,6 +3,8 @@ package com.TennisCenter.model;
 import java.util.Collection;
 import java.util.List;
 
+import com.TennisCenter.model.enums.PlayerLevel;
+import com.TennisCenter.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -40,6 +42,9 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    @Enumerated(EnumType.STRING)
+    private PlayerLevel playerLevel;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

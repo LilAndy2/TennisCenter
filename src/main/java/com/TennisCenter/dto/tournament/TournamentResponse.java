@@ -20,4 +20,6 @@ public class TournamentResponse {
     private Integer currentPlayers;
     private boolean registeredByCurrentUser;
     private boolean registrationOpen;
+    private boolean registrationAllowedByLevel;
+    private boolean currentUserAdmin;
 }

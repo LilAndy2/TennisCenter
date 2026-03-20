@@ -30,6 +30,8 @@ export type TournamentType = {
     isFull: boolean;
     registeredByCurrentUser: boolean;
     registrationOpen: boolean;
+    registrationAllowedByLevel: boolean;
+    currentUserAdmin: boolean;
 };
 
 export type TournamentParticipantType = {
