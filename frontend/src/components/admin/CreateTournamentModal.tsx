@@ -6,6 +6,7 @@ import styled from "styled-components";
 type CreateTournamentFormData = {
     name: string;
     level: string;
+    bracketType: string;
     surface: string;
     startDate: string;
     endDate: string;
@@ -33,6 +34,7 @@ function CreateTournamentModal({
         initialData ?? {
             name: "",
             level: "ENTRY",
+            bracketType: "SINGLE_ELIMINATION",
             surface: "CLAY",
             startDate: "",
             endDate: "",
@@ -48,6 +50,7 @@ function CreateTournamentModal({
                 initialData ?? {
                     name: "",
                     level: "ENTRY",
+                    bracketType: "SINGLE_ELIMINATION",
                     surface: "CLAY",
                     startDate: "",
                     endDate: "",
@@ -59,7 +62,7 @@ function CreateTournamentModal({
         }
     }, [initialData, open]);
 
-    const handleChange = (field: keyof CreateTournamentFormData, value: string | boolean) => {
+    const handleChange = (field: keyof CreateTournamentFormData, value: string) => {
         setFormData((previous) => ({
             ...previous,
             [field]: value,
@@ -71,6 +74,20 @@ function CreateTournamentModal({
     };
 
     const handleSubmit = async () => {
+        if (
+            !formData.name.trim() ||
+            !formData.location.trim() ||
+            !formData.startDate ||
+            !formData.endDate ||
+            !formData.maxPlayers.trim()
+        ) {
+            return;
+        }
+
+        if (new Date(formData.endDate) < new Date(formData.startDate)) {
+            return;
+        }
+
         await onSubmit(formData);
         onClose();
     };
@@ -146,6 +163,7 @@ function CreateTournamentModal({
                         <FieldLabel>Max players</FieldLabel>
                         <StyledInput
                             type="number"
+                            min="2"
                             value={formData.maxPlayers}
                             onChange={(e) => handleChange("maxPlayers", e.target.value)}
                         />
@@ -157,6 +175,19 @@ function CreateTournamentModal({
                             value={formData.location}
                             onChange={(e) => handleChange("location", e.target.value)}
                         />
+                    </FieldGroup>
+
+                    <FieldGroup>
+                        <FieldLabel>Bracket type</FieldLabel>
+                        <StyledSelect
+                            value={formData.bracketType}
+                            onChange={(e) => handleChange("bracketType", e.target.value)}
+                        >
+                            <option value="SINGLE_ELIMINATION">Single elimination</option>
+                            <option value="ROUND_ROBIN_THEN_KNOCKOUT">
+                                Round robin + knockout
+                            </option>
+                        </StyledSelect>
                     </FieldGroup>
                 </FormGrid>
 

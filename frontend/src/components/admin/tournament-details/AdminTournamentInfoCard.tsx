@@ -10,7 +10,6 @@ import { Box, Typography } from "@mui/material";
 import styled from "styled-components";
 import TournamentLevelBadge from "../../tournaments/TournamentLevelBadge";
 import type { TournamentType } from "../../../types/tournament";
-import { formatTournamentDate } from "../../../utils/formatTournamentDate";
 import { formatTournamentDateRange } from "../../../utils/formatTournamentDateRange";
 
 type AdminTournamentInfoCardProps = {
@@ -91,7 +90,7 @@ function AdminTournamentInfoCard({
                     </InfoIconWrapper>
                     <InfoTextBlock>
                         <InfoLabel>Start date</InfoLabel>
-                        <InfoValue>{formatTournamentDate(tournament.startDate)}</InfoValue>
+                        <InfoValue>{tournament.bracketType}</InfoValue>
                     </InfoTextBlock>
                 </InfoItem>
 

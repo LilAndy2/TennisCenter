@@ -4,10 +4,7 @@ import com.TennisCenter.dto.tournament.CreateTournamentRequest;
 import com.TennisCenter.dto.tournament.TournamentResponse;
 import com.TennisCenter.exception.ResourceNotFoundException;
 import com.TennisCenter.model.*;
-import com.TennisCenter.model.enums.Role;
-import com.TennisCenter.model.enums.TournamentLevel;
-import com.TennisCenter.model.enums.TournamentStatus;
-import com.TennisCenter.model.enums.TournamentSurface;
+import com.TennisCenter.model.enums.*;
 import com.TennisCenter.repository.TournamentRegistrationRepository;
 import com.TennisCenter.repository.TournamentRepository;
 import lombok.RequiredArgsConstructor;
@@ -70,6 +67,7 @@ public class TournamentService {
                 .description(request.getDescription())
                 .isFull(false)
                 .createdBy(currentUser)
+                .bracketType(TournamentBracketType.valueOf(request.getBracketType().toUpperCase()))
                 .build();
 
         Tournament savedTournament = tournamentRepository.save(tournament);
@@ -88,6 +86,7 @@ public class TournamentService {
         tournament.setMaxPlayers(request.getMaxPlayers());
         tournament.setLocation(request.getLocation());
         tournament.setDescription(request.getDescription());
+        tournament.setBracketType(TournamentBracketType.valueOf(request.getBracketType().toUpperCase()));
 
         updateTournamentFullStatus(tournament);
 
@@ -179,6 +178,7 @@ public class TournamentService {
                 .registrationOpen(registrationOpen)
                 .registrationAllowedByLevel(registrationAllowedByLevel)
                 .currentUserAdmin(currentUserAdmin)
+                .bracketType(tournament.getBracketType().getDisplayName())
                 .build();
     }
 

@@ -15,7 +15,6 @@ import axiosInstance from "../api/axiosInstance";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 import TournamentLevelBadge from "../components/tournaments/TournamentLevelBadge";
 import type { TournamentType, TournamentParticipantType } from "../types/tournament";
-import { formatTournamentDate } from "../utils/formatTournamentDate";
 import { formatTournamentDateRange } from "../utils/formatTournamentDateRange";
 
 function TournamentDetailsPage() {
@@ -223,10 +222,8 @@ function TournamentDetailsPage() {
                                 <EmojiEventsOutlined sx={{ fontSize: 20 }} />
                             </InfoIconWrapper>
                             <InfoTextBlock>
-                                <InfoLabel>Start date</InfoLabel>
-                                <InfoValue>
-                                    {formatTournamentDate(tournament.startDate)}
-                                </InfoValue>
+                                <InfoLabel>Bracket type</InfoLabel>
+                                <InfoValue>{tournament.bracketType}</InfoValue>
                             </InfoTextBlock>
                         </InfoItem>
 

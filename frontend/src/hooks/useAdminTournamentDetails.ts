@@ -5,6 +5,7 @@ import type { TournamentParticipantType, TournamentType } from "../types/tournam
 export type TournamentFormData = {
     name: string;
     level: string;
+    bracketType: string;
     surface: string;
     startDate: string;
     endDate: string;
@@ -59,6 +60,10 @@ function useAdminTournamentDetails(id: string | undefined) {
         return {
             name: tournament.name,
             level: tournament.level.toUpperCase(),
+            bracketType:
+                tournament.bracketType === "Round Robin + Knockout"
+                    ? "ROUND_ROBIN_THEN_KNOCKOUT"
+                    : "SINGLE_ELIMINATION",
             surface: tournament.surface.toUpperCase(),
             startDate: tournament.startDate,
             endDate: tournament.endDate,
@@ -75,6 +80,7 @@ function useAdminTournamentDetails(id: string | undefined) {
                 {
                     name: data.name,
                     level: data.level,
+                    bracketType: data.bracketType,
                     surface: data.surface,
                     startDate: data.startDate,
                     endDate: data.endDate,

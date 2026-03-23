@@ -22,4 +22,5 @@ public class TournamentResponse {
     private boolean registrationOpen;
     private boolean registrationAllowedByLevel;
     private boolean currentUserAdmin;
+    private String bracketType;
 }

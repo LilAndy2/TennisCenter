@@ -1,5 +1,6 @@
 package com.TennisCenter.model;
 
+import com.TennisCenter.model.enums.TournamentBracketType;
 import com.TennisCenter.model.enums.TournamentLevel;
 import com.TennisCenter.model.enums.TournamentStatus;
 import com.TennisCenter.model.enums.TournamentSurface;
@@ -57,4 +58,8 @@ public class Tournament {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_id")
     private User createdBy;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TournamentBracketType bracketType;
 }
