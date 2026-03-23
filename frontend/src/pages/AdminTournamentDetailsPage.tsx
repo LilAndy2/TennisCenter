@@ -32,6 +32,8 @@ function AdminTournamentDetailsPage() {
         handleCloseRemoveParticipantDialog,
         handleStartTournament,
         handleFinishTournament,
+        matches,
+        handleGenerateBracket,
     } = useAdminTournamentDetails(id);
 
     if (loading) {
@@ -87,9 +89,36 @@ function AdminTournamentDetailsPage() {
                     <SectionCard>
                         <SectionTitle>Bracket management</SectionTitle>
                         <SectionText>
-                            This section will later contain bracket generation and tournament
-                            structure controls.
+                            Generate the tournament structure based on the selected bracket type.
                         </SectionText>
+
+                        <ActionRow>
+                            <GenerateBracketButton onClick={handleGenerateBracket}>
+                                Generate bracket
+                            </GenerateBracketButton>
+                        </ActionRow>
+
+                        {matches.length > 0 ? (
+                            <MatchesList>
+                                {matches.map((match) => (
+                                    <MatchCard key={match.id}>
+                                        <MatchMeta>
+                                            {match.phase === "GROUP_STAGE"
+                                                ? match.groupName
+                                                : `Knockout - Round ${match.roundNumber}`}
+                                        </MatchMeta>
+
+                                        <MatchPlayers>
+                                            <span>{match.playerOneName ?? "TBD"}</span>
+                                            <strong>vs</strong>
+                                            <span>{match.playerTwoName ?? "TBD"}</span>
+                                        </MatchPlayers>
+
+                                        <MatchStatus>{match.status}</MatchStatus>
+                                    </MatchCard>
+                                ))}
+                            </MatchesList>
+                        ) : null}
                     </SectionCard>
 
                     <SectionCard $fullWidth>
@@ -187,4 +216,60 @@ const LoadingWrapper = styled(Box)`
   display: flex;
   justify-content: center;
   padding: 2rem 0;
+`;
+
+const ActionRow = styled(Box)`
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+`;
+
+const GenerateBracketButton = styled.button`
+  height: 2.8rem;
+  padding: 0 1rem;
+  border: none;
+  border-radius: 999px;
+  background: #10b981;
+  color: white;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:hover {
+    background: #059669;
+  }
+`;
+
+const MatchesList = styled(Box)`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+
+const MatchCard = styled(Box)`
+  padding: 0.9rem 1rem;
+  border-radius: 0.95rem;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+`;
+
+const MatchMeta = styled(Typography)`
+  font-size: 0.8rem !important;
+  color: #64748b;
+  margin-bottom: 0.25rem !important;
+`;
+
+const MatchPlayers = styled(Box)`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #111827;
+  font-weight: 700;
+`;
+
+const MatchStatus = styled(Typography)`
+  font-size: 0.82rem !important;
+  color: #334155;
+  margin-top: 0.35rem !important;
 `;

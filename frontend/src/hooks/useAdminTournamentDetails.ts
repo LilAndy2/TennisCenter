@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
 import type { TournamentParticipantType, TournamentType } from "../types/tournament";
+import type { TournamentMatch } from "../types/match.ts";
 
 export type TournamentFormData = {
     name: string;
@@ -22,6 +23,7 @@ function useAdminTournamentDetails(id: string | undefined) {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [participantToRemove, setParticipantToRemove] =
         useState<TournamentParticipantType | null>(null);
+    const [matches, setMatches] = useState<TournamentMatch[]>([]);
 
     const loadTournament = async () => {
         try {
@@ -48,10 +50,22 @@ function useAdminTournamentDetails(id: string | undefined) {
         }
     };
 
+    const loadMatches = async () => {
+        try {
+            const response = await axiosInstance.get<TournamentMatch[]>(
+                `/player/tournaments/${id}/matches`
+            );
+            setMatches(response.data);
+        } catch (error) {
+            console.error("Failed to load matches", error);
+        }
+    }
+
     useEffect(() => {
         if (!id) return;
         loadTournament();
         loadParticipants();
+        loadMatches();
     }, [id]);
 
     const initialEditData = useMemo<TournamentFormData | undefined>(() => {
@@ -156,6 +170,17 @@ function useAdminTournamentDetails(id: string | undefined) {
         }
     };
 
+    const handleGenerateBracket = async () => {
+        try {
+            const response = await axiosInstance.post<TournamentMatch[]>(
+                `/admin/tournaments/${id}/generate-bracket`
+            );
+            setMatches(response.data);
+        } catch (error) {
+            console.error("Failed to generate bracket", error);
+        }
+    };
+
     return {
         tournament,
         participants,
@@ -172,7 +197,9 @@ function useAdminTournamentDetails(id: string | undefined) {
         handleConfirmRemoveParticipant,
         handleCloseRemoveParticipantDialog,
         handleStartTournament,
-        handleFinishTournament
+        handleFinishTournament,
+        matches,
+        handleGenerateBracket,
     };
 }
 
