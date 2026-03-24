@@ -1,5 +1,6 @@
 package com.TennisCenter.controller;
 
+import com.TennisCenter.dto.match.GroupStandingResponse;
 import com.TennisCenter.dto.match.TournamentMatchResponse;
 import com.TennisCenter.dto.tournament.TournamentResponse;
 import com.TennisCenter.service.TournamentMatchService;
@@ -40,5 +41,12 @@ public class TournamentController {
             @AuthenticationPrincipal User currentUser
     ) {
         return tournamentMatchService.getTournamentMatches(id, currentUser);
+    }
+
+    @GetMapping("/{id}/group-standings")
+    public List<GroupStandingResponse> getGroupStandings(
+            @PathVariable Long id
+    ) {
+        return tournamentMatchService.getGroupStanding(id);
     }
 }

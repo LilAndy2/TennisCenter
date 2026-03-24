@@ -24,3 +24,18 @@ export type TournamentMatch = {
     sets: MatchSet[];
     editableByCurrentUser: boolean;
 };
+
+export type GroupStandingPlayer = {
+    playerId: number;
+    position: number;
+    playerName: string;
+    wins: number;
+    losses: number;
+    setsWinPercentage: number;
+    gamesWinPercentage: number;
+};
+
+export type GroupStanding = {
+    groupName: string;
+    players: GroupStandingPlayer[];
+};

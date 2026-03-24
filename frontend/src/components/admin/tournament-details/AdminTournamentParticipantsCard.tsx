@@ -49,6 +49,7 @@ function AdminTournamentParticipantsCard({
 export default AdminTournamentParticipantsCard;
 
 const SectionCard = styled(Box)`
+  grid-column: 1 / -1;  
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 1.2rem;
@@ -69,12 +70,20 @@ const SectionText = styled(Typography)`
 `;
 
 const ParticipantsList = styled(Box)`
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.8rem;
-  max-height: 11rem;
+  max-height: 12.5rem;
   overflow-y: auto;
   padding-right: 0.35rem;
+    
+  @media (max-width: 72rem) {  
+    grid-template-columns: repeat(2, minmax(0, 1fr));  
+  } 
+    
+  @media (max-width: 48rem) {
+    grid-template-columns: 1fr;  
+  }  
 
   &::-webkit-scrollbar {
     width: 0.4rem;
@@ -91,15 +100,11 @@ const ParticipantItem = styled(Box)`
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
+  min-height: 5.4rem;  
   padding: 0.9rem 1rem;
   border-radius: 0.9rem;
   background: #f8fafc;
   border: 1px solid #e5e7eb;
-
-  @media (max-width: 40rem) {
-    flex-direction: column;
-    align-items: stretch;
-  }
 `;
 
 const ParticipantLeftColumn = styled(Box)`

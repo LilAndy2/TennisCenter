@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
 import type { TournamentParticipantType, TournamentType } from "../types/tournament";
-import type { TournamentMatch } from "../types/match.ts";
+import type { TournamentMatch, GroupStanding } from "../types/match.ts";
 
 export type TournamentFormData = {
     name: string;
@@ -24,6 +24,7 @@ function useAdminTournamentDetails(id: string | undefined) {
     const [participantToRemove, setParticipantToRemove] =
         useState<TournamentParticipantType | null>(null);
     const [matches, setMatches] = useState<TournamentMatch[]>([]);
+    const [groupStandings, setGroupStandings] = useState<GroupStanding[]>([]);
 
     const loadTournament = async () => {
         try {
@@ -61,11 +62,23 @@ function useAdminTournamentDetails(id: string | undefined) {
         }
     }
 
+    const loadGroupStandings = async () => {
+        try {
+            const response = await axiosInstance.get<GroupStanding[]>(
+                `/player/tournaments/${id}/group-standings`
+            );
+            setGroupStandings(response.data);
+        } catch (error) {
+            console.error("Failed to load group standings", error);
+        }
+    };
+
     useEffect(() => {
         if (!id) return;
         loadTournament();
         loadParticipants();
         loadMatches();
+        loadGroupStandings();
     }, [id]);
 
     const initialEditData = useMemo<TournamentFormData | undefined>(() => {
@@ -138,6 +151,7 @@ function useAdminTournamentDetails(id: string | undefined) {
 
             await loadParticipants();
             await loadTournament();
+            await loadGroupStandings();
             setParticipantToRemove(null);
         } catch (error) {
             console.error("Failed to remove participant", error);
@@ -176,6 +190,7 @@ function useAdminTournamentDetails(id: string | undefined) {
                 `/admin/tournaments/${id}/generate-bracket`
             );
             setMatches(response.data);
+            await loadGroupStandings();
         } catch (error) {
             console.error("Failed to generate bracket", error);
         }
@@ -200,6 +215,7 @@ function useAdminTournamentDetails(id: string | undefined) {
         handleFinishTournament,
         matches,
         handleGenerateBracket,
+        groupStandings,
     };
 }
 
