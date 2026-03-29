@@ -207,8 +207,8 @@ const CardWrapper = styled(Box)`
     width: 100%;
     background: white;
     border-radius: 1.25rem;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 0.75rem 2rem rgba(15, 23, 42, 0.05);
+    border: 1px solid #d1fae5;
+    box-shadow: 0 0.75rem 2rem rgba(5, 150, 105, 0.07);
     padding: 1.2rem;
 `;
 
@@ -228,7 +228,8 @@ const PostHeaderLeft = styled(Box)`
 const StyledAvatar = styled(Avatar)`
     width: 2.8rem !important;
     height: 2.8rem !important;
-    background: #e2e8f0 !important;
+    background: #ecfdf5 !important;
+    color: #059669 !important;
 `;
 
 const AuthorInfo = styled(Box)`
@@ -260,6 +261,7 @@ const PostImage = styled.img`
     object-fit: cover;
     border-radius: 1rem;
     margin-top: 1rem;
+    border: 1px solid #d1fae5;
 `;
 
 const PostActions = styled(Box)`
@@ -273,7 +275,7 @@ const ActionButton = styled.button`
     height: 2.7rem;
     border: none;
     border-radius: 0.85rem;
-    background: #f8fafc;
+    background: #f0fdf4;
     color: #334155;
     font-size: 0.92rem;
     font-weight: 700;
@@ -285,7 +287,8 @@ const ActionButton = styled.button`
     transition: 0.2s ease;
 
     &:hover {
-        background: #eef2f7;
+        background: #dcfce7;
+        color: #065f46;
     }
 `;
 
@@ -294,8 +297,8 @@ const CountBadge = styled.span`
     height: 1.35rem;
     padding: 0 0.35rem;
     border-radius: 999px;
-    background: #e2e8f0;
-    color: #334155;
+    background: #d1fae5;
+    color: #065f46;
     font-size: 0.75rem;
     font-weight: 700;
     display: inline-flex;

@@ -72,12 +72,13 @@ function AdminTournamentDetailsPage() {
                     onBack={() => navigate("/admin")}
                     onEdit={() => setIsEditModalOpen(true)}
                     onDelete={() => setIsDeleteDialogOpen(true)}
-                />
-
-                <AdminTournamentStatusActions
-                    tournament={tournament}
-                    onStart={handleStartTournament}
-                    onFinish={handleFinishTournament}
+                    extraActions={
+                        <AdminTournamentStatusActions
+                            tournament={tournament}
+                            onStart={handleStartTournament}
+                            onFinish={handleFinishTournament}
+                        />
+                    }
                 />
 
                 <AdminTournamentInfoCard tournament={tournament} />

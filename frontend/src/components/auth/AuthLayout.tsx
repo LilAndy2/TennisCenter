@@ -3,15 +3,16 @@ import styled from "styled-components";
 
 export const AuthPage = styled(Box)`
     min-height: 100vh;
-    background: #f3f4f6;
+    background: linear-gradient(180deg, #ecfdf5 0%, #f8fafc 70%);
     display: flex;
     flex-direction: column;
 `;
 
 export const AuthTopBar = styled(Box)`
   height: 4rem;
-  background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid #d1fae5;
+  backdrop-filter: blur(0.5rem);
   display: flex;
   align-items: center;
   justify-content: space-between;

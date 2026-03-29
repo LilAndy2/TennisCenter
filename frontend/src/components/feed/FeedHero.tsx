@@ -41,10 +41,10 @@ const HeroWrapper = styled(Box)`
   align-items: center;
   gap: 1rem;
   padding: 1.5rem;
-  background: linear-gradient(135deg, #ffffff, #f8fafc);
-  border: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #ffffff, #f0fdf4);
+  border: 1px solid #bbf7d0;
   border-radius: 1.25rem;
-  box-shadow: 0 0.75rem 2rem rgba(15, 23, 42, 0.05);
+  box-shadow: 0 0.75rem 2rem rgba(5, 150, 105, 0.08);
 
   @media (max-width: 56rem) {
     flex-direction: column;
@@ -91,7 +91,7 @@ const CreatePostButton = styled.button`
   padding: 0 1.1rem;
   border: none;
   border-radius: 999px;
-  background: #10b981;
+  background: linear-gradient(135deg, #10b981, #059669);
   color: white;
   font-size: 0.95rem;
   font-weight: 700;
@@ -103,6 +103,6 @@ const CreatePostButton = styled.button`
   flex-shrink: 0;
 
   &:hover {
-    background: #059669;
+    background: linear-gradient(135deg, #059669, #047857);
   }
 `;

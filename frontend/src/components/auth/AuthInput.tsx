@@ -5,6 +5,15 @@ const AuthInput = styled(TextField)`
     .MuiOutlinedInput-root {
         border-radius: 0.65rem;
         background: white;
+
+        &:hover .MuiOutlinedInput-notchedOutline {
+            border-color: #86efac;
+        }
+
+        &.Mui-focused .MuiOutlinedInput-notchedOutline {
+            border-color: #10b981;
+            border-width: 2px;
+        }
     }
 
     .MuiOutlinedInput-input {
@@ -14,6 +23,10 @@ const AuthInput = styled(TextField)`
 
     .MuiInputLabel-root {
         font-weight: 500;
+    }
+
+    .MuiInputLabel-root.Mui-focused {
+        color: #047857;
     }
 `;
 

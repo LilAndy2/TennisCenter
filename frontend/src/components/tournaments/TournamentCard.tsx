@@ -68,17 +68,17 @@ export default TournamentCard;
 
 const CardWrapper = styled(Box)`
     background: white;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #d1fae5;
     border-radius: 1.25rem;
     padding: 1.2rem;
-    box-shadow: 0 0.75rem 2rem rgba(15, 23, 42, 0.05);
+    box-shadow: 0 0.75rem 2rem rgba(5, 150, 105, 0.06);
     cursor: pointer;
     transition: 0.2s ease;
 
     &:hover {
         transform: translateY(-0.15rem);
-        box-shadow: 0 1rem 2.2rem rgba(15, 23, 42, 0.08);
-        border-color: #d1d5db;
+        box-shadow: 0 1rem 2.2rem rgba(5, 150, 105, 0.12);
+        border-color: #86efac;
     }
 `;
 
@@ -99,7 +99,7 @@ const StatusBadge = styled(Typography)<{ $status: string }>`
     background: ${({ $status }) => {
         switch ($status) {
             case "Upcoming":
-                return "#eff6ff";
+                return "#dcfce7";
             case "Ongoing":
                 return "#ecfdf5";
             case "Finished":
@@ -111,7 +111,7 @@ const StatusBadge = styled(Typography)<{ $status: string }>`
     color: ${({ $status }) => {
         switch ($status) {
             case "Upcoming":
-                return "#1d4ed8";
+                return "#047857";
             case "Ongoing":
                 return "#059669";
             case "Finished":

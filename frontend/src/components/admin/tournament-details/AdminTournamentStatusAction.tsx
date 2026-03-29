@@ -43,8 +43,6 @@ const ActionsRow = styled(Box)`
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
 `;
 
 const StartButton = styled.button`

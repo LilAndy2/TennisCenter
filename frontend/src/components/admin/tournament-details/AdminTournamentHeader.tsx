@@ -1,17 +1,20 @@
 import { ArrowBack, DeleteOutline, EditOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
+import type { ReactNode } from "react";
 import styled from "styled-components";
 
 type AdminTournamentHeaderProps = {
     onBack: () => void;
     onEdit: () => void;
     onDelete: () => void;
+    extraActions?: ReactNode;
 };
 
 function AdminTournamentHeader({
                                    onBack,
                                    onEdit,
                                    onDelete,
+                                   extraActions,
                                }: AdminTournamentHeaderProps) {
     return (
         <TopBar>
@@ -21,6 +24,8 @@ function AdminTournamentHeader({
             </BackButton>
 
             <TopBarActions>
+                {extraActions}
+
                 <SecondaryActionButton onClick={onEdit}>
                     <EditOutlined sx={{ fontSize: 18 }} />
                     <span>Edit tournament</span>

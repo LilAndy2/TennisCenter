@@ -15,6 +15,7 @@ import axiosInstance from "../api/axiosInstance";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 import TournamentLevelBadge from "../components/tournaments/TournamentLevelBadge";
 import type { TournamentType, TournamentParticipantType } from "../types/tournament";
+import type { GroupStanding } from "../types/match.ts";
 import { formatTournamentDateRange } from "../utils/formatTournamentDateRange";
 
 function TournamentDetailsPage() {
@@ -25,6 +26,7 @@ function TournamentDetailsPage() {
     const [loading, setLoading] = useState(true);
     const [participants, setParticipants] = useState<TournamentParticipantType[]>([]);
     const [registering, setRegistering] = useState(false);
+    const [groupStandings, setGroupStandings] = useState<GroupStanding[]>([]);
 
     const loadParticipants = async () => {
         try {
@@ -34,6 +36,17 @@ function TournamentDetailsPage() {
             setParticipants(response.data);
         } catch (error) {
             console.error("Failed to load participants", error);
+        }
+    };
+
+    const loadGroupStandings = async () => {
+        try {
+            const response = await axiosInstance.get<GroupStanding[]>(
+                `/player/tournaments/${id}/group-standings`
+            );
+            setGroupStandings(response.data);
+        } catch (error) {
+            console.error("Failed to load group standings", error);
         }
     };
 
@@ -90,6 +103,7 @@ function TournamentDetailsPage() {
 
         loadTournament();
         loadParticipants();
+        loadGroupStandings();
     }, [id]);
 
     if (loading) {
@@ -240,7 +254,7 @@ function TournamentDetailsPage() {
                 </HeroCard>
 
                 <BottomSectionsGrid>
-                    <SectionCard>
+                    <SectionCard $fullWidth>
                         <SectionTitle>Participants</SectionTitle>
 
                         {participants.length === 0 ? (
@@ -257,11 +271,48 @@ function TournamentDetailsPage() {
                         )}
                     </SectionCard>
 
-                    <SectionCard>
-                        <SectionTitle>Bracket</SectionTitle>
-                        <SectionText>
-                            This section will contain the tournament bracket and match progression.
-                        </SectionText>
+                    <SectionCard $fullWidth>
+                        <SectionTitle>Group standings</SectionTitle>
+
+                        {groupStandings.length === 0 ? (
+                            <SectionText>
+                                Group standings will appear here after the round robin bracket is generated.
+                            </SectionText>
+                        ) : (
+                            <GroupsWrapper>
+                                {groupStandings.map((group) => (
+                                    <GroupCard key={group.groupName}>
+                                        <GroupTitle>{group.groupName}</GroupTitle>
+
+                                        <StyledTable>
+                                            <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Player</th>
+                                                <th>W</th>
+                                                <th>L</th>
+                                                <th>Sets %</th>
+                                                <th>Games %</th>
+                                            </tr>
+                                            </thead>
+
+                                            <tbody>
+                                            {group.players.map((player) => (
+                                                <tr key={player.playerId}>
+                                                    <td>{player.position}</td>
+                                                    <td>{player.playerName}</td>
+                                                    <td>{player.wins}</td>
+                                                    <td>{player.losses}</td>
+                                                    <td>{player.setsWinPercentage}%</td>
+                                                    <td>{player.gamesWinPercentage}%</td>
+                                                </tr>
+                                            ))}
+                                            </tbody>
+                                        </StyledTable>
+                                    </GroupCard>
+                                ))}
+                            </GroupsWrapper>
+                        )}
                     </SectionCard>
 
                     <SectionCard $fullWidth>
@@ -522,12 +573,20 @@ const RegisterButton = styled.button`
 `;
 
 const ParticipantsList = styled(Box)`
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    max-height: 10.5rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.8rem;
+    max-height: 12.5rem;
     overflow-y: auto;
     padding-right: 0.35rem;
+
+    @media (max-width: 72rem) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (max-width: 48rem) {
+        grid-template-columns: 1fr;
+    }
 
     &::-webkit-scrollbar {
         width: 0.4rem;
@@ -540,10 +599,11 @@ const ParticipantsList = styled(Box)`
 `;
 
 const ParticipantItem = styled(Box)`
-  padding: 0.85rem 1rem;
-  border-radius: 0.9rem;
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
+    min-height: 5.2rem;
+    padding: 0.85rem 1rem;
+    border-radius: 0.9rem;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
 `;
 
 const ParticipantName = styled(Typography)`
@@ -579,4 +639,55 @@ const WithdrawButton = styled.button`
     color: white;
     cursor: not-allowed;
   }
+`;
+
+const GroupsWrapper = styled(Box)`
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+
+    @media (max-width: 72rem) {
+        grid-template-columns: 1fr;
+    }
+`;
+
+const GroupCard = styled(Box)`
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    background: #f8fafc;
+    padding: 1rem;
+`;
+
+const GroupTitle = styled(Typography)`
+    font-size: 1rem !important;
+    font-weight: 800 !important;
+    color: #111827;
+    margin-bottom: 0.65rem !important;
+`;
+
+const StyledTable = styled.table`
+    width: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+        text-align: left;
+        padding: 0.65rem 0.45rem;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 0.88rem;
+    }
+
+    th {
+        color: #475569;
+        font-weight: 800;
+    }
+
+    td {
+        color: #111827;
+        font-weight: 500;
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
 `;

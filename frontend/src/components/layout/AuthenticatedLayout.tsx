@@ -20,9 +20,12 @@ export default AuthenticatedLayout;
 
 const LayoutWrapper = styled(Box)`
   min-height: 100vh;
-  background: #f8fafc;
+  background: linear-gradient(180deg, #ecfdf5 0%, #f8fafc 22rem);
 `;
 
 const PageContent = styled(Box)`
   padding: 2rem;
+  max-width: 92rem;
+  width: 100%;
+  margin: 0 auto;
 `;

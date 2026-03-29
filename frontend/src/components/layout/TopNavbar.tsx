@@ -195,9 +195,9 @@ const NavbarWrapper = styled(Box)`
   top: 0;
   z-index: 1000;
   width: 100%;
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(0.75rem);
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #d1fae5;
 `;
 
 const NavbarContent = styled(Box)`
@@ -239,7 +239,7 @@ const BrandTextWrapper = styled(Box)`
 const BrandMutedText = styled(Typography)`
   font-size: 1.15rem !important;
   font-weight: 700 !important;
-  color: #64748b;
+  color: #475569;
   line-height: 1 !important;
 `;
 
@@ -279,12 +279,12 @@ const NavItemContent = styled(Box)`
   gap: 0.45rem;
   padding: 0 0.95rem;
   border-radius: 999px;
-  color: #475569;
+  color: #334155;
   transition: all 0.2s ease;
 
   &:hover {
-    background: #f8fafc;
-    color: #0f172a;
+    background: #f0fdf4;
+    color: #047857;
   }
 `;
 
@@ -316,9 +316,9 @@ const UserRoleText = styled(Typography)`
 const StyledAvatar = styled(Avatar)`
   width: 2.75rem !important;
   height: 2.75rem !important;
-  background: #f1f5f9 !important;
-  color: #64748b !important;
-  border: 2px solid #e2e8f0;
+  background: #ecfdf5 !important;
+  color: #059669 !important;
+  border: 2px solid #d1fae5;
 `;
 
 const StyledMenu = styled(Menu)`
@@ -327,7 +327,7 @@ const StyledMenu = styled(Menu)`
     margin-top: 0.4rem;
     border-radius: 1rem;
     box-shadow: 0 1rem 2.5rem rgba(15, 23, 42, 0.14);
-    border: 1px solid #e5e7eb;
+    border: 1px solid #d1fae5;
   }
 `;
 

@@ -1,5 +1,6 @@
 import { AnimatePresence } from "framer-motion";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { createGlobalStyle } from "styled-components";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import FeedPage from "./pages/FeedPage";
@@ -14,6 +15,23 @@ import AdminDashboardPage from "./pages/AdminDashboardPage.tsx";
 import AdminTournamentDetailsPage from "./pages/AdminTournamentDetailsPage.tsx";
 import PrivateRoute from "./routes/PrivateRoute";
 import LeaderboardPage from "./pages/LeaderboardPage.tsx";
+
+const GlobalStyle = createGlobalStyle`
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        color: #0f172a;
+        background: linear-gradient(180deg, #f0fdf4 0%, #f8fafc 26rem);
+    }
+
+    button, input, textarea, select {
+        font-family: inherit;
+    }
+`;
 
 function AnimatedRoutes() {
     const location = useLocation();
@@ -131,6 +149,7 @@ function AnimatedRoutes() {
 function App() {
     return (
         <BrowserRouter>
+            <GlobalStyle />
             <AnimatedRoutes />
         </BrowserRouter>
     );
