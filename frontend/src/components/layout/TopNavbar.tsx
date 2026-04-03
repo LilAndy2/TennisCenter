@@ -191,13 +191,14 @@ function TopNavbar() {
 export default TopNavbar;
 
 const NavbarWrapper = styled(Box)`
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  width: 100%;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(0.75rem);
-  border-bottom: 1px solid #d1fae5;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(1rem);
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
 `;
 
 const NavbarContent = styled(Box)`

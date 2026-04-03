@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tournament_matches")
@@ -59,4 +60,11 @@ public class TournamentMatch {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reported_by_id")
     private User reportedBy;
+
+    @Column
+    private LocalDateTime scheduledTime;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "court_id")
+    private Court court;
 }

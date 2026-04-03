@@ -5,9 +5,11 @@ import type { GroupStanding, TournamentMatch } from "../../../types/match";
 type AdminTournamentGroupsCardProps = {
     groupStandings: GroupStanding[];
     matches: TournamentMatch[];
-    onGenerateBracket: () => void;
     hasGeneratedBracket: boolean;
-    onUpdateScore: (match: TournamentMatch) => void;
+    readOnly?: boolean;
+    onGenerateBracket?: () => void;
+    onUpdateScore?: (match: TournamentMatch) => void;
+    onScheduleMatch: (match: TournamentMatch) => void;
 };
 
 const getTiebreakSuperscript = (matchSet: TournamentMatch["sets"][number]) => {
@@ -34,6 +36,8 @@ function AdminTournamentGroupsCard({
                                        onGenerateBracket,
                                        hasGeneratedBracket,
                                        onUpdateScore,
+                                       readOnly = false,
+                                       onScheduleMatch,
                                    }: AdminTournamentGroupsCardProps) {
     const maxPlayersInGroup = Math.max(
         ...groupStandings.map((group) => group.players.length),
@@ -41,6 +45,17 @@ function AdminTournamentGroupsCard({
     );
 
     if (!hasGeneratedBracket) {
+        if (readOnly) {
+            return (
+                <SectionCard>
+                    <SectionTitle>Group standings &amp; matches</SectionTitle>
+                    <SectionText>
+                        Group standings and match results will appear here after the bracket is
+                        generated.
+                    </SectionText>
+                </SectionCard>
+            );
+        }
         return (
             <SectionCard>
                 <SectionTitle>Bracket management</SectionTitle>
@@ -154,9 +169,34 @@ function AdminTournamentGroupsCard({
                                                     <NoScoreText>No score added yet.</NoScoreText>
                                                 )}
 
-                                                <UpdateScoreButton onClick={() => onUpdateScore(match)}>
-                                                    Update score
-                                                </UpdateScoreButton>
+                                                {!readOnly && onUpdateScore ? (
+                                                    <UpdateScoreButton
+                                                        onClick={() => onUpdateScore(match)}
+                                                    >
+                                                        Update score
+                                                    </UpdateScoreButton>
+                                                ) : null}
+
+                                                {match.status !== "COMPLETED" &&
+                                                match.playerOneId != null &&
+                                                match.playerTwoId != null ? (
+                                                    <ScheduleButton onClick={() => onScheduleMatch(match)}>
+                                                        {match.scheduledTime ? "Edit schedule" : "Set schedule"}
+                                                    </ScheduleButton>
+                                                ) : null}
+
+                                                {match.scheduledTime ? (
+                                                    <ScheduleInfo>
+                                                        {new Date(match.scheduledTime).toLocaleString("en-GB", {
+                                                            day: "2-digit",
+                                                            month: "short",
+                                                            hour: "2-digit",
+                                                            minute: "2-digit",
+                                                        })}
+                                                        {match.locationName ? ` · ${match.locationName}` : ""}
+                                                        {match.courtNumber != null ? ` · Court ${match.courtNumber}` : ""}
+                                                    </ScheduleInfo>
+                                                ) : null}
                                             </MatchCard>
                                         ))}
                                     </MatchesList>
@@ -406,4 +446,27 @@ const UpdateScoreButton = styled.button`
 
 const StandingsArea = styled(Box)<{ $maxPlayers: number }>`
   min-height: ${({ $maxPlayers }) => `calc(1rem + ${$maxPlayers} * 3rem)`};
+`;
+
+const ScheduleButton = styled.button`
+  height: 2.3rem;
+  padding: 0 0.85rem;
+  border: none;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 0.4rem;
+
+  &:hover {
+    background: #dbeafe;
+  }
+`;
+
+const ScheduleInfo = styled(Typography)`
+  font-size: 0.78rem !important;
+  color: #64748b;
+  margin-top: 0.35rem !important;
 `;

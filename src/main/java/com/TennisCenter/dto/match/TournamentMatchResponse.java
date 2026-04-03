@@ -29,4 +29,9 @@ public class TournamentMatchResponse {
     private List<MatchSetResponse> sets;
 
     private boolean editableByCurrentUser;
+
+    private String scheduledTime;
+    private Long courtId;
+    private Integer courtNumber;
+    private String locationName;
 }

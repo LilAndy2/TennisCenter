@@ -1,5 +1,6 @@
 package com.TennisCenter.controller;
 
+import com.TennisCenter.dto.match.ScheduleMatchRequest;
 import com.TennisCenter.dto.match.SubmitMatchScoreRequest;
 import com.TennisCenter.dto.match.TournamentMatchResponse;
 import com.TennisCenter.model.User;
@@ -26,5 +27,14 @@ public class AdminMatchController {
             @AuthenticationPrincipal User currentUser
     ) {
         return tournamentMatchService.submitMatchScore(matchId, request, currentUser);
+    }
+
+    @PutMapping("/{matchId}/schedule")
+    public TournamentMatchResponse scheduleMatch(
+            @PathVariable Long matchId,
+            @RequestBody ScheduleMatchRequest request,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        return tournamentMatchService.scheduleMatch(matchId, request, currentUser);
     }
 }

@@ -15,7 +15,8 @@ import axiosInstance from "../api/axiosInstance";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 import TournamentLevelBadge from "../components/tournaments/TournamentLevelBadge";
 import type { TournamentType, TournamentParticipantType } from "../types/tournament";
-import type { GroupStanding } from "../types/match.ts";
+import type { GroupStanding, TournamentMatch } from "../types/match.ts";
+import AdminTournamentGroupsCard from "../components/admin/tournament-details/AdminTournamentGroupsCard.tsx";
 import { formatTournamentDateRange } from "../utils/formatTournamentDateRange";
 
 function TournamentDetailsPage() {
@@ -27,6 +28,7 @@ function TournamentDetailsPage() {
     const [participants, setParticipants] = useState<TournamentParticipantType[]>([]);
     const [registering, setRegistering] = useState(false);
     const [groupStandings, setGroupStandings] = useState<GroupStanding[]>([]);
+    const [matches, setMatches] = useState<TournamentMatch[]>([]);
 
     const loadParticipants = async () => {
         try {
@@ -50,6 +52,17 @@ function TournamentDetailsPage() {
         }
     };
 
+    const loadMatches = async () => {
+        try {
+            const response = await axiosInstance.get<TournamentMatch[]>(
+                `/player/tournaments/${id}/matches`
+            );
+            setMatches(response.data);
+        } catch (error) {
+            console.error("Failed to load matches", error);
+        }
+    };
+
     const handleRegister = async () => {
         if (!tournament) return;
 
@@ -62,6 +75,8 @@ function TournamentDetailsPage() {
 
             setTournament(response.data);
             await loadParticipants();
+            await loadGroupStandings();
+            await loadMatches();
         } catch (error) {
             console.error("Failed to register to tournament", error);
         } finally {
@@ -81,6 +96,8 @@ function TournamentDetailsPage() {
 
             setTournament(response.data);
             await loadParticipants();
+            await loadGroupStandings();
+            await loadMatches();
         } catch (error) {
             console.error("Failed to withdraw from tournament", error);
         } finally {
@@ -104,6 +121,7 @@ function TournamentDetailsPage() {
         loadTournament();
         loadParticipants();
         loadGroupStandings();
+        loadMatches();
     }, [id]);
 
     if (loading) {
@@ -206,7 +224,7 @@ function TournamentDetailsPage() {
                             <InfoTextBlock>
                                 <InfoLabel>Players</InfoLabel>
                                 <InfoValue>
-                                    Max {tournament.maxPlayers} accepted players
+                                    {tournament.currentPlayers}/{tournament.maxPlayers} players
                                 </InfoValue>
                             </InfoTextBlock>
                         </InfoItem>
@@ -271,56 +289,12 @@ function TournamentDetailsPage() {
                         )}
                     </SectionCard>
 
-                    <SectionCard $fullWidth>
-                        <SectionTitle>Group standings</SectionTitle>
-
-                        {groupStandings.length === 0 ? (
-                            <SectionText>
-                                Group standings will appear here after the round robin bracket is generated.
-                            </SectionText>
-                        ) : (
-                            <GroupsWrapper>
-                                {groupStandings.map((group) => (
-                                    <GroupCard key={group.groupName}>
-                                        <GroupTitle>{group.groupName}</GroupTitle>
-
-                                        <StyledTable>
-                                            <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>Player</th>
-                                                <th>W</th>
-                                                <th>L</th>
-                                                <th>Sets %</th>
-                                                <th>Games %</th>
-                                            </tr>
-                                            </thead>
-
-                                            <tbody>
-                                            {group.players.map((player) => (
-                                                <tr key={player.playerId}>
-                                                    <td>{player.position}</td>
-                                                    <td>{player.playerName}</td>
-                                                    <td>{player.wins}</td>
-                                                    <td>{player.losses}</td>
-                                                    <td>{player.setsWinPercentage}%</td>
-                                                    <td>{player.gamesWinPercentage}%</td>
-                                                </tr>
-                                            ))}
-                                            </tbody>
-                                        </StyledTable>
-                                    </GroupCard>
-                                ))}
-                            </GroupsWrapper>
-                        )}
-                    </SectionCard>
-
-                    <SectionCard $fullWidth>
-                        <SectionTitle>Matches & Scores</SectionTitle>
-                        <SectionText>
-                            This section will show scheduled matches, results, and score updates.
-                        </SectionText>
-                    </SectionCard>
+                    <AdminTournamentGroupsCard
+                        groupStandings={groupStandings}
+                        matches={matches}
+                        hasGeneratedBracket={matches.length > 0}
+                        readOnly
+                    />
                 </BottomSectionsGrid>
             </PageWrapper>
         </AuthenticatedLayout>
@@ -639,55 +613,4 @@ const WithdrawButton = styled.button`
     color: white;
     cursor: not-allowed;
   }
-`;
-
-const GroupsWrapper = styled(Box)`
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-
-    @media (max-width: 72rem) {
-        grid-template-columns: 1fr;
-    }
-`;
-
-const GroupCard = styled(Box)`
-    border: 1px solid #e5e7eb;
-    border-radius: 1rem;
-    background: #f8fafc;
-    padding: 1rem;
-`;
-
-const GroupTitle = styled(Typography)`
-    font-size: 1rem !important;
-    font-weight: 800 !important;
-    color: #111827;
-    margin-bottom: 0.65rem !important;
-`;
-
-const StyledTable = styled.table`
-    width: 100%;
-    border-collapse: collapse;
-
-    th,
-    td {
-        text-align: left;
-        padding: 0.65rem 0.45rem;
-        border-bottom: 1px solid #e5e7eb;
-        font-size: 0.88rem;
-    }
-
-    th {
-        color: #475569;
-        font-weight: 800;
-    }
-
-    td {
-        color: #111827;
-        font-weight: 500;
-    }
-
-    tbody tr:last-child td {
-        border-bottom: none;
-    }
 `;

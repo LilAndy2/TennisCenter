@@ -3,6 +3,8 @@ package com.TennisCenter.dto.tournament;
 import lombok.Data;
 import lombok.Builder;
 
+import java.util.List;
+
 @Data
 @Builder
 public class TournamentResponse {
@@ -23,4 +25,5 @@ public class TournamentResponse {
     private boolean registrationAllowedByLevel;
     private boolean currentUserAdmin;
     private String bracketType;
+    private List<Long> locationIds;
 }

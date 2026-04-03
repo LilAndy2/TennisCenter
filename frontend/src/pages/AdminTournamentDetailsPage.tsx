@@ -12,6 +12,7 @@ import AdminTournamentStatusActions from "../components/admin/tournament-details
 import useAdminTournamentDetails from "../hooks/useAdminTournamentDetails";
 import AdminTournamentGroupsCard from "../components/admin/tournament-details/AdminTournamentGroupsCard.tsx";
 import UpdateMatchScoreDialog from "../components/admin/tournament-details/UpdateMatchScoreDialog.tsx";
+import ScheduleMatchDialog from "../components/admin/tournament-details/ScheduleMatchDialog.tsx";
 
 function AdminTournamentDetailsPage() {
     const navigate = useNavigate();
@@ -42,6 +43,12 @@ function AdminTournamentDetailsPage() {
         handleOpenUpdateScoreDialog,
         handleCloseUpdateScoreDialog,
         handleSubmitMatchScore,
+        locations,
+        isScheduleDialogOpen,
+        matchToSchedule,
+        handleOpenScheduleDialog,
+        handleCloseScheduleDialog,
+        handleScheduleMatch,
     } = useAdminTournamentDetails(id);
 
     if (loading) {
@@ -101,6 +108,7 @@ function AdminTournamentDetailsPage() {
                         onGenerateBracket={handleGenerateBracket}
                         hasGeneratedBracket={matches.length > 0}
                         onUpdateScore={handleOpenUpdateScoreDialog}
+                        onScheduleMatch={handleOpenScheduleDialog}
                     />
                 </SectionsGrid>
             </PageWrapper>
@@ -131,6 +139,14 @@ function AdminTournamentDetailsPage() {
                 match={selectedMatch}
                 onClose={handleCloseUpdateScoreDialog}
                 onSubmit={handleSubmitMatchScore}
+            />
+
+            <ScheduleMatchDialog
+                open={isScheduleDialogOpen}
+                match={matchToSchedule}
+                locations={locations}
+                onClose={handleCloseScheduleDialog}
+                onSubmit={handleScheduleMatch}
             />
         </AuthenticatedLayout>
     );

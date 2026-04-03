@@ -68,17 +68,17 @@ export default TournamentCard;
 
 const CardWrapper = styled(Box)`
     background: white;
-    border: 1px solid #d1fae5;
+    border: 1px solid #e5e7eb;
     border-radius: 1.25rem;
     padding: 1.2rem;
-    box-shadow: 0 0.75rem 2rem rgba(5, 150, 105, 0.06);
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
     cursor: pointer;
-    transition: 0.2s ease;
+    transition: all 0.2s ease;
 
     &:hover {
-        transform: translateY(-0.15rem);
-        box-shadow: 0 1rem 2.2rem rgba(5, 150, 105, 0.12);
-        border-color: #86efac;
+        transform: translateY(-0.2rem);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+        border-color: #d1fae5;
     }
 `;
 

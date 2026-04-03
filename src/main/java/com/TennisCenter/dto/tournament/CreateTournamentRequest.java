@@ -2,6 +2,8 @@ package com.TennisCenter.dto.tournament;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class CreateTournamentRequest {
     private String name;
@@ -13,4 +15,5 @@ public class CreateTournamentRequest {
     private String location;
     private String description;
     private String bracketType;
+    private List<Long> locationIds;
 }

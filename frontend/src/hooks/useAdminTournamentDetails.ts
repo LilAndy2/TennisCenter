@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
 import type { TournamentParticipantType, TournamentType } from "../types/tournament";
 import type { TournamentMatch, GroupStanding, MatchSet } from "../types/match.ts";
+import type { Location } from "../types/location";
 
 export type TournamentFormData = {
     name: string;
@@ -27,6 +28,9 @@ function useAdminTournamentDetails(id: string | undefined) {
     const [groupStandings, setGroupStandings] = useState<GroupStanding[]>([]);
     const [isUpdateScoreDialogOpen, setIsUpdateScoreDialogOpen] = useState(false);
     const [selectedMatch, setSelectedMatch] = useState<TournamentMatch | null>(null);
+    const [locations, setLocations] = useState<Location[]>([]);
+    const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
+    const [matchToSchedule, setMatchToSchedule] = useState<TournamentMatch | null>(null);
 
     const loadTournament = async () => {
         try {
@@ -75,12 +79,22 @@ function useAdminTournamentDetails(id: string | undefined) {
         }
     };
 
+    const loadLocations = async () => {
+        try {
+            const response = await axiosInstance.get<Location[]>("/admin/locations");
+            setLocations(response.data);
+        } catch (error) {
+            console.error("Failed to load locations", error);
+        }
+    };
+
     useEffect(() => {
         if (!id) return;
         loadTournament();
         loadParticipants();
         loadMatches();
         loadGroupStandings();
+        loadLocations();
     }, [id]);
 
     const initialEditData = useMemo<TournamentFormData | undefined>(() => {
@@ -232,6 +246,28 @@ function useAdminTournamentDetails(id: string | undefined) {
         }
     };
 
+    const handleOpenScheduleDialog = (match: TournamentMatch) => {
+        setMatchToSchedule(match);
+        setIsScheduleDialogOpen(true);
+    };
+
+    const handleCloseScheduleDialog = () => {
+        setMatchToSchedule(null);
+        setIsScheduleDialogOpen(false);
+    };
+
+    const handleScheduleMatch = async (
+        matchId: number,
+        scheduledTime: string,
+        courtId: number
+    ) => {
+        await axiosInstance.put(`/admin/matches/${matchId}/schedule`, {
+            scheduledTime,
+            courtId,
+        });
+        await loadMatches();
+    };
+
     return {
         tournament,
         participants,
@@ -257,6 +293,12 @@ function useAdminTournamentDetails(id: string | undefined) {
         handleOpenUpdateScoreDialog,
         handleCloseUpdateScoreDialog,
         handleSubmitMatchScore,
+        locations,
+        isScheduleDialogOpen,
+        matchToSchedule,
+        handleOpenScheduleDialog,
+        handleCloseScheduleDialog,
+        handleScheduleMatch,
     };
 }
 

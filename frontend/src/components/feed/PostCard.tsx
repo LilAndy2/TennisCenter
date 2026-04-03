@@ -207,9 +207,14 @@ const CardWrapper = styled(Box)`
     width: 100%;
     background: white;
     border-radius: 1.25rem;
-    border: 1px solid #d1fae5;
-    box-shadow: 0 0.75rem 2rem rgba(5, 150, 105, 0.07);
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
     padding: 1.2rem;
+    transition: box-shadow 0.2s ease;
+
+    &:hover {
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.09);
+    }
 `;
 
 const PostHeader = styled(Box)`

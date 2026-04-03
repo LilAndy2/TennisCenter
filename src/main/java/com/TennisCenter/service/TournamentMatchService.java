@@ -6,6 +6,7 @@ import com.TennisCenter.dto.match.SubmitMatchScoreRequest;
 import com.TennisCenter.dto.match.TournamentMatchResponse;
 import com.TennisCenter.dto.match.GroupStandingPlayerResponse;
 import com.TennisCenter.dto.match.GroupStandingResponse;
+import com.TennisCenter.dto.match.ScheduleMatchRequest;
 import com.TennisCenter.exception.ResourceNotFoundException;
 import com.TennisCenter.exception.UnauthorizedActionException;
 import com.TennisCenter.model.*;
@@ -14,10 +15,13 @@ import com.TennisCenter.repository.MatchSetRepository;
 import com.TennisCenter.repository.TournamentMatchRepository;
 import com.TennisCenter.repository.TournamentRegistrationRepository;
 import com.TennisCenter.repository.TournamentRepository;
+import com.TennisCenter.repository.CourtRepository;
+import com.TennisCenter.repository.TournamentLocationRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,6 +33,7 @@ public class TournamentMatchService {
     private final MatchSetRepository matchSetRepository;
     private final TournamentRegistrationRepository tournamentRegistrationRepository;
     private final TournamentMatchRepository tournamentMatchRepository;
+    private final CourtRepository courtRepository;
 
     public List<TournamentMatchResponse> generateBracket(Long tournamentId, User currentUser) {
         Tournament tournament = tournamentRepository.findById(tournamentId)
@@ -378,6 +383,10 @@ public class TournamentMatchService {
                         : null)
                 .sets(sets)
                 .editableByCurrentUser(editableByCurrentUser)
+                .scheduledTime(match.getScheduledTime() != null ? match.getScheduledTime().toString() : null)
+                .courtId(match.getCourt() != null ? match.getCourt().getId() : null)
+                .courtNumber(match.getCourt() != null ? match.getCourt().getCourtNumber() : null)
+                .locationName(match.getCourt() != null ? match.getCourt().getLocation().getName() : null)
                 .build();
     }
 
@@ -491,6 +500,25 @@ public class TournamentMatchService {
         }
 
         return result;
+    }
+
+    @Transactional
+    public TournamentMatchResponse scheduleMatch(Long matchId, ScheduleMatchRequest request, User currentUser) {
+        if (currentUser == null || currentUser.getRole() != Role.ADMIN) {
+            throw new UnauthorizedActionException("Only admins can schedule matches");
+        }
+
+        TournamentMatch match = tournamentMatchRepository.findById(matchId)
+                .orElseThrow(() -> new ResourceNotFoundException("Match not found"));
+
+        Court court = courtRepository.findById(request.getCourtId())
+                .orElseThrow(() -> new ResourceNotFoundException("Court not found"));
+
+        match.setScheduledTime(LocalDateTime.parse(request.getScheduledTime()));
+        match.setCourt(court);
+
+        TournamentMatch saved = tournamentMatchRepository.save(match);
+        return mapToResponse(saved, currentUser);
     }
 
     private double roundOneDecimal(double value) {

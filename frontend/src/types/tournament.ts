@@ -34,6 +34,7 @@ export type TournamentType = {
     currentUserAdmin: boolean;
     currentPlayers: number;
     bracketType: string;
+    locationIds: number[];
 };
 
 export type TournamentParticipantType = {

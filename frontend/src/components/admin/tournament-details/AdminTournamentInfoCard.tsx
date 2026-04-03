@@ -89,7 +89,7 @@ function AdminTournamentInfoCard({
                         <EmojiEventsOutlined sx={{ fontSize: 20 }} />
                     </InfoIconWrapper>
                     <InfoTextBlock>
-                        <InfoLabel>Start date</InfoLabel>
+                        <InfoLabel>Bracket type</InfoLabel>
                         <InfoValue>{tournament.bracketType}</InfoValue>
                     </InfoTextBlock>
                 </InfoItem>

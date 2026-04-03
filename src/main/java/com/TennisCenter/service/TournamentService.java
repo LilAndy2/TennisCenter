@@ -5,6 +5,8 @@ import com.TennisCenter.dto.tournament.TournamentResponse;
 import com.TennisCenter.exception.ResourceNotFoundException;
 import com.TennisCenter.model.*;
 import com.TennisCenter.model.enums.*;
+import com.TennisCenter.repository.LocationRepository;
+import com.TennisCenter.repository.TournamentLocationRepository;
 import com.TennisCenter.repository.TournamentRegistrationRepository;
 import com.TennisCenter.repository.TournamentRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,8 @@ public class TournamentService {
 
     private final TournamentRepository tournamentRepository;
     private final TournamentRegistrationRepository tournamentRegistrationRepository;
+    private final TournamentLocationRepository tournamentLocationRepository;
+    private final LocationRepository locationRepository;
 
     public List<TournamentResponse> getAllTournaments(User currentUser) {
         List<Tournament> tournaments = tournamentRepository.findAllByOrderByStartDateAsc();
@@ -71,6 +75,19 @@ public class TournamentService {
                 .build();
 
         Tournament savedTournament = tournamentRepository.save(tournament);
+
+        if (request.getLocationIds() != null) {
+            for (Long locationId : request.getLocationIds()) {
+                locationRepository.findById(locationId).ifPresent(location -> {
+                    TournamentLocation tl = TournamentLocation.builder()
+                            .tournament(savedTournament)
+                            .location(location)
+                            .build();
+                    tournamentLocationRepository.save(tl);
+                });
+            }
+        }
+
         return mapToResponse(savedTournament, currentUser);
     }
 
@@ -91,6 +108,23 @@ public class TournamentService {
         updateTournamentFullStatus(tournament);
 
         Tournament updatedTournament = tournamentRepository.save(tournament);
+
+        tournamentLocationRepository.deleteAll(
+                tournamentLocationRepository.findByTournamentId(tournament.getId())
+        );
+
+        if (request.getLocationIds() != null) {
+            for (Long locationId : request.getLocationIds()) {
+                locationRepository.findById(locationId).ifPresent(location -> {
+                    TournamentLocation tl = TournamentLocation.builder()
+                            .tournament(tournament)
+                            .location(location)
+                            .build();
+                    tournamentLocationRepository.save(tl);
+                });
+            }
+        }
+
         return mapToResponse(updatedTournament, currentUser);
     }
 
@@ -179,6 +213,12 @@ public class TournamentService {
                 .registrationAllowedByLevel(registrationAllowedByLevel)
                 .currentUserAdmin(currentUserAdmin)
                 .bracketType(tournament.getBracketType().getDisplayName())
+                .locationIds(
+                        tournamentLocationRepository.findByTournamentId(tournament.getId())
+                                .stream()
+                                .map(tl -> tl.getLocation().getId())
+                                .toList()
+                )
                 .build();
     }
 
