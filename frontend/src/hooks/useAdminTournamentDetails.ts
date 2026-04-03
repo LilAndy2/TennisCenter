@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
 import type { TournamentParticipantType, TournamentType } from "../types/tournament";
-import type { TournamentMatch, GroupStanding } from "../types/match.ts";
+import type { TournamentMatch, GroupStanding, MatchSet } from "../types/match.ts";
 
 export type TournamentFormData = {
     name: string;
@@ -25,6 +25,8 @@ function useAdminTournamentDetails(id: string | undefined) {
         useState<TournamentParticipantType | null>(null);
     const [matches, setMatches] = useState<TournamentMatch[]>([]);
     const [groupStandings, setGroupStandings] = useState<GroupStanding[]>([]);
+    const [isUpdateScoreDialogOpen, setIsUpdateScoreDialogOpen] = useState(false);
+    const [selectedMatch, setSelectedMatch] = useState<TournamentMatch | null>(null);
 
     const loadTournament = async () => {
         try {
@@ -196,6 +198,40 @@ function useAdminTournamentDetails(id: string | undefined) {
         }
     };
 
+    const handleOpenUpdateScoreDialog = (match: TournamentMatch) => {
+        setSelectedMatch(match);
+        setIsUpdateScoreDialogOpen(true);
+    };
+
+    const handleCloseUpdateScoreDialog = () => {
+        setSelectedMatch(null);
+        setIsUpdateScoreDialogOpen(false);
+    };
+
+    const handleSubmitMatchScore = async (sets: MatchSet[]) => {
+        if (!selectedMatch) return;
+
+        try {
+            await axiosInstance.put(`/admin/matches/${selectedMatch.id}/score`, {
+                sets: sets.map((set) => ({
+                    setNumber: set.setNumber,
+                    playerOneGames: set.playerOneGames,
+                    playerTwoGames: set.playerTwoGames,
+                    playerOneTiebreakPoints: set.playerOneTiebreakPoints ?? null,
+                    playerTwoTiebreakPoints: set.playerTwoTiebreakPoints ?? null,
+                })),
+            });
+
+            await loadMatches();
+            await loadGroupStandings();
+            setIsUpdateScoreDialogOpen(false);
+            setSelectedMatch(null);
+        } catch (error) {
+            console.error("Failed to submit match score", error);
+            throw error;
+        }
+    };
+
     return {
         tournament,
         participants,
@@ -216,6 +252,11 @@ function useAdminTournamentDetails(id: string | undefined) {
         matches,
         handleGenerateBracket,
         groupStandings,
+        isUpdateScoreDialogOpen,
+        selectedMatch,
+        handleOpenUpdateScoreDialog,
+        handleCloseUpdateScoreDialog,
+        handleSubmitMatchScore,
     };
 }
 

@@ -11,6 +11,7 @@ import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 import AdminTournamentStatusActions from "../components/admin/tournament-details/AdminTournamentStatusAction.tsx";
 import useAdminTournamentDetails from "../hooks/useAdminTournamentDetails";
 import AdminTournamentGroupsCard from "../components/admin/tournament-details/AdminTournamentGroupsCard.tsx";
+import UpdateMatchScoreDialog from "../components/admin/tournament-details/UpdateMatchScoreDialog.tsx";
 
 function AdminTournamentDetailsPage() {
     const navigate = useNavigate();
@@ -36,6 +37,11 @@ function AdminTournamentDetailsPage() {
         matches,
         handleGenerateBracket,
         groupStandings,
+        isUpdateScoreDialogOpen,
+        selectedMatch,
+        handleOpenUpdateScoreDialog,
+        handleCloseUpdateScoreDialog,
+        handleSubmitMatchScore,
     } = useAdminTournamentDetails(id);
 
     if (loading) {
@@ -91,17 +97,11 @@ function AdminTournamentDetailsPage() {
 
                     <AdminTournamentGroupsCard
                         groupStandings={groupStandings}
+                        matches={matches}
                         onGenerateBracket={handleGenerateBracket}
                         hasGeneratedBracket={matches.length > 0}
+                        onUpdateScore={handleOpenUpdateScoreDialog}
                     />
-
-                    <SectionCard $fullWidth>
-                        <SectionTitle>Matches & scores management</SectionTitle>
-                        <SectionText>
-                            This section will later allow the admin to manage matches, update
-                            scores, and advance players.
-                        </SectionText>
-                    </SectionCard>
                 </SectionsGrid>
             </PageWrapper>
 
@@ -125,6 +125,13 @@ function AdminTournamentDetailsPage() {
                 onClose={handleCloseRemoveParticipantDialog}
                 onConfirm={handleConfirmRemoveParticipant}
             />
+
+            <UpdateMatchScoreDialog
+                open={isUpdateScoreDialogOpen}
+                match={selectedMatch}
+                onClose={handleCloseUpdateScoreDialog}
+                onSubmit={handleSubmitMatchScore}
+            />
         </AuthenticatedLayout>
     );
 }
@@ -145,27 +152,6 @@ const SectionsGrid = styled(Box)`
   @media (max-width: 64rem) {
     grid-template-columns: 1fr;
   }
-`;
-
-const SectionCard = styled(Box)<{ $fullWidth?: boolean }>`
-  grid-column: ${({ $fullWidth }) => ($fullWidth ? "1 / -1" : "auto")};
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 1.2rem;
-  padding: 1.3rem;
-  box-shadow: 0 0.45rem 1.2rem rgba(15, 23, 42, 0.03);
-`;
-
-const SectionTitle = styled(Typography)`
-  font-size: 1.1rem !important;
-  font-weight: 800 !important;
-  color: #111827;
-  margin-bottom: 0.45rem !important;
-`;
-
-const SectionText = styled(Typography)`
-  color: #64748b;
-  line-height: 1.65 !important;
 `;
 
 const NotFoundCard = styled(Box)`

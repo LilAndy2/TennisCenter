@@ -96,4 +96,5 @@ public class AdminTournamentController {
     ) {
         return tournamentMatchService.generateBracket(id, currentUser);
     }
+
 }
