@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import axiosInstance from "../api/axiosInstance";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
-import type { ScheduledMatch } from "../types/match";
+import type { ScheduledMatch } from "../types/schedule";
 
 const levelColors: Record<string, { bg: string; border: string; text: string }> = {
     ENTRY:   { bg: "#ecfeff", border: "#a5f3fc", text: "#0e7490" },
@@ -21,7 +21,7 @@ function SchedulePage() {
     useEffect(() => {
         const load = async () => {
             try {
-                const response = await axiosInstance.get<ScheduledMatch[]>("/player/schedule");
+                const response = await axiosInstance.get<ScheduledMatch[]>("/player/tournaments/schedule");
                 setMatches(response.data);
             } catch (error) {
                 console.error("Failed to load schedule", error);

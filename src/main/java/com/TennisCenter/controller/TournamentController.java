@@ -3,6 +3,9 @@ package com.TennisCenter.controller;
 import com.TennisCenter.dto.match.GroupStandingResponse;
 import com.TennisCenter.dto.match.TournamentMatchResponse;
 import com.TennisCenter.dto.tournament.TournamentResponse;
+import com.TennisCenter.dto.match.ScheduledMatchResponse;
+import com.TennisCenter.service.ScheduleService;
+import com.TennisCenter.service.GroupStandingService;
 import com.TennisCenter.service.TournamentMatchService;
 import com.TennisCenter.service.TournamentService;
 import com.TennisCenter.model.User;
@@ -19,6 +22,8 @@ public class TournamentController {
 
     private final TournamentService tournamentService;
     private final TournamentMatchService tournamentMatchService;
+    private final GroupStandingService groupStandingService;
+    private final ScheduleService scheduleService;
 
     @GetMapping
     public List<TournamentResponse> getAllTournaments(
@@ -47,6 +52,11 @@ public class TournamentController {
     public List<GroupStandingResponse> getGroupStandings(
             @PathVariable Long id
     ) {
-        return tournamentMatchService.getGroupStanding(id);
+        return groupStandingService.getGroupStandings(id);
+    }
+
+    @GetMapping("/schedule")
+    public List<ScheduledMatchResponse> getSchedule() {
+        return scheduleService.getAllScheduledMatches();
     }
 }

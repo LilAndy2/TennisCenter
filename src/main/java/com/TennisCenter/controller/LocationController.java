@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/admin/locations")
+@RequestMapping("/api/locations")
 @RequiredArgsConstructor
 public class LocationController {
 
@@ -30,13 +30,15 @@ public class LocationController {
         return locationService.createLocation(request);
     }
 
+    @PutMapping("/{id}")
+    public LocationResponse updateLocation(
+            @PathVariable Long id,
+            @RequestBody CreateLocationRequest request) {
+        return locationService.updateLocation(id, request);
+    }
+
     @DeleteMapping("/{id}")
     public void deleteLocation(@PathVariable Long id) {
         locationService.deleteLocation(id);
-    }
-
-    @PutMapping("/{id}")
-    public LocationResponse updateLocation(@PathVariable Long id, @RequestBody CreateLocationRequest request) {
-        return locationService.updateLocation(id, request);
     }
 }

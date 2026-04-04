@@ -5,7 +5,7 @@ import com.TennisCenter.dto.tournament.CreateTournamentRequest;
 import com.TennisCenter.dto.tournament.TournamentResponse;
 import com.TennisCenter.model.enums.TournamentStatus;
 import com.TennisCenter.model.User;
-import com.TennisCenter.service.TournamentMatchService;
+import com.TennisCenter.service.BracketService;
 import com.TennisCenter.service.TournamentRegistrationService;
 import com.TennisCenter.service.TournamentService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class AdminTournamentController {
 
     private final TournamentService tournamentService;
     private final TournamentRegistrationService tournamentRegistrationService;
-    private final TournamentMatchService tournamentMatchService;
+    private final BracketService bracketService;
 
     @GetMapping("/ongoing")
     public List<TournamentResponse> getOngoingTournaments(
@@ -89,12 +89,11 @@ public class AdminTournamentController {
         return tournamentService.finishTournament(id, currentUser);
     }
 
-    @PostMapping("/{id}/generate-bracket")
+    @PostMapping("/tournaments/{tournamentId}/generate-bracket")
     public List<TournamentMatchResponse> generateBracket(
-            @PathVariable Long id,
-            @AuthenticationPrincipal User currentUser
-    ) {
-        return tournamentMatchService.generateBracket(id, currentUser);
+            @PathVariable Long tournamentId,
+            @AuthenticationPrincipal User currentUser) {
+        return bracketService.generateBracket(tournamentId, currentUser);
     }
 
 }
