@@ -235,7 +235,7 @@ function TournamentDetailsPage() {
                             </InfoIconWrapper>
                             <InfoTextBlock>
                                 <InfoLabel>Location</InfoLabel>
-                                <InfoValue>{tournament.location}</InfoValue>
+                                <InfoValue>{tournament.locationNames?.join(", ") || "No locations assigned"}</InfoValue>
                             </InfoTextBlock>
                         </InfoItem>
 

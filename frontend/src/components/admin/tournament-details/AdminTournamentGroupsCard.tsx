@@ -9,7 +9,7 @@ type AdminTournamentGroupsCardProps = {
     readOnly?: boolean;
     onGenerateBracket?: () => void;
     onUpdateScore?: (match: TournamentMatch) => void;
-    onScheduleMatch: (match: TournamentMatch) => void;
+    onScheduleMatch?: (match: TournamentMatch) => void;
 };
 
 const getTiebreakSuperscript = (matchSet: TournamentMatch["sets"][number]) => {
@@ -177,7 +177,8 @@ function AdminTournamentGroupsCard({
                                                     </UpdateScoreButton>
                                                 ) : null}
 
-                                                {match.status !== "COMPLETED" &&
+                                                {!readOnly && onScheduleMatch &&
+                                                match.status !== "COMPLETED" &&
                                                 match.playerOneId != null &&
                                                 match.playerTwoId != null ? (
                                                     <ScheduleButton onClick={() => onScheduleMatch(match)}>

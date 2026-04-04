@@ -46,9 +46,6 @@ public class Tournament {
     @Column(nullable = false)
     private Integer maxPlayers;
 
-    @Column(nullable = false)
-    private String location;
-
     @Column(columnDefinition = "TEXT")
     private String description;
 

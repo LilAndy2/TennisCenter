@@ -79,4 +79,15 @@ public class LocationService {
                 .courts(courts)
                 .build();
     }
+
+    public LocationResponse updateLocation(Long id, CreateLocationRequest request) {
+        Location location = locationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Location not found"));
+        location.setName(request.getName());
+        location.setAddress(request.getAddress());
+        location.setPhone(request.getPhone());
+        location.setEmail(request.getEmail());
+        locationRepository.save(location);
+        return mapToResponse(location);
+    }
 }

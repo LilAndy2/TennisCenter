@@ -16,7 +16,6 @@ public class TournamentResponse {
     private String startDate;
     private String endDate;
     private Integer maxPlayers;
-    private String location;
     private String description;
     private boolean isFull;
     private Integer currentPlayers;
@@ -26,4 +25,5 @@ public class TournamentResponse {
     private boolean currentUserAdmin;
     private String bracketType;
     private List<Long> locationIds;
+    private List<String> locationNames;
 }

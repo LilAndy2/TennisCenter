@@ -12,7 +12,6 @@ public class CreateTournamentRequest {
     private String startDate;
     private String endDate;
     private Integer maxPlayers;
-    private String location;
     private String description;
     private String bracketType;
     private List<Long> locationIds;

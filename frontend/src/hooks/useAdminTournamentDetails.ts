@@ -12,7 +12,7 @@ export type TournamentFormData = {
     startDate: string;
     endDate: string;
     maxPlayers: string;
-    location: string;
+    locationIds: number[];
     description: string;
 };
 
@@ -111,7 +111,7 @@ function useAdminTournamentDetails(id: string | undefined) {
             startDate: tournament.startDate,
             endDate: tournament.endDate,
             maxPlayers: String(tournament.maxPlayers),
-            location: tournament.location,
+            locationIds: tournament.locationIds ?? [],
             description: tournament.description,
         };
     }, [tournament]);
@@ -128,7 +128,7 @@ function useAdminTournamentDetails(id: string | undefined) {
                     startDate: data.startDate,
                     endDate: data.endDate,
                     maxPlayers: Number(data.maxPlayers),
-                    location: data.location,
+                    locationIds: data.locationIds,
                     description: data.description,
                 }
             );

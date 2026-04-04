@@ -25,7 +25,6 @@ export type TournamentType = {
     startDate: string;
     endDate: string;
     maxPlayers: number;
-    location: string;
     description: string;
     isFull: boolean;
     registeredByCurrentUser: boolean;
@@ -35,6 +34,7 @@ export type TournamentType = {
     currentPlayers: number;
     bracketType: string;
     locationIds: number[];
+    locationNames: string[];
 };
 
 export type TournamentParticipantType = {

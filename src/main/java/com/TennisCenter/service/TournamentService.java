@@ -67,7 +67,6 @@ public class TournamentService {
                 .startDate(LocalDate.parse(request.getStartDate()))
                 .endDate(LocalDate.parse(request.getEndDate()))
                 .maxPlayers(request.getMaxPlayers())
-                .location(request.getLocation())
                 .description(request.getDescription())
                 .isFull(false)
                 .createdBy(currentUser)
@@ -101,7 +100,6 @@ public class TournamentService {
         tournament.setStartDate(LocalDate.parse(request.getStartDate()));
         tournament.setEndDate(LocalDate.parse(request.getEndDate()));
         tournament.setMaxPlayers(request.getMaxPlayers());
-        tournament.setLocation(request.getLocation());
         tournament.setDescription(request.getDescription());
         tournament.setBracketType(TournamentBracketType.valueOf(request.getBracketType().toUpperCase()));
 
@@ -205,7 +203,6 @@ public class TournamentService {
                 .endDate(tournament.getEndDate().toString())
                 .maxPlayers(tournament.getMaxPlayers())
                 .currentPlayers(currentPlayers)
-                .location(tournament.getLocation())
                 .description(tournament.getDescription())
                 .isFull(tournament.isFull())
                 .registeredByCurrentUser(registeredByCurrentUser)
@@ -217,6 +214,12 @@ public class TournamentService {
                         tournamentLocationRepository.findByTournamentId(tournament.getId())
                                 .stream()
                                 .map(tl -> tl.getLocation().getId())
+                                .toList()
+                )
+                .locationNames(
+                        tournamentLocationRepository.findByTournamentId(tournament.getId())
+                                .stream()
+                                .map(tl -> tl.getLocation().getName())
                                 .toList()
                 )
                 .build();

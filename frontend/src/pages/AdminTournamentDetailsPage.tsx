@@ -119,6 +119,7 @@ function AdminTournamentDetailsPage() {
                 onSubmit={handleEditTournament}
                 initialData={initialEditData}
                 mode="edit"
+                locations={locations}
             />
 
             <DeleteTournamentDialog

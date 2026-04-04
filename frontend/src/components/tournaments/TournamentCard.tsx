@@ -52,7 +52,7 @@ function TournamentCard({ tournament, detailsPath }: TournamentCardProps) {
 
                 <DetailItem>
                     <LocationOn sx={{ fontSize: 18 }} />
-                    <DetailText>{tournament.location}</DetailText>
+                    <DetailText>{tournament.locationNames?.join(", ") || "No locations assigned"}</DetailText>
                 </DetailItem>
 
                 <DetailItem>
