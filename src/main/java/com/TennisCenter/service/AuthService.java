@@ -4,6 +4,7 @@ import com.TennisCenter.config.JwtService;
 import com.TennisCenter.dto.auth.AuthResponse;
 import com.TennisCenter.dto.auth.LoginRequest;
 import com.TennisCenter.dto.auth.RegisterRequest;
+import com.TennisCenter.exception.ConflictException;
 import com.TennisCenter.model.enums.PlayerLevel;
 import com.TennisCenter.model.enums.Role;
 import com.TennisCenter.model.User;
@@ -24,11 +25,11 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already in use");
+            throw new ConflictException("Email already in use");
         }
 
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username is already in use");
+            throw new ConflictException("Username is already in use");
         }
 
         User user = User.builder()

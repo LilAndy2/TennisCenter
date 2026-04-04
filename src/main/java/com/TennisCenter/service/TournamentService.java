@@ -3,6 +3,7 @@ package com.TennisCenter.service;
 import com.TennisCenter.dto.tournament.CreateTournamentRequest;
 import com.TennisCenter.dto.tournament.TournamentResponse;
 import com.TennisCenter.exception.ResourceNotFoundException;
+import com.TennisCenter.exception.ValidationException;
 import com.TennisCenter.model.*;
 import com.TennisCenter.model.enums.*;
 import com.TennisCenter.repository.LocationRepository;
@@ -148,7 +149,7 @@ public class TournamentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
 
         if (tournament.getStatus() != TournamentStatus.UPCOMING) {
-            throw new IllegalStateException("Only upcoming tournaments can be started");
+            throw new ValidationException("Only upcoming tournaments can be started");
         }
 
         tournament.setStatus(TournamentStatus.ONGOING);
@@ -162,7 +163,7 @@ public class TournamentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
 
         if (tournament.getStatus() != TournamentStatus.ONGOING) {
-            throw new IllegalStateException("Only ongoing tournaments can be finished");
+            throw new ValidationException("Only ongoing tournaments can be finished");
         }
 
         tournament.setStatus(TournamentStatus.FINISHED);

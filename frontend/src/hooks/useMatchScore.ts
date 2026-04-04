@@ -1,6 +1,10 @@
 import { useState } from "react";
 import axiosInstance from "../api/axiosInstance";
 import type { TournamentMatch, MatchSet } from "../types/match";
+import { getErrorMessage } from "../utils/getErrorMessage.ts";
+import { useToast } from "../context/ToastContext.tsx";
+
+const { showToast } = useToast();
 
 function useMatchScore(
     onSuccess: () => Promise<void>
@@ -34,7 +38,7 @@ function useMatchScore(
             setIsUpdateScoreDialogOpen(false);
             setSelectedMatch(null);
         } catch (error) {
-            console.error("Failed to submit match score", error);
+            showToast(getErrorMessage(error));
             throw error;
         }
     };

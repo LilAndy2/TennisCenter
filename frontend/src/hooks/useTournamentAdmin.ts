@@ -2,6 +2,8 @@ import axiosInstance from "../api/axiosInstance";
 import type { TournamentType } from "../types/tournament";
 import type { TournamentMatch } from "../types/match";
 import type { TournamentFormData } from "../types/forms";
+import { getErrorMessage } from "../utils/getErrorMessage.ts";
+import { useToast } from "../context/ToastContext.tsx";
 
 type UseTournamentAdminParams = {
     id: string | undefined;
@@ -11,6 +13,8 @@ type UseTournamentAdminParams = {
     setIsEditModalOpen: (open: boolean) => void;
     setIsDeleteDialogOpen: (open: boolean) => void;
 };
+
+const { showToast } = useToast();
 
 function useTournamentAdmin({
                                 id,
@@ -40,7 +44,7 @@ function useTournamentAdmin({
             setTournament(response.data);
             setIsEditModalOpen(false);
         } catch (error) {
-            console.error("Failed to update tournament", error);
+            showToast(getErrorMessage(error));
             throw error;
         }
     };
@@ -51,7 +55,7 @@ function useTournamentAdmin({
             setIsDeleteDialogOpen(false);
             onSuccess();
         } catch (error) {
-            console.error("Failed to delete tournament", error);
+            showToast(getErrorMessage(error));
         }
     };
 
@@ -62,7 +66,7 @@ function useTournamentAdmin({
             );
             setTournament(response.data);
         } catch (error) {
-            console.error("Failed to start tournament", error);
+            showToast(getErrorMessage(error));
         }
     };
 
@@ -73,7 +77,7 @@ function useTournamentAdmin({
             );
             setTournament(response.data);
         } catch (error) {
-            console.error("Failed to finish tournament", error);
+            showToast(getErrorMessage(error));
         }
     };
 
@@ -85,7 +89,7 @@ function useTournamentAdmin({
             setMatches(response.data);
             await loadGroupStandings();
         } catch (error) {
-            console.error("Failed to generate bracket", error);
+            showToast(getErrorMessage(error));
         }
     };
 

@@ -3,6 +3,10 @@ import axiosInstance from "../api/axiosInstance";
 import type { TournamentMatch } from "../types/match";
 import type { Location } from "../types/location";
 import { useEffect } from "react";
+import { getErrorMessage } from "../utils/getErrorMessage.ts";
+import { useToast } from "../context/ToastContext.tsx";
+
+const { showToast } = useToast();
 
 function useMatchSchedule(
     onSuccess: () => Promise<void>
@@ -17,7 +21,7 @@ function useMatchSchedule(
                 const response = await axiosInstance.get<Location[]>("/admin/locations");
                 setLocations(response.data);
             } catch (error) {
-                console.error("Failed to load locations", error);
+                showToast(getErrorMessage(error));
             }
         };
         loadLocations();

@@ -7,6 +7,7 @@ import com.TennisCenter.dto.match.SubmitMatchScoreRequest;
 import com.TennisCenter.dto.match.TournamentMatchResponse;
 import com.TennisCenter.exception.ResourceNotFoundException;
 import com.TennisCenter.exception.UnauthorizedActionException;
+import com.TennisCenter.exception.ValidationException;
 import com.TennisCenter.model.*;
 import com.TennisCenter.model.enums.*;
 import com.TennisCenter.repository.CourtRepository;
@@ -49,13 +50,13 @@ public class TournamentMatchService {
                 .orElseThrow(() -> new ResourceNotFoundException("Match not found"));
 
         if (request == null || request.getSets() == null || request.getSets().isEmpty()) {
-            throw new IllegalArgumentException("At least one set is required");
+            throw new ValidationException("At least one set is required");
         }
         if (request.getSets().size() > 3) {
-            throw new IllegalArgumentException("Maximum 3 sets are allowed");
+            throw new ValidationException("Maximum 3 sets are allowed");
         }
         if (match.getPlayerOne() == null || match.getPlayerTwo() == null) {
-            throw new IllegalStateException("Cannot submit score for a match without two players");
+            throw new ValidationException("Cannot submit score for a match without two players");
         }
 
         int playerOneSetsWon = 0;
@@ -76,7 +77,7 @@ public class TournamentMatchService {
         } else if (playerTwoSetsWon > playerOneSetsWon) {
             winner = match.getPlayerTwo();
         } else {
-            throw new IllegalArgumentException("Sets cannot end in a tie");
+            throw new ValidationException("Sets cannot end in a tie");
         }
 
         matchSetRepository.deleteByMatchId(matchId);
@@ -185,20 +186,20 @@ public class TournamentMatchService {
 
     private void validateSetScore(MatchSetScoreRequest setRequest) {
         if (setRequest.getSetNumber() == null || setRequest.getSetNumber() < 1) {
-            throw new IllegalArgumentException("Set number must be at least 1");
+            throw new ValidationException("Set number must be at least 1");
         }
         if (setRequest.getPlayerOneGames() == null || setRequest.getPlayerTwoGames() == null) {
-            throw new IllegalArgumentException("Set scores are required");
+            throw new ValidationException("Set scores are required");
         }
 
         int playerOneGames = setRequest.getPlayerOneGames();
         int playerTwoGames = setRequest.getPlayerTwoGames();
 
         if (playerOneGames < 0 || playerTwoGames < 0) {
-            throw new IllegalArgumentException("Games cannot be negative");
+            throw new ValidationException("Games cannot be negative");
         }
         if (playerOneGames == playerTwoGames) {
-            throw new IllegalArgumentException("A set cannot end in a draw");
+            throw new ValidationException("A set cannot end in a draw");
         }
 
         int winnerGames = Math.max(playerOneGames, playerTwoGames);
@@ -209,15 +210,15 @@ public class TournamentMatchService {
         Integer playerTwoTiebreak = setRequest.getPlayerTwoTiebreakPoints();
 
         if ((playerOneTiebreak == null) != (playerTwoTiebreak == null)) {
-            throw new IllegalArgumentException("Both tie-break values must be provided");
+            throw new ValidationException("Both tie-break values must be provided");
         }
 
         if (winnerGames == 6) {
             if (loserGames > 4) {
-                throw new IllegalArgumentException("Invalid set score. Allowed scores include 6-0 to 6-4");
+                throw new ValidationException("Invalid set score. Allowed scores include 6-0 to 6-4");
             }
             if (playerOneTiebreak != null || playerTwoTiebreak != null) {
-                throw new IllegalArgumentException("Tie-break points are allowed only for 7-6 sets");
+                throw new ValidationException("Tie-break points are allowed only for 7-6 sets");
             }
             return;
         }
@@ -225,19 +226,19 @@ public class TournamentMatchService {
         if (winnerGames == 7) {
             if (loserGames == 5) {
                 if (playerOneTiebreak != null || playerTwoTiebreak != null) {
-                    throw new IllegalArgumentException("Tie-break points are allowed only for 7-6 sets");
+                    throw new ValidationException("Tie-break points are allowed only for 7-6 sets");
                 }
                 return;
             }
 
             if (!isTiebreakSet) {
-                throw new IllegalArgumentException("Invalid set score. Allowed scores include 7-5 and 7-6");
+                throw new ValidationException("Invalid set score. Allowed scores include 7-5 and 7-6");
             }
             if (playerOneTiebreak == null || playerTwoTiebreak == null) {
-                throw new IllegalArgumentException("Tie-break points are required for 7-6 sets");
+                throw new ValidationException("Tie-break points are required for 7-6 sets");
             }
             if (playerOneTiebreak < 0 || playerTwoTiebreak < 0) {
-                throw new IllegalArgumentException("Tie-break points cannot be negative");
+                throw new ValidationException("Tie-break points cannot be negative");
             }
 
             boolean playerOneWonSet = playerOneGames > playerTwoGames;
@@ -245,12 +246,12 @@ public class TournamentMatchService {
             int loserTiebreak = playerOneWonSet ? playerTwoTiebreak : playerOneTiebreak;
 
             if (winnerTiebreak < 7 || winnerTiebreak - loserTiebreak < 2) {
-                throw new IllegalArgumentException(
+                throw new ValidationException(
                         "Invalid tie-break score. Winner must have at least 7 points and 2-point difference");
             }
             return;
         }
 
-        throw new IllegalArgumentException("Invalid set score. Allowed winner game values are 6 or 7");
+        throw new ValidationException("Invalid set score. Allowed winner game values are 6 or 7");
     }
 }

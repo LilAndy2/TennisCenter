@@ -2,6 +2,8 @@ package com.TennisCenter.service;
 
 import com.TennisCenter.dto.tournament.TournamentParticipantResponse;
 import com.TennisCenter.dto.tournament.TournamentResponse;
+import com.TennisCenter.exception.ConflictException;
+import com.TennisCenter.exception.ResourceNotFoundException;
 import com.TennisCenter.exception.UnauthorizedActionException;
 import com.TennisCenter.model.*;
 import com.TennisCenter.model.enums.Role;
@@ -24,7 +26,7 @@ public class TournamentRegistrationService {
 
     public TournamentResponse registerToTournament(Long tournamentId, User currentUser) {
         Tournament tournament = tournamentRepository.findById(tournamentId)
-                .orElseThrow(() -> new RuntimeException("Tournament not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
 
         if (currentUser.getRole() != Role.PLAYER) {
             throw new UnauthorizedActionException("Only players can register to tournaments");
@@ -43,14 +45,14 @@ public class TournamentRegistrationService {
         }
 
         if (tournament.isFull()) {
-            throw new UnauthorizedActionException("This tournament is already full");
+            throw new ConflictException("This tournament is already full");
         }
 
         boolean alreadyRegistered = tournamentRegistrationRepository
                 .existsByPlayerIdAndTournamentId(currentUser.getId(), tournamentId);
 
         if (alreadyRegistered) {
-            throw new UnauthorizedActionException("You are already registered for this tournament");
+            throw new ConflictException("You are already registered for this tournament");
         }
 
         TournamentRegistration registration = TournamentRegistration.builder()
@@ -69,7 +71,7 @@ public class TournamentRegistrationService {
 
     public TournamentResponse withdrawFromTournament(Long tournamentId, User currentUser) {
         Tournament tournament = tournamentRepository.findById(tournamentId)
-                .orElseThrow(() -> new RuntimeException("Tournament not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
 
         if (currentUser.getRole() != Role.PLAYER) {
             throw new UnauthorizedActionException("Only players can withdraw from tournaments");
@@ -104,7 +106,7 @@ public class TournamentRegistrationService {
 
     public void removeParticipantByAdmin(Long tournamentId, Long playerId) {
         Tournament tournament = tournamentRepository.findById(tournamentId)
-                .orElseThrow(() -> new RuntimeException("Tournament not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
 
         TournamentRegistration registration = tournamentRegistrationRepository
                 .findByPlayerIdAndTournamentId(playerId, tournamentId)

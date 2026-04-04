@@ -1,12 +1,16 @@
 import { useState } from "react";
 import axiosInstance from "../api/axiosInstance";
 import type { TournamentType } from "../types/tournament";
+import { getErrorMessage } from "../utils/getErrorMessage.ts";
+import { useToast } from "../context/ToastContext";
 
 type UseTournamentRegistrationParams = {
     tournament: TournamentType | null;
     setTournament: (t: TournamentType) => void;
     refreshAll: () => Promise<void>;
 };
+
+const { showToast } = useToast();
 
 function useTournamentRegistration({
                                        tournament,
@@ -25,7 +29,7 @@ function useTournamentRegistration({
             setTournament(response.data);
             await refreshAll();
         } catch (error) {
-            console.error("Failed to register", error);
+            showToast(getErrorMessage(error));
         } finally {
             setRegistering(false);
         }
@@ -41,7 +45,7 @@ function useTournamentRegistration({
             setTournament(response.data);
             await refreshAll();
         } catch (error) {
-            console.error("Failed to withdraw", error);
+            showToast(getErrorMessage(error));
         } finally {
             setRegistering(false);
         }

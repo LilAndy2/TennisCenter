@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
 import type { TournamentType, TournamentParticipantType } from "../types/tournament";
 import type { TournamentMatch, GroupStanding } from "../types/match";
+import { getErrorMessage } from "../utils/getErrorMessage.ts";
+import { useToast } from "../context/ToastContext.tsx";
+
+const { showToast } = useToast();
 
 function useTournamentData(id: string | undefined) {
     const [tournament, setTournament] = useState<TournamentType | null>(null);
@@ -15,7 +19,7 @@ function useTournamentData(id: string | undefined) {
             const response = await axiosInstance.get<TournamentType>(`/player/tournaments/${id}`);
             setTournament(response.data);
         } catch (error) {
-            console.error("Failed to load tournament", error);
+            showToast(getErrorMessage(error));
             setTournament(null);
         } finally {
             setLoading(false);
@@ -29,7 +33,7 @@ function useTournamentData(id: string | undefined) {
             );
             setParticipants(response.data);
         } catch (error) {
-            console.error("Failed to load participants", error);
+            showToast(getErrorMessage(error));
         }
     };
 
@@ -40,7 +44,7 @@ function useTournamentData(id: string | undefined) {
             );
             setMatches(response.data);
         } catch (error) {
-            console.error("Failed to load matches", error);
+            showToast(getErrorMessage(error));
         }
     };
 
@@ -51,7 +55,7 @@ function useTournamentData(id: string | undefined) {
             );
             setGroupStandings(response.data);
         } catch (error) {
-            console.error("Failed to load group standings", error);
+            showToast(getErrorMessage(error));
         }
     };
 

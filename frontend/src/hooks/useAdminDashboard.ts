@@ -3,6 +3,10 @@ import axiosInstance from "../api/axiosInstance";
 import type { TournamentType } from "../types/tournament";
 import type { TournamentFormData } from "../types/forms";
 import useLocationManagement from "./useLocationManagement";
+import { getErrorMessage } from "../utils/getErrorMessage.ts";
+import { useToast } from "../context/ToastContext.tsx";
+
+const { showToast } = useToast();
 
 function useAdminDashboard() {
     const [ongoingTournaments, setOngoingTournaments] = useState<TournamentType[]>([]);
@@ -21,7 +25,7 @@ function useAdminDashboard() {
             setOngoingTournaments(ongoingRes.data);
             setUpcomingTournaments(upcomingRes.data);
         } catch (error) {
-            console.error("Failed to load tournaments", error);
+            showToast(getErrorMessage(error));
         } finally {
             setLoading(false);
         }
@@ -46,7 +50,7 @@ function useAdminDashboard() {
             });
             await loadTournaments();
         } catch (error) {
-            console.error("Failed to create tournament", error);
+            showToast(getErrorMessage(error));
             throw error;
         }
     };

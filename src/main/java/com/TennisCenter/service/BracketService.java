@@ -1,8 +1,10 @@
 package com.TennisCenter.service;
 
 import com.TennisCenter.dto.match.TournamentMatchResponse;
+import com.TennisCenter.exception.ConflictException;
 import com.TennisCenter.exception.ResourceNotFoundException;
 import com.TennisCenter.exception.UnauthorizedActionException;
+import com.TennisCenter.exception.ValidationException;
 import com.TennisCenter.model.*;
 import com.TennisCenter.model.enums.*;
 import com.TennisCenter.repository.TournamentMatchRepository;
@@ -32,14 +34,14 @@ public class BracketService {
         }
 
         if (tournament.getStatus() != TournamentStatus.ONGOING) {
-            throw new IllegalStateException("Bracket can only be generated for ongoing tournaments");
+            throw new ValidationException("Bracket can only be generated for ongoing tournaments");
         }
 
         List<TournamentMatch> existingMatches =
                 tournamentMatchRepository.findByTournamentIdOrderByPhaseAscRoundNumberAscMatchOrderAsc(tournamentId);
 
         if (!existingMatches.isEmpty()) {
-            throw new IllegalStateException("Bracket already generated for this tournament");
+            throw new ConflictException("Bracket already generated for this tournament");
         }
 
         List<User> participants = tournamentRegistrationRepository
@@ -53,7 +55,7 @@ public class BracketService {
                 .toList();
 
         if (participants.size() < 2) {
-            throw new IllegalStateException("Bracket requires at least 2 participants");
+            throw new ValidationException("Bracket requires at least 2 participants");
         }
 
         if (tournament.getBracketType() == TournamentBracketType.SINGLE_ELIMINATION) {

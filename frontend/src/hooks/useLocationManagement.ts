@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
 import type { Location } from "../types/location";
 import type { LocationFormData } from "../types/forms";
+import { getErrorMessage } from "../utils/getErrorMessage.ts";
+import { useToast } from "../context/ToastContext.tsx";
 
+const { showToast } = useToast();
 const emptyLocationForm: LocationFormData = { name: "", address: "", phone: "", email: "" };
 
 function useLocationManagement() {
@@ -16,7 +19,7 @@ function useLocationManagement() {
             const res = await axiosInstance.get<Location[]>("/admin/locations");
             setLocations(res.data);
         } catch (error) {
-            console.error("Failed to load locations", error);
+            showToast(getErrorMessage(error));
         }
     };
 
@@ -58,7 +61,7 @@ function useLocationManagement() {
             closeLocationModal();
             await loadLocations();
         } catch (error) {
-            console.error("Failed to save location", error);
+            showToast(getErrorMessage(error));
         }
     };
 
@@ -67,7 +70,7 @@ function useLocationManagement() {
             await axiosInstance.delete(`/admin/locations/${id}`);
             await loadLocations();
         } catch (error) {
-            console.error("Failed to delete location", error);
+            showToast(getErrorMessage(error));
         }
     };
 

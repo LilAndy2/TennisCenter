@@ -6,6 +6,10 @@ import CreatePostModal from "../components/feed/CreatePostModal";
 import FeedHero from "../components/feed/FeedHero";
 import PostCard, { type FeedPostType } from "../components/feed/PostCard";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
+import { getErrorMessage } from "../utils/getErrorMessage.ts";
+import { useToast } from "../context/ToastContext.tsx";
+
+const { showToast } = useToast();
 
 function FeedPage() {
     const [posts, setPosts] = useState<FeedPostType[]>([]);
@@ -57,7 +61,7 @@ function FeedPage() {
 
             setPosts((previousPosts) => [response.data, ...previousPosts]);
         } catch (error) {
-            console.error("Failed to create post", error);
+            showToast(getErrorMessage(error));
             throw error;
         }
     };
@@ -69,7 +73,7 @@ function FeedPage() {
                 previousPosts.filter((post) => post.id !== postId)
             );
         } catch (error) {
-            console.error("Failed to delete post", error);
+            showToast(getErrorMessage(error));
         }
     };
 
@@ -104,7 +108,7 @@ function FeedPage() {
             setIsCreatePostModalOpen(false);
 
         } catch (error) {
-            console.error("Failed to update post", error);
+            showToast(getErrorMessage(error));
         }
     };
 
@@ -120,7 +124,7 @@ function FeedPage() {
                 )
             );
         } catch (error) {
-            console.error("Failed to toggle like", error);
+            showToast(getErrorMessage(error));
         }
     };
 
