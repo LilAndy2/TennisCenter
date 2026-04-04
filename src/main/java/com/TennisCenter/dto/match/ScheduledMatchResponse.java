@@ -3,6 +3,8 @@ package com.TennisCenter.dto.match;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Builder
 public class ScheduledMatchResponse {
@@ -19,4 +21,5 @@ public class ScheduledMatchResponse {
     private String matchDate;
     private String status;
     private String winnerName;
+    private List<MatchSetResponse> sets;
 }

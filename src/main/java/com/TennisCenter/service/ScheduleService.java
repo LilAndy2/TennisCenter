@@ -1,21 +1,22 @@
 package com.TennisCenter.service;
 
+import com.TennisCenter.dto.match.MatchSetResponse;
 import com.TennisCenter.dto.match.ScheduledMatchResponse;
 import com.TennisCenter.model.TournamentMatch;
-import com.TennisCenter.model.enums.TournamentMatchStatus;
+import com.TennisCenter.repository.MatchSetRepository;
 import com.TennisCenter.repository.TournamentMatchRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Comparator;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
 
     private final TournamentMatchRepository tournamentMatchRepository;
+    private final MatchSetRepository matchSetRepository;
 
     public List<ScheduledMatchResponse> getAllScheduledMatches() {
         return tournamentMatchRepository.findAll()
@@ -47,6 +48,15 @@ public class ScheduleService {
                 .winnerName(match.getWinner() != null
                         ? match.getWinner().getFirstName() + " " + match.getWinner().getLastName()
                         : null)
+                .sets(matchSetRepository.findByMatchIdOrderBySetNumberAsc(match.getId()).stream()
+                        .map(set -> MatchSetResponse.builder()
+                                .setNumber(set.getSetNumber())
+                                .playerOneGames(set.getPlayerOneGames())
+                                .playerTwoGames(set.getPlayerTwoGames())
+                                .playerOneTiebreakPoints(set.getPlayerOneTiebreakPoints())
+                                .playerTwoTiebreakPoints(set.getPlayerTwoTiebreakPoints())
+                                .build())
+                        .toList())
                 .build();
     }
 }

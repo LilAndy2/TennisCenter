@@ -1,3 +1,5 @@
+import type { MatchSet } from "./match";
+
 export type ScheduledMatch = {
     matchId: number;
     scheduledTime: string;
@@ -12,4 +14,5 @@ export type ScheduledMatch = {
     locationName: string | null;
     status: string;
     winnerName: string | null;
+    sets?: MatchSet[];
 };

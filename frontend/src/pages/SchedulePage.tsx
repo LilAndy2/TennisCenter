@@ -3,7 +3,28 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import axiosInstance from "../api/axiosInstance";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
+import type { MatchSet } from "../types/match";
 import type { ScheduledMatch } from "../types/schedule";
+
+function tiebreakSuperscriptForPlayerRow(set: MatchSet, forPlayerOne: boolean): number | null {
+    if (
+        set.playerOneTiebreakPoints == null ||
+        set.playerTwoTiebreakPoints == null
+    ) {
+        return null;
+    }
+    if (set.playerOneGames === set.playerTwoGames) {
+        return null;
+    }
+    const playerOneWonSet = set.playerOneGames > set.playerTwoGames;
+    if (forPlayerOne && !playerOneWonSet) {
+        return set.playerOneTiebreakPoints;
+    }
+    if (!forPlayerOne && playerOneWonSet) {
+        return set.playerTwoTiebreakPoints;
+    }
+    return null;
+}
 
 const levelColors: Record<string, { bg: string; border: string; text: string }> = {
     ENTRY:   { bg: "#ecfeff", border: "#a5f3fc", text: "#0e7490" },
@@ -124,6 +145,17 @@ function SchedulePage() {
                                                                             minute: "2-digit",
                                                                         });
 
+                                                                    const sets = match.sets ?? [];
+                                                                    const isPlayed =
+                                                                        match.status === "COMPLETED" &&
+                                                                        Boolean(match.winnerName);
+                                                                    const p1Won =
+                                                                        isPlayed &&
+                                                                        match.winnerName === match.playerOneName;
+                                                                    const p2Won =
+                                                                        isPlayed &&
+                                                                        match.winnerName === match.playerTwoName;
+
                                                                     return (
                                                                         <MatchChip
                                                                             key={match.matchId}
@@ -134,18 +166,89 @@ function SchedulePage() {
                                                                                 {time}
                                                                             </MatchTime>
                                                                             <MatchPlayers>
-                                                                                <PlayerLine>{match.playerOneName}</PlayerLine>
-                                                                                <VsText>vs</VsText>
-                                                                                <PlayerLine>{match.playerTwoName}</PlayerLine>
+                                                                                {isPlayed ? (
+                                                                                    <>
+                                                                                        <PlayerScoreRow>
+                                                                                            <PlayerNameCell $bold={p1Won}>
+                                                                                                {match.playerOneName}
+                                                                                            </PlayerNameCell>
+                                                                                            {sets.length > 0 ? (
+                                                                                                <SetScoresRow>
+                                                                                                    {sets.map((set) => {
+                                                                                                        const tb =
+                                                                                                            tiebreakSuperscriptForPlayerRow(
+                                                                                                                set,
+                                                                                                                true
+                                                                                                            );
+                                                                                                        return (
+                                                                                                            <SetGameColumn
+                                                                                                                key={set.setNumber}
+                                                                                                            >
+                                                                                                                <SetGameNumber>
+                                                                                                                    {
+                                                                                                                        set.playerOneGames
+                                                                                                                    }
+                                                                                                                    {tb != null ? (
+                                                                                                                        <TiebreakSup>
+                                                                                                                            {tb}
+                                                                                                                        </TiebreakSup>
+                                                                                                                    ) : null}
+                                                                                                                </SetGameNumber>
+                                                                                                            </SetGameColumn>
+                                                                                                        );
+                                                                                                    })}
+                                                                                                </SetScoresRow>
+                                                                                            ) : null}
+                                                                                        </PlayerScoreRow>
+                                                                                        <VsText>vs</VsText>
+                                                                                        <PlayerScoreRow>
+                                                                                            <PlayerNameCell $bold={p2Won}>
+                                                                                                {match.playerTwoName}
+                                                                                            </PlayerNameCell>
+                                                                                            {sets.length > 0 ? (
+                                                                                                <SetScoresRow>
+                                                                                                    {sets.map((set) => {
+                                                                                                        const tb =
+                                                                                                            tiebreakSuperscriptForPlayerRow(
+                                                                                                                set,
+                                                                                                                false
+                                                                                                            );
+                                                                                                        return (
+                                                                                                            <SetGameColumn
+                                                                                                                key={set.setNumber}
+                                                                                                            >
+                                                                                                                <SetGameNumber>
+                                                                                                                    {
+                                                                                                                        set.playerTwoGames
+                                                                                                                    }
+                                                                                                                    {tb != null ? (
+                                                                                                                        <TiebreakSup>
+                                                                                                                            {tb}
+                                                                                                                        </TiebreakSup>
+                                                                                                                    ) : null}
+                                                                                                                </SetGameNumber>
+                                                                                                            </SetGameColumn>
+                                                                                                        );
+                                                                                                    })}
+                                                                                                </SetScoresRow>
+                                                                                            ) : null}
+                                                                                        </PlayerScoreRow>
+                                                                                    </>
+                                                                                ) : (
+                                                                                    <>
+                                                                                        <PlayerNameCell $bold={false}>
+                                                                                            {match.playerOneName}
+                                                                                        </PlayerNameCell>
+                                                                                        <VsText>vs</VsText>
+                                                                                        <PlayerNameCell $bold={false}>
+                                                                                            {match.playerTwoName}
+                                                                                        </PlayerNameCell>
+                                                                                    </>
+                                                                                )}
                                                                             </MatchPlayers>
                                                                             <TournamentTag $color={colors.text}>
                                                                                 {match.tournamentName}
                                                                             </TournamentTag>
-                                                                            {match.status === "COMPLETED" && match.winnerName ? (
-                                                                                <WinnerTag>
-                                                                                    ✓ {match.winnerName}
-                                                                                </WinnerTag>
-                                                                            ) : null}
                                                                         </MatchChip>
                                                                     );
                                                                 })}
@@ -279,10 +382,45 @@ const MatchPlayers = styled(Box)`
   gap: 0.1rem;
 `;
 
-const PlayerLine = styled(Typography)`
+const PlayerScoreRow = styled(Box)`
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem;
+`;
+
+const PlayerNameCell = styled(Typography)<{ $bold: boolean }>`
   font-size: 0.88rem !important;
-  font-weight: 700 !important;
+  font-weight: ${({ $bold }) => ($bold ? 700 : 400)} !important;
   color: #111827;
+  flex: 1;
+  min-width: 0;
+`;
+
+const SetScoresRow = styled(Box)`
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.4rem;
+  align-items: baseline;
+`;
+
+const SetGameColumn = styled.span`
+  display: inline-block;
+  min-width: 1rem;
+  text-align: center;
+`;
+
+const SetGameNumber = styled.span`
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  color: #334155;
+`;
+
+const TiebreakSup = styled.sup`
+  font-size: 0.65em;
+  font-weight: 700;
+  line-height: 0;
+  color: #475569;
 `;
 
 const VsText = styled(Typography)`
@@ -297,11 +435,4 @@ const TournamentTag = styled(Typography)<{ $color: string }>`
   font-weight: 600 !important;
   margin-top: 0.4rem !important;
   opacity: 0.85;
-`;
-
-const WinnerTag = styled(Typography)`
-  font-size: 0.75rem !important;
-  font-weight: 700 !important;
-  color: #059669;
-  margin-top: 0.25rem !important;
 `;
