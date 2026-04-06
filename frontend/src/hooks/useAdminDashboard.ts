@@ -6,9 +6,8 @@ import useLocationManagement from "./useLocationManagement";
 import { getErrorMessage } from "../utils/getErrorMessage.ts";
 import { useToast } from "../context/ToastContext.tsx";
 
-const { showToast } = useToast();
-
 function useAdminDashboard() {
+    const { showToast } = useToast();
     const [ongoingTournaments, setOngoingTournaments] = useState<TournamentType[]>([]);
     const [upcomingTournaments, setUpcomingTournaments] = useState<TournamentType[]>([]);
     const [loading, setLoading] = useState(true);

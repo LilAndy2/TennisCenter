@@ -4,11 +4,10 @@ import type { TournamentMatch, MatchSet } from "../types/match";
 import { getErrorMessage } from "../utils/getErrorMessage.ts";
 import { useToast } from "../context/ToastContext.tsx";
 
-const { showToast } = useToast();
-
 function useMatchScore(
     onSuccess: () => Promise<void>
 ) {
+    const { showToast } = useToast();
     const [isUpdateScoreDialogOpen, setIsUpdateScoreDialogOpen] = useState(false);
     const [selectedMatch, setSelectedMatch] = useState<TournamentMatch | null>(null);
 

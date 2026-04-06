@@ -5,9 +5,8 @@ import type { TournamentMatch, GroupStanding } from "../types/match";
 import { getErrorMessage } from "../utils/getErrorMessage.ts";
 import { useToast } from "../context/ToastContext.tsx";
 
-const { showToast } = useToast();
-
 function useTournamentData(id: string | undefined) {
+    const { showToast } = useToast();
     const [tournament, setTournament] = useState<TournamentType | null>(null);
     const [participants, setParticipants] = useState<TournamentParticipantType[]>([]);
     const [matches, setMatches] = useState<TournamentMatch[]>([]);

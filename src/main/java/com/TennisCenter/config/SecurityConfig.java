@@ -45,8 +45,6 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/player/**").hasAnyRole("PLAYER", "ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/locations/**").authenticated()
-                        .requestMatchers("/api/locations/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session ->

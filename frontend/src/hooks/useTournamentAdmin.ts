@@ -14,8 +14,6 @@ type UseTournamentAdminParams = {
     setIsDeleteDialogOpen: (open: boolean) => void;
 };
 
-const { showToast } = useToast();
-
 function useTournamentAdmin({
                                 id,
                                 setTournament,
@@ -24,7 +22,7 @@ function useTournamentAdmin({
                                 setIsEditModalOpen,
                                 setIsDeleteDialogOpen,
                             }: UseTournamentAdminParams) {
-
+    const { showToast } = useToast();
     const handleEditTournament = async (data: TournamentFormData) => {
         try {
             const response = await axiosInstance.put<TournamentType>(

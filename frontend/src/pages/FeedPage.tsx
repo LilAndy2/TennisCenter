@@ -9,9 +9,8 @@ import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 import { getErrorMessage } from "../utils/getErrorMessage.ts";
 import { useToast } from "../context/ToastContext.tsx";
 
-const { showToast } = useToast();
-
 function FeedPage() {
+    const { showToast } = useToast();
     const [posts, setPosts] = useState<FeedPostType[]>([]);
     const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
     const [editingPost, setEditingPost] = useState<FeedPostType | null>(null);

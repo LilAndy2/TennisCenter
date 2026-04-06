@@ -6,11 +6,10 @@ import { useEffect } from "react";
 import { getErrorMessage } from "../utils/getErrorMessage.ts";
 import { useToast } from "../context/ToastContext.tsx";
 
-const { showToast } = useToast();
-
 function useMatchSchedule(
     onSuccess: () => Promise<void>
 ) {
+    const { showToast } = useToast();
     const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
     const [matchToSchedule, setMatchToSchedule] = useState<TournamentMatch | null>(null);
     const [locations, setLocations] = useState<Location[]>([]);

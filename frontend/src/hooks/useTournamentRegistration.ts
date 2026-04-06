@@ -10,13 +10,12 @@ type UseTournamentRegistrationParams = {
     refreshAll: () => Promise<void>;
 };
 
-const { showToast } = useToast();
-
 function useTournamentRegistration({
                                        tournament,
                                        setTournament,
                                        refreshAll,
                                    }: UseTournamentRegistrationParams) {
+    const { showToast } = useToast();
     const [registering, setRegistering] = useState(false);
 
     const handleRegister = async () => {

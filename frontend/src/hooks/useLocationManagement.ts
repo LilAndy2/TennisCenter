@@ -5,10 +5,10 @@ import type { LocationFormData } from "../types/forms";
 import { getErrorMessage } from "../utils/getErrorMessage.ts";
 import { useToast } from "../context/ToastContext.tsx";
 
-const { showToast } = useToast();
 const emptyLocationForm: LocationFormData = { name: "", address: "", phone: "", email: "" };
 
 function useLocationManagement() {
+    const { showToast } = useToast();
     const [locations, setLocations] = useState<Location[]>([]);
     const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
     const [editingLocation, setEditingLocation] = useState<Location | null>(null);
