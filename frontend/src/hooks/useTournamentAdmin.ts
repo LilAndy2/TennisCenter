@@ -10,6 +10,7 @@ type UseTournamentAdminParams = {
     setTournament: (t: TournamentType) => void;
     setMatches: (m: TournamentMatch[]) => void;
     loadGroupStandings: () => Promise<void>;
+    loadMatches: () => Promise<void>;
     setIsEditModalOpen: (open: boolean) => void;
     setIsDeleteDialogOpen: (open: boolean) => void;
 };
@@ -17,8 +18,8 @@ type UseTournamentAdminParams = {
 function useTournamentAdmin({
                                 id,
                                 setTournament,
-                                setMatches,
                                 loadGroupStandings,
+                                loadMatches,
                                 setIsEditModalOpen,
                                 setIsDeleteDialogOpen,
                             }: UseTournamentAdminParams) {
@@ -81,13 +82,26 @@ function useTournamentAdmin({
 
     const handleGenerateBracket = async () => {
         try {
-            const response = await axiosInstance.post<TournamentMatch[]>(
+            await axiosInstance.post<TournamentMatch[]>(
                 `/admin/tournaments/${id}/generate-bracket`
             );
-            setMatches(response.data);
+            await loadMatches();         // reload instead of setMatches
             await loadGroupStandings();
         } catch (error) {
             showToast(getErrorMessage(error));
+        }
+    };
+
+    const handleGenerateKnockout = async () => {
+        try {
+            await axiosInstance.post<TournamentMatch[]>(
+                `/admin/tournaments/${id}/generate-knockout`
+            );
+            await loadMatches();         // reload all matches fresh
+            await loadGroupStandings();
+        } catch (error) {
+            showToast(getErrorMessage(error));
+            throw error;
         }
     };
 
@@ -97,6 +111,7 @@ function useTournamentAdmin({
         handleStartTournament,
         handleFinishTournament,
         handleGenerateBracket,
+        handleGenerateKnockout,
     };
 }
 

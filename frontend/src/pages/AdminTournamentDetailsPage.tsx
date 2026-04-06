@@ -49,6 +49,7 @@ function AdminTournamentDetailsPage() {
         handleOpenScheduleDialog,
         handleCloseScheduleDialog,
         handleScheduleMatch,
+        handleGenerateKnockout,
     } = useAdminTournamentDetails(id);
 
     if (loading) {
@@ -105,7 +106,9 @@ function AdminTournamentDetailsPage() {
                     <AdminTournamentGroupsCard
                         groupStandings={groupStandings}
                         matches={matches}
+                        tournament={tournament}
                         onGenerateBracket={handleGenerateBracket}
+                        onGenerateKnockout={handleGenerateKnockout}
                         hasGeneratedBracket={matches.length > 0}
                         onUpdateScore={handleOpenUpdateScoreDialog}
                         onScheduleMatch={handleOpenScheduleDialog}

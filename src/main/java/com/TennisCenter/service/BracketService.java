@@ -67,55 +67,102 @@ public class BracketService {
         return tournamentMatchService.getTournamentMatches(tournamentId, currentUser);
     }
 
+    public List<TournamentMatchResponse> generateKnockoutFromGroups(Long tournamentId, User currentUser) {
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
+
+        if (currentUser.getRole() != Role.ADMIN)
+            throw new UnauthorizedActionException("Only admins can generate knockout bracket");
+
+        List<TournamentMatch> groupMatches = tournamentMatchRepository
+                .findByTournamentIdAndPhaseOrderByGroupNameAscMatchOrderAsc(tournamentId, TournamentMatchPhase.GROUP_STAGE);
+
+        boolean allDone = groupMatches.stream()
+                .allMatch(m -> m.getStatus() == TournamentMatchStatus.COMPLETED);
+        if (!allDone)
+            throw new ValidationException("All group stage matches must be completed before generating the knockout bracket");
+
+        boolean knockoutExists = tournamentMatchRepository
+                .findByTournamentIdOrderByPhaseAscRoundNumberAscMatchOrderAsc(tournamentId)
+                .stream().anyMatch(m -> m.getPhase() == TournamentMatchPhase.KNOCKOUT);
+        if (knockoutExists)
+            throw new ConflictException("Knockout bracket already generated");
+
+        List<User> knockoutParticipants = getTopPlayersFromGroups(groupMatches)
+                .stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        generateSingleEliminationFirstRound(tournament, knockoutParticipants);
+
+        return tournamentMatchService.getTournamentMatches(tournamentId, currentUser);
+    }
+
+    private List<User> getTopPlayersFromGroups(List<TournamentMatch> groupMatches) {
+        Map<String, List<TournamentMatch>> byGroup = groupMatches.stream()
+                .collect(Collectors.groupingBy(TournamentMatch::getGroupName, LinkedHashMap::new, Collectors.toList()));
+
+        List<User> result = new ArrayList<>();
+        for (Map.Entry<String, List<TournamentMatch>> entry : byGroup.entrySet()) {
+            Map<Long, int[]> winsMap = new LinkedHashMap<>();
+            Map<Long, User> userMap = new LinkedHashMap<>();
+
+            for (TournamentMatch m : entry.getValue()) {
+                if (m.getPlayerOne() != null) {
+                    winsMap.putIfAbsent(m.getPlayerOne().getId(), new int[]{0, 0});
+                    userMap.put(m.getPlayerOne().getId(), m.getPlayerOne());
+                }
+                if (m.getPlayerTwo() != null) {
+                    winsMap.putIfAbsent(m.getPlayerTwo().getId(), new int[]{0, 0});
+                    userMap.put(m.getPlayerTwo().getId(), m.getPlayerTwo());
+                }
+                if (m.getWinner() != null) {
+                    winsMap.get(m.getWinner().getId())[0]++;
+                    Long loserId = m.getWinner().getId().equals(m.getPlayerOne().getId())
+                            ? m.getPlayerTwo().getId() : m.getPlayerOne().getId();
+                    winsMap.get(loserId)[1]++;
+                }
+            }
+
+            winsMap.entrySet().stream()
+                    .sorted((a, b) -> b.getValue()[0] - a.getValue()[0])
+                    .limit(2)
+                    .map(e -> userMap.get(e.getKey()))
+                    .filter(Objects::nonNull)
+                    .forEach(result::add);
+        }
+        return result;
+    }
+
     private void generateSingleEliminationFirstRound(Tournament tournament, List<User> participants) {
-        int participantCount = participants.size();
-        int bracketSize = nextPowerOfTwo(participantCount);
-        int byes = bracketSize - participantCount;
-
-        List<User> seededPlayers = new ArrayList<>(participants);
-        List<User> playersWithByes = seededPlayers.subList(0, byes);
-        List<User> remainingPlayers = seededPlayers.subList(byes, seededPlayers.size());
-
+        int bracketSize = nextPowerOfTwo(participants.size());
         int matchOrder = 1;
 
-        for (int i = 0; i < remainingPlayers.size(); i += 2) {
-            User playerOne = remainingPlayers.get(i);
-            User playerTwo = i + 1 < remainingPlayers.size() ? remainingPlayers.get(i + 1) : null;
+        // Pair players: seed 1 vs last, seed 2 vs second-to-last, etc.
+        List<User> seeded = new ArrayList<>(participants);
+        // Pad with nulls for BYEs
+        while (seeded.size() < bracketSize) {
+            seeded.add(null);
+        }
+
+        for (int i = 0; i < bracketSize / 2; i++) {
+            User playerOne = seeded.get(i);
+            User playerTwo = seeded.get(bracketSize - 1 - i);
+            boolean isBye = playerTwo == null;
 
             TournamentMatch match = TournamentMatch.builder()
                     .tournament(tournament)
                     .playerOne(playerOne)
                     .playerTwo(playerTwo)
-                    .winner(null)
+                    .winner(isBye ? playerOne : null)
                     .phase(TournamentMatchPhase.KNOCKOUT)
-                    .status(TournamentMatchStatus.SCHEDULED)
+                    .status(isBye ? TournamentMatchStatus.COMPLETED : TournamentMatchStatus.SCHEDULED)
                     .roundNumber(1)
-                    .groupName(null)
                     .matchOrder(matchOrder++)
                     .matchDate(tournament.getStartDate())
                     .build();
 
             tournamentMatchRepository.save(match);
-        }
-
-        if (!playersWithByes.isEmpty()) {
-            int byeOrder = 1000;
-            for (User byePlayer : playersWithByes) {
-                TournamentMatch byeMatch = TournamentMatch.builder()
-                        .tournament(tournament)
-                        .playerOne(byePlayer)
-                        .playerTwo(null)
-                        .winner(byePlayer)
-                        .phase(TournamentMatchPhase.KNOCKOUT)
-                        .status(TournamentMatchStatus.COMPLETED)
-                        .roundNumber(1)
-                        .groupName(null)
-                        .matchOrder(byeOrder++)
-                        .matchDate(tournament.getStartDate())
-                        .build();
-
-                tournamentMatchRepository.save(byeMatch);
-            }
         }
     }
 

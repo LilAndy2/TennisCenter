@@ -92,8 +92,8 @@ public class GroupStandingService {
 
             sortedPlayers.sort(
                     Comparator.comparingInt(GroupStandingAccumulator::getWins).reversed()
-                            .thenComparingDouble(GroupStandingAccumulator::getSetsWinPercentage).reversed()
-                            .thenComparingDouble(GroupStandingAccumulator::getGamesWinPercentage).reversed()
+                            .thenComparing(Comparator.comparingDouble(GroupStandingAccumulator::getSetsWinPercentage).reversed())
+                            .thenComparing(Comparator.comparingDouble(GroupStandingAccumulator::getGamesWinPercentage).reversed())
                             .thenComparing(acc -> acc.user.getLastName(), String.CASE_INSENSITIVE_ORDER)
             );
 

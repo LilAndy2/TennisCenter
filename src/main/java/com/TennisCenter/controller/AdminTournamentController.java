@@ -89,11 +89,18 @@ public class AdminTournamentController {
         return tournamentService.finishTournament(id, currentUser);
     }
 
-    @PostMapping("/tournaments/{tournamentId}/generate-bracket")
+    @PostMapping("/{id}/generate-bracket")
     public List<TournamentMatchResponse> generateBracket(
-            @PathVariable Long tournamentId,
+            @PathVariable Long id,
             @AuthenticationPrincipal User currentUser) {
-        return bracketService.generateBracket(tournamentId, currentUser);
+        return bracketService.generateBracket(id, currentUser);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/{id}/generate-knockout")
+    public List<TournamentMatchResponse> generateKnockout(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser) {
+        return bracketService.generateKnockoutFromGroups(id, currentUser);
+    }
 }

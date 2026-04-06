@@ -17,6 +17,7 @@ function useAdminTournamentDetails(id: string | undefined) {
         setTournament: dataHook.setTournament,
         setMatches: dataHook.setMatches,
         loadGroupStandings: dataHook.loadGroupStandings,
+        loadMatches: dataHook.loadMatches,
         setIsEditModalOpen,
         setIsDeleteDialogOpen,
     });
