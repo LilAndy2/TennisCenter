@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -99,6 +100,7 @@ public class TournamentMatchService {
         match.setStatus(TournamentMatchStatus.COMPLETED);
         match.setReportedBy(currentUser);
         TournamentMatch saved = tournamentMatchRepository.save(match);
+        advanceWinnerToNextRound(match, winner);
 
         return mapToResponse(saved, currentUser);
     }
@@ -253,5 +255,43 @@ public class TournamentMatchService {
         }
 
         throw new ValidationException("Invalid set score. Allowed winner game values are 6 or 7");
+    }
+
+    private void advanceWinnerToNextRound(TournamentMatch completedMatch, User winner) {
+        if (completedMatch.getPhase() != TournamentMatchPhase.KNOCKOUT) return;
+
+        int nextRound = completedMatch.getRoundNumber() + 1;
+        Long tournamentId = completedMatch.getTournament().getId();
+
+        // Find all matches in the next round
+        List<TournamentMatch> nextRoundMatches = tournamentMatchRepository
+                .findByTournamentIdOrderByPhaseAscRoundNumberAscMatchOrderAsc(tournamentId)
+                .stream()
+                .filter(m -> m.getPhase() == TournamentMatchPhase.KNOCKOUT
+                        && m.getRoundNumber() == nextRound)
+                .sorted(Comparator.comparingInt(m -> m.getMatchOrder() == null ? 0 : m.getMatchOrder()))
+                .toList();
+
+        if (nextRoundMatches.isEmpty()) return;
+
+        // Figure out which slot this winner goes into.
+        // Match order in current round determines position in next round:
+        // matches 1&2 → next round match 1, matches 3&4 → next round match 2, etc.
+        int currentMatchOrder = completedMatch.getMatchOrder() == null ? 1 : completedMatch.getMatchOrder();
+        int nextMatchIndex = (currentMatchOrder - 1) / 2; // 0-based index into next round
+
+        if (nextMatchIndex >= nextRoundMatches.size()) return;
+
+        TournamentMatch nextMatch = nextRoundMatches.get(nextMatchIndex);
+
+        // Slot into playerOne or playerTwo based on whether current match order is odd or even
+        if (currentMatchOrder % 2 == 1) {
+            nextMatch.setPlayerOne(winner);
+        } else {
+            nextMatch.setPlayerTwo(winner);
+        }
+
+        // If both players are now set, the match is ready to play (already SCHEDULED)
+        tournamentMatchRepository.save(nextMatch);
     }
 }

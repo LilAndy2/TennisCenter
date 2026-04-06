@@ -3,28 +3,9 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import axiosInstance from "../api/axiosInstance";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
-import type { MatchSet } from "../types/match";
+import { tiebreakSuperscriptForPlayerRow } from "../utils/tiebreakUtils";
 import type { ScheduledMatch } from "../types/schedule";
 
-function tiebreakSuperscriptForPlayerRow(set: MatchSet, forPlayerOne: boolean): number | null {
-    if (
-        set.playerOneTiebreakPoints == null ||
-        set.playerTwoTiebreakPoints == null
-    ) {
-        return null;
-    }
-    if (set.playerOneGames === set.playerTwoGames) {
-        return null;
-    }
-    const playerOneWonSet = set.playerOneGames > set.playerTwoGames;
-    if (forPlayerOne && !playerOneWonSet) {
-        return set.playerOneTiebreakPoints;
-    }
-    if (!forPlayerOne && playerOneWonSet) {
-        return set.playerTwoTiebreakPoints;
-    }
-    return null;
-}
 
 const levelColors: Record<string, { bg: string; border: string; text: string }> = {
     ENTRY:   { bg: "#ecfeff", border: "#a5f3fc", text: "#0e7490" },

@@ -89,6 +89,7 @@ function TournamentDetailsPage() {
                     <AdminTournamentGroupsCard
                         groupStandings={groupStandings}
                         matches={matches}
+                        tournament={tournament}
                         hasGeneratedBracket={matches.length > 0}
                         readOnly
                     />

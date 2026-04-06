@@ -1,6 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import styled from "styled-components";
 import type { TournamentMatch } from "../../../types/match";
+import { tiebreakSuperscriptForPlayerRow } from "../../../utils/tiebreakUtils.ts";
 
 type KnockoutBracketCardProps = {
     matches: TournamentMatch[];
@@ -29,15 +30,11 @@ function KnockoutBracketCard({
 
     if (knockoutMatches.length === 0) return null;
 
-    const visibleMatches = knockoutMatches.filter(
-        m => !(m.playerTwoName === null && m.status === "COMPLETED")
-    );
+    const visibleMatches = knockoutMatches;
 
     const roundNumbers = [...new Set(visibleMatches.map(m => m.roundNumber ?? 1))].sort((a, b) => a - b);
 
-    const matchesInFirstRound = visibleMatches.filter(m => m.roundNumber === roundNumbers[0]).length;
-    const totalRounds = Math.max(1, Math.ceil(Math.log2(matchesInFirstRound * 2)));
-    const maxRoundNumber = (roundNumbers[roundNumbers.length - 1] ?? 1) + totalRounds - 1;
+    const maxRoundNumber = roundNumbers[roundNumbers.length - 1] ?? 1;
 
     const byRound = roundNumbers.map(rn => ({
         roundNumber: rn,
@@ -62,9 +59,14 @@ function KnockoutBracketCard({
                                             {match.sets.length > 0 && (
                                                 <ScoreChips>
                                                     {match.sets.map(s => (
-                                                        <SetChip key={s.setNumber} $bold={s.playerOneGames > s.playerTwoGames}>
-                                                            {s.playerOneGames}
-                                                        </SetChip>
+                                                        <SetChipWrapper key={s.setNumber}>
+                                                            <SetChip $bold={s.playerOneGames > s.playerTwoGames}>
+                                                                {s.playerOneGames}
+                                                            </SetChip>
+                                                            {tiebreakSuperscriptForPlayerRow(s, true) != null && (
+                                                                <TiebreakSup>{tiebreakSuperscriptForPlayerRow(s, true)}</TiebreakSup>
+                                                            )}
+                                                        </SetChipWrapper>
                                                     ))}
                                                 </ScoreChips>
                                             )}
@@ -75,28 +77,34 @@ function KnockoutBracketCard({
                                             {match.sets.length > 0 && (
                                                 <ScoreChips>
                                                     {match.sets.map(s => (
-                                                        <SetChip key={s.setNumber} $bold={s.playerTwoGames > s.playerOneGames}>
-                                                            {s.playerTwoGames}
-                                                        </SetChip>
+                                                        <SetChipWrapper key={s.setNumber}>
+                                                            <SetChip $bold={s.playerTwoGames > s.playerOneGames}>
+                                                                {s.playerTwoGames}
+                                                            </SetChip>
+                                                            {tiebreakSuperscriptForPlayerRow(s, false) != null && (
+                                                                <TiebreakSup>{tiebreakSuperscriptForPlayerRow(s, false)}</TiebreakSup>
+                                                            )}
+                                                        </SetChipWrapper>
                                                     ))}
                                                 </ScoreChips>
                                             )}
                                         </PlayerRow>
 
-                                        {!readOnly && match.status !== "COMPLETED" && (
-                                            <ActionRow>
-                                                {onUpdateScore && (
-                                                    <ActionButton onClick={() => onUpdateScore(match)}>
-                                                        Enter score
-                                                    </ActionButton>
-                                                )}
-                                                {onScheduleMatch && (
-                                                    <ScheduleActionButton onClick={() => onScheduleMatch(match)}>
-                                                        {match.scheduledTime ? "Edit schedule" : "Set schedule"}
-                                                    </ScheduleActionButton>
-                                                )}
-                                            </ActionRow>
-                                        )}
+                                        {!readOnly && match.status !== "COMPLETED" &&
+                                            match.playerOneName !== null && match.playerTwoName !== null && (
+                                                <ActionRow>
+                                                    {onUpdateScore && (
+                                                        <ActionButton onClick={() => onUpdateScore(match)}>
+                                                            Enter score
+                                                        </ActionButton>
+                                                    )}
+                                                    {onScheduleMatch && (
+                                                        <ScheduleActionButton onClick={() => onScheduleMatch(match)}>
+                                                            {match.scheduledTime ? "Edit schedule" : "Set schedule"}
+                                                        </ScheduleActionButton>
+                                                    )}
+                                                </ActionRow>
+                                            )}
 
                                         {match.scheduledTime && (
                                             <ScheduleInfo>
@@ -169,8 +177,8 @@ const BracketRow = styled(Box)`
 const RoundColumn = styled(Box)`
     display: flex;
     flex-direction: column;
-    min-width: 14rem;
-    max-width: 14rem;
+    min-width: 18rem;
+    max-width: 18rem;
     padding: 0 0.75rem;
     border-right: 1px dashed #e5e7eb;
     &:last-child { border-right: none; }
@@ -212,32 +220,50 @@ const PlayerRow = styled(Box)<{ $winner: boolean }>`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.5rem 0.7rem;
+    padding: 0.65rem 1rem;
     background: ${({ $winner }) => ($winner ? "#dcfce7" : "transparent")};
 `;
 
 const PlayerName = styled(Typography)`
-    font-size: 0.85rem !important;
+    font-size: 0.95rem !important;
     font-weight: 600 !important;
     color: #111827;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 8rem;
+    max-width: 10rem;
 `;
 
 const ScoreChips = styled(Box)`
     display: flex;
-    gap: 0.2rem;
+    gap: 0.3rem;
     flex-shrink: 0;
+    align-items: center;
 `;
 
 const SetChip = styled(Box)<{ $bold: boolean }>`
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: ${({ $bold }) => ($bold ? "800" : "500")};
     color: ${({ $bold }) => ($bold ? "#111827" : "#64748b")};
     min-width: 1.1rem;
     text-align: center;
+`;
+
+const SetChipWrapper = styled(Box)`
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    min-width: 1.4rem;
+    justify-content: center;
+`;
+
+const TiebreakSup = styled.sup`
+    font-size: 0.55rem;
+    font-weight: 700;
+    color: #64748b;
+    position: absolute;
+    top: -0.15rem;
+    right: -0.05rem;
 `;
 
 const Divider = styled(Box)`

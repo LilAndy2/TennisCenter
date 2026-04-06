@@ -136,15 +136,16 @@ public class BracketService {
 
     private void generateSingleEliminationFirstRound(Tournament tournament, List<User> participants) {
         int bracketSize = nextPowerOfTwo(participants.size());
-        int matchOrder = 1;
+        int totalRounds = (int) (Math.log(bracketSize) / Math.log(2));
 
-        // Pair players: seed 1 vs last, seed 2 vs second-to-last, etc.
-        List<User> seeded = new ArrayList<>(participants);
         // Pad with nulls for BYEs
+        List<User> seeded = new ArrayList<>(participants);
         while (seeded.size() < bracketSize) {
             seeded.add(null);
         }
 
+        // Generate Round 1
+        int matchOrder = 1;
         for (int i = 0; i < bracketSize / 2; i++) {
             User playerOne = seeded.get(i);
             User playerTwo = seeded.get(bracketSize - 1 - i);
@@ -163,6 +164,26 @@ public class BracketService {
                     .build();
 
             tournamentMatchRepository.save(match);
+        }
+
+        // Generate empty placeholder matches for all subsequent rounds
+        for (int round = 2; round <= totalRounds; round++) {
+            int matchesInRound = bracketSize / (int) Math.pow(2, round);
+            for (int i = 1; i <= matchesInRound; i++) {
+                TournamentMatch placeholder = TournamentMatch.builder()
+                        .tournament(tournament)
+                        .playerOne(null)
+                        .playerTwo(null)
+                        .winner(null)
+                        .phase(TournamentMatchPhase.KNOCKOUT)
+                        .status(TournamentMatchStatus.SCHEDULED)
+                        .roundNumber(round)
+                        .matchOrder(i)
+                        .matchDate(tournament.getStartDate())
+                        .build();
+
+                tournamentMatchRepository.save(placeholder);
+            }
         }
     }
 
