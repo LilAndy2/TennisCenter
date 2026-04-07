@@ -3,18 +3,35 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import axiosInstance from "../api/axiosInstance";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
-import { tiebreakSuperscriptForPlayerRow } from "../utils/tiebreakUtils";
+import { PageWrapper, PageTitle, LoadingWrapper } from "../components/common/PageLayout";
+import ScheduleLocationSection from "../components/schedule/ScheduleLocationSection";
 import type { ScheduledMatch } from "../types/schedule";
 
+type ScheduleGroup = Record<string, Record<string, Record<string, ScheduledMatch[]>>>;
 
-const levelColors: Record<string, { bg: string; border: string; text: string }> = {
-    ENTRY:   { bg: "#ecfeff", border: "#a5f3fc", text: "#0e7490" },
-    STARTER: { bg: "#f0fdf4", border: "#bbf7d0", text: "#15803d" },
-    MEDIUM:  { bg: "#eff6ff", border: "#bfdbfe", text: "#1d4ed8" },
-    MASTER:  { bg: "#faf5ff", border: "#e9d5ff", text: "#7e22ce" },
-    EXPERT:  { bg: "#fff7ed", border: "#fed7aa", text: "#c2410c" },
-    STELLAR: { bg: "#fef2f2", border: "#fecaca", text: "#b91c1c" },
-};
+function buildScheduleGroups(matches: ScheduledMatch[]): ScheduleGroup {
+    return matches.reduce<ScheduleGroup>((acc, match) => {
+        const date = match.matchDate;
+        const loc = match.locationId != null ? String(match.locationId) : "__no_location__";
+        const court = match.courtNumber != null ? String(match.courtNumber) : "__no_court__";
+
+        if (!acc[date]) acc[date] = {};
+        if (!acc[date][loc]) acc[date][loc] = {};
+        if (!acc[date][loc][court]) acc[date][loc][court] = [];
+        acc[date][loc][court].push(match);
+        return acc;
+    }, {} as ScheduleGroup);
+}
+
+function buildLocationNames(matches: ScheduledMatch[]): Record<string, string> {
+    const map: Record<string, string> = {};
+    matches.forEach((m) => {
+        if (m.locationId != null && m.locationName) {
+            map[String(m.locationId)] = m.locationName;
+        }
+    });
+    return map;
+}
 
 function SchedulePage() {
     const [matches, setMatches] = useState<ScheduledMatch[]>([]);
@@ -23,7 +40,9 @@ function SchedulePage() {
     useEffect(() => {
         const load = async () => {
             try {
-                const response = await axiosInstance.get<ScheduledMatch[]>("/player/tournaments/schedule");
+                const response = await axiosInstance.get<ScheduledMatch[]>(
+                    "/player/tournaments/schedule"
+                );
                 setMatches(response.data);
             } catch (error) {
                 console.error("Failed to load schedule", error);
@@ -34,40 +53,15 @@ function SchedulePage() {
         load();
     }, []);
 
-    type ScheduleGroup = Record<string, Record<string, Record<string, ScheduledMatch[]>>>;
-
-    const grouped = matches.reduce<ScheduleGroup>((acc, match) => {
-        const date = match.matchDate;
-        const loc = match.locationId != null
-            ? String(match.locationId)
-            : "__no_location__";
-        const court = match.courtNumber != null
-            ? String(match.courtNumber)
-            : "__no_court__";
-
-        if (!acc[date]) acc[date] = {};
-        if (!acc[date][loc]) acc[date][loc] = {};
-        if (!acc[date][loc][court]) acc[date][loc][court] = [];
-        acc[date][loc][court].push(match);
-        return acc;
-    }, {} as ScheduleGroup);
-
+    const grouped = buildScheduleGroups(matches);
+    const locationNames = buildLocationNames(matches);
     const sortedDates = Object.keys(grouped).sort();
-
-    const locationNames: Record<string, string> = {};
-    matches.forEach(m => {
-        if (m.locationId != null && m.locationName) {
-            locationNames[String(m.locationId)] = m.locationName;
-        }
-    });
 
     return (
         <AuthenticatedLayout>
             <PageWrapper>
                 <PageTitle>Schedule</PageTitle>
-                <PageSubtitle>
-                    All scheduled matches across ongoing tournaments.
-                </PageSubtitle>
+                <PageSubtitle>All scheduled matches across ongoing tournaments.</PageSubtitle>
 
                 {loading ? (
                     <LoadingWrapper>
@@ -76,7 +70,7 @@ function SchedulePage() {
                 ) : sortedDates.length === 0 ? (
                     <EmptyState>No matches have been scheduled yet.</EmptyState>
                 ) : (
-                    sortedDates.map(date => {
+                    sortedDates.map((date) => {
                         const locationsOnDay = grouped[date];
                         const sortedLocations = Object.keys(locationsOnDay).sort();
 
@@ -91,155 +85,14 @@ function SchedulePage() {
                                     })}
                                 </DateHeading>
 
-                                {sortedLocations.map(locKey => {
-                                    const courts = locationsOnDay[locKey];
-                                    const sortedCourts = Object.keys(courts).sort((a, b) =>
-                                        Number(a) - Number(b)
-                                    );
-                                    const locName = locationNames[locKey] ?? "Unassigned";
-
-                                    return (
-                                        <LocationSection key={locKey}>
-                                            <LocationHeading>{locName}</LocationHeading>
-
-                                            <CourtsRow>
-                                                {sortedCourts.map(courtKey => (
-                                                    <CourtColumn key={courtKey}>
-                                                        <CourtLabel>
-                                                            {courtKey !== "__no_court__"
-                                                                ? `Court ${courtKey}`
-                                                                : "Unassigned court"}
-                                                        </CourtLabel>
-
-                                                        <MatchesList>
-                                                            {courts[courtKey]
-                                                                .slice()
-                                                                .sort((a, b) =>
-                                                                    a.scheduledTime.localeCompare(b.scheduledTime)
-                                                                )
-                                                                .map(match => {
-                                                                    const colors = levelColors[match.tournamentLevel]
-                                                                        ?? levelColors.ENTRY;
-                                                                    const time = new Date(match.scheduledTime)
-                                                                        .toLocaleTimeString("en-GB", {
-                                                                            hour: "2-digit",
-                                                                            minute: "2-digit",
-                                                                        });
-
-                                                                    const sets = match.sets ?? [];
-                                                                    const isPlayed =
-                                                                        match.status === "COMPLETED" &&
-                                                                        Boolean(match.winnerName);
-                                                                    const p1Won =
-                                                                        isPlayed &&
-                                                                        match.winnerName === match.playerOneName;
-                                                                    const p2Won =
-                                                                        isPlayed &&
-                                                                        match.winnerName === match.playerTwoName;
-
-                                                                    return (
-                                                                        <MatchChip
-                                                                            key={match.matchId}
-                                                                            $bg={colors.bg}
-                                                                            $border={colors.border}
-                                                                        >
-                                                                            <MatchTime $color={colors.text}>
-                                                                                {time}
-                                                                            </MatchTime>
-                                                                            <MatchPlayers>
-                                                                                {isPlayed ? (
-                                                                                    <>
-                                                                                        <PlayerScoreRow>
-                                                                                            <PlayerNameCell $bold={p1Won}>
-                                                                                                {match.playerOneName}
-                                                                                            </PlayerNameCell>
-                                                                                            {sets.length > 0 ? (
-                                                                                                <SetScoresRow>
-                                                                                                    {sets.map((set) => {
-                                                                                                        const tb =
-                                                                                                            tiebreakSuperscriptForPlayerRow(
-                                                                                                                set,
-                                                                                                                true
-                                                                                                            );
-                                                                                                        return (
-                                                                                                            <SetGameColumn
-                                                                                                                key={set.setNumber}
-                                                                                                            >
-                                                                                                                <SetGameNumber>
-                                                                                                                    {
-                                                                                                                        set.playerOneGames
-                                                                                                                    }
-                                                                                                                    {tb != null ? (
-                                                                                                                        <TiebreakSup>
-                                                                                                                            {tb}
-                                                                                                                        </TiebreakSup>
-                                                                                                                    ) : null}
-                                                                                                                </SetGameNumber>
-                                                                                                            </SetGameColumn>
-                                                                                                        );
-                                                                                                    })}
-                                                                                                </SetScoresRow>
-                                                                                            ) : null}
-                                                                                        </PlayerScoreRow>
-                                                                                        <VsText>vs</VsText>
-                                                                                        <PlayerScoreRow>
-                                                                                            <PlayerNameCell $bold={p2Won}>
-                                                                                                {match.playerTwoName}
-                                                                                            </PlayerNameCell>
-                                                                                            {sets.length > 0 ? (
-                                                                                                <SetScoresRow>
-                                                                                                    {sets.map((set) => {
-                                                                                                        const tb =
-                                                                                                            tiebreakSuperscriptForPlayerRow(
-                                                                                                                set,
-                                                                                                                false
-                                                                                                            );
-                                                                                                        return (
-                                                                                                            <SetGameColumn
-                                                                                                                key={set.setNumber}
-                                                                                                            >
-                                                                                                                <SetGameNumber>
-                                                                                                                    {
-                                                                                                                        set.playerTwoGames
-                                                                                                                    }
-                                                                                                                    {tb != null ? (
-                                                                                                                        <TiebreakSup>
-                                                                                                                            {tb}
-                                                                                                                        </TiebreakSup>
-                                                                                                                    ) : null}
-                                                                                                                </SetGameNumber>
-                                                                                                            </SetGameColumn>
-                                                                                                        );
-                                                                                                    })}
-                                                                                                </SetScoresRow>
-                                                                                            ) : null}
-                                                                                        </PlayerScoreRow>
-                                                                                    </>
-                                                                                ) : (
-                                                                                    <>
-                                                                                        <PlayerNameCell $bold={false}>
-                                                                                            {match.playerOneName}
-                                                                                        </PlayerNameCell>
-                                                                                        <VsText>vs</VsText>
-                                                                                        <PlayerNameCell $bold={false}>
-                                                                                            {match.playerTwoName}
-                                                                                        </PlayerNameCell>
-                                                                                    </>
-                                                                                )}
-                                                                            </MatchPlayers>
-                                                                            <TournamentTag $color={colors.text}>
-                                                                                {match.tournamentName}
-                                                                            </TournamentTag>
-                                                                        </MatchChip>
-                                                                    );
-                                                                })}
-                                                        </MatchesList>
-                                                    </CourtColumn>
-                                                ))}
-                                            </CourtsRow>
-                                        </LocationSection>
-                                    );
-                                })}
+                                {sortedLocations.map((locKey) => (
+                                    <ScheduleLocationSection
+                                        key={locKey}
+                                        locKey={locKey}
+                                        locationName={locationNames[locKey] ?? "Unassigned"}
+                                        courts={locationsOnDay[locKey]}
+                                    />
+                                ))}
                             </DaySection>
                         );
                     })
@@ -251,28 +104,9 @@ function SchedulePage() {
 
 export default SchedulePage;
 
-const PageWrapper = styled(Box)`
-  width: 100%;
-  max-width: 90rem;
-  margin: 0 auto;
-`;
-
-const PageTitle = styled(Typography)`
-  font-size: 2rem !important;
-  font-weight: 800 !important;
-  color: #111827;
-  margin-bottom: 0.3rem !important;
-`;
-
 const PageSubtitle = styled(Typography)`
   color: #64748b;
   margin-bottom: 2rem !important;
-`;
-
-const LoadingWrapper = styled(Box)`
-  display: flex;
-  justify-content: center;
-  padding: 3rem 0;
 `;
 
 const EmptyState = styled(Typography)`
@@ -293,127 +127,4 @@ const DateHeading = styled(Typography)`
   margin-bottom: 1rem !important;
   padding-bottom: 0.5rem;
   border-bottom: 2px solid #e5e7eb;
-`;
-
-const LocationSection = styled(Box)`
-  margin-bottom: 1.5rem;
-`;
-
-const LocationHeading = styled(Typography)`
-  font-size: 1rem !important;
-  font-weight: 700 !important;
-  color: #475569;
-  margin-bottom: 0.75rem !important;
-`;
-
-const CourtsRow = styled(Box)`
-  display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-  padding-bottom: 0.4rem;
-  align-items: flex-start;
-
-  &::-webkit-scrollbar {
-    height: 0.4rem;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 999px;
-  }
-`;
-
-const CourtColumn = styled(Box)`
-  flex: 0 0 14rem;
-  min-width: 14rem;
-`;
-
-const CourtLabel = styled(Typography)`
-  font-size: 0.82rem !important;
-  font-weight: 800 !important;
-  color: #94a3b8;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 0.5rem !important;
-`;
-
-const MatchesList = styled(Box)`
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-`;
-
-const MatchChip = styled(Box)<{ $bg: string; $border: string }>`
-  background: ${({ $bg }) => $bg};
-  border: 1px solid ${({ $border }) => $border};
-  border-radius: 0.85rem;
-  padding: 0.75rem 0.85rem;
-`;
-
-const MatchTime = styled(Typography)<{ $color: string }>`
-  font-size: 0.82rem !important;
-  font-weight: 800 !important;
-  color: ${({ $color }) => $color};
-  margin-bottom: 0.3rem !important;
-`;
-
-const MatchPlayers = styled(Box)`
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-`;
-
-const PlayerScoreRow = styled(Box)`
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 0.5rem;
-`;
-
-const PlayerNameCell = styled(Typography)<{ $bold: boolean }>`
-  font-size: 0.88rem !important;
-  font-weight: ${({ $bold }) => ($bold ? 700 : 400)} !important;
-  color: #111827;
-  flex: 1;
-  min-width: 0;
-`;
-
-const SetScoresRow = styled(Box)`
-  display: flex;
-  flex-shrink: 0;
-  gap: 0.4rem;
-  align-items: baseline;
-`;
-
-const SetGameColumn = styled.span`
-  display: inline-block;
-  min-width: 1rem;
-  text-align: center;
-`;
-
-const SetGameNumber = styled.span`
-  font-size: 0.88rem !important;
-  font-weight: 600 !important;
-  color: #334155;
-`;
-
-const TiebreakSup = styled.sup`
-  font-size: 0.65em;
-  font-weight: 700;
-  line-height: 0;
-  color: #475569;
-`;
-
-const VsText = styled(Typography)`
-  font-size: 0.75rem !important;
-  color: #94a3b8;
-  font-weight: 600 !important;
-`;
-
-const TournamentTag = styled(Typography)<{ $color: string }>`
-  font-size: 0.75rem !important;
-  color: ${({ $color }) => $color};
-  font-weight: 600 !important;
-  margin-top: 0.4rem !important;
-  opacity: 0.85;
 `;

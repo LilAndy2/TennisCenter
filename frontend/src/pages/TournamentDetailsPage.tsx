@@ -6,7 +6,6 @@ import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 import TournamentInfoCard from "../components/tournaments/TournamentInfoCard";
 import AdminTournamentGroupsCard from "../components/admin/tournament-details/AdminTournamentGroupsCard";
 import useTournamentDetails from "../hooks/useTournamentDetails";
-import KnockoutBracketCard from "../components/admin/tournament-details/KnockoutBracketCard.tsx";
 
 function TournamentDetailsPage() {
     const navigate = useNavigate();
@@ -94,13 +93,6 @@ function TournamentDetailsPage() {
                         hasGeneratedBracket={matches.length > 0}
                         readOnly
                     />
-
-                    {tournament.bracketType === "Single Elimination" && (
-                        <KnockoutBracketCard
-                            matches={matches}
-                            readOnly
-                        />
-                    )}
                 </BottomSectionsGrid>
             </PageWrapper>
         </AuthenticatedLayout>

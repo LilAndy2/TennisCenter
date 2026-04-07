@@ -1,29 +1,11 @@
-import {
-    ChatBubbleOutline,
-    DeleteOutline,
-    FavoriteBorder,
-    MoreVert,
-    EditOutlined,
-    Favorite,
-} from "@mui/icons-material";
-import {
-    Avatar,
-    Box,
-    IconButton,
-    Typography,
-    Menu,
-    MenuItem,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Button,
-} from "@mui/material";
+import { DeleteOutline, EditOutlined, MoreVert } from "@mui/icons-material";
+import { Avatar, Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import { useState } from "react";
 import styled from "styled-components";
-import PostComments from "./PostComments.tsx";
-import { motion } from "framer-motion"
-import { formatTimeAgo } from "../../utils/formatTimeAgo.ts";
+import { formatTimeAgo } from "../../utils/formatTimeAgo";
+import PostActionsBar from "./PostActionsBar";
+import PostComments from "./PostComments";
+import DeletePostDialog from "./DeletePostDialog";
 
 export type FeedPostType = {
     id: number;
@@ -46,13 +28,11 @@ type PostCardProps = {
     onToggleLike: (postId: number) => void;
 };
 
-const MotionIconWrapper = motion.span;
-
 function PostCard({ post, onDelete, onEdit, onCommentAdded, onToggleLike }: PostCardProps) {
     const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
     const [showComments, setShowComments] = useState(false);
-    const [isLikeAnimation, setIsLikeAnimation] = useState(false);
+    const [isLikeAnimating, setIsLikeAnimating] = useState(false);
 
     const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
         setMenuAnchor(event.currentTarget);
@@ -62,24 +42,11 @@ function PostCard({ post, onDelete, onEdit, onCommentAdded, onToggleLike }: Post
         setMenuAnchor(null);
     };
 
-    const handleDeleteClick = () => {
-        handleCloseMenu();
-        setConfirmDeleteOpen(true);
-    };
-
-    const handleConfirmDelete = () => {
-        onDelete(post.id);
-        setConfirmDeleteOpen(false);
-    };
-
-    const handleLikeClick = async () => {
-        setIsLikeAnimation(true);
+    const handleLikeClick = () => {
+        setIsLikeAnimating(true);
         onToggleLike(post.id);
-
-        setTimeout(() => {
-            setIsLikeAnimation(false);
-        }, 300)
-    }
+        setTimeout(() => setIsLikeAnimating(false), 300);
+    };
 
     return (
         <CardWrapper>
@@ -94,12 +61,11 @@ function PostCard({ post, onDelete, onEdit, onCommentAdded, onToggleLike }: Post
                     </AuthorInfo>
                 </PostHeaderLeft>
 
-                {post.owner ? (
+                {post.owner && (
                     <>
                         <IconButton onClick={handleOpenMenu}>
                             <MoreVert />
                         </IconButton>
-
                         <Menu
                             anchorEl={menuAnchor}
                             open={Boolean(menuAnchor)}
@@ -114,55 +80,36 @@ function PostCard({ post, onDelete, onEdit, onCommentAdded, onToggleLike }: Post
                                 <EditOutlined sx={{ mr: 1 }} />
                                 Edit
                             </MenuItem>
-
-                            <MenuItem onClick={handleDeleteClick} sx={{ color: "#dc2626" }}>
+                            <MenuItem
+                                onClick={() => {
+                                    handleCloseMenu();
+                                    setConfirmDeleteOpen(true);
+                                }}
+                                sx={{ color: "#dc2626" }}
+                            >
                                 <DeleteOutline sx={{ mr: 1 }} />
                                 Delete
                             </MenuItem>
                         </Menu>
                     </>
-                ) : null}
+                )}
             </PostHeader>
 
             <PostContent>{post.content}</PostContent>
 
-            {post.imageUrl ? <PostImage src={`http://localhost:8080${post.imageUrl}`} alt="Post" /> : null}
+            {post.imageUrl && (
+                <PostImage src={`http://localhost:8080${post.imageUrl}`} alt="Post" />
+            )}
 
-            <PostActions>
-                <ActionButton onClick={handleLikeClick}>
-                    <MotionIconWrapper
-                        animate={
-                            isLikeAnimation
-                                ? { scale: [1, 1.35, 0.95, 1] }
-                                : { scale: 1 }
-                        }
-                        transition={{ duration: 0.3, ease: "easeOut" }}
-                        style={{ display: "flex", alignItems: "center" }}
-                    >
-                        {post.likedByCurrentUser ? (
-                            <Favorite sx={{ fontSize: 20, color: "#059669" }} />
-                        ) : (
-                            <FavoriteBorder sx={{ fontSize: 20, color: "#64748b" }} />
-                        )}
-                    </MotionIconWrapper>
-
-                    <span>
-                        {post.likedByCurrentUser ? "Unlike" : "Like"}
-                    </span>
-
-                    {post.likesCount > 0 ? (
-                        <CountBadge>{post.likesCount}</CountBadge>
-                    ) : null}
-                </ActionButton>
-
-                <ActionButton onClick={() => setShowComments((prev) => !prev)}>
-                    <ChatBubbleOutline sx={{ fontSize: 20 }} />
-                    <span>Comment</span>
-                    {!showComments && post.commentsCount > 0 ? (
-                        <CountBadge>{post.commentsCount}</CountBadge>
-                    ) : null}
-                </ActionButton>
-            </PostActions>
+            <PostActionsBar
+                likesCount={post.likesCount}
+                commentsCount={post.commentsCount}
+                likedByCurrentUser={post.likedByCurrentUser}
+                showComments={showComments}
+                isLikeAnimating={isLikeAnimating}
+                onLike={handleLikeClick}
+                onToggleComments={() => setShowComments((prev) => !prev)}
+            />
 
             {showComments && (
                 <PostComments
@@ -171,32 +118,14 @@ function PostCard({ post, onDelete, onEdit, onCommentAdded, onToggleLike }: Post
                 />
             )}
 
-            <Dialog
+            <DeletePostDialog
                 open={confirmDeleteOpen}
                 onClose={() => setConfirmDeleteOpen(false)}
-            >
-                <DialogTitle>Delete post</DialogTitle>
-
-                <DialogContent>
-                    <Typography>
-                        Are you sure you want to permanently delete this post?
-                    </Typography>
-                </DialogContent>
-
-                <DialogActions>
-                    <Button onClick={() => setConfirmDeleteOpen(false)}>
-                        Cancel
-                    </Button>
-
-                    <Button
-                        color="error"
-                        variant="contained"
-                        onClick={handleConfirmDelete}
-                    >
-                        Delete
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                onConfirm={() => {
+                    onDelete(post.id);
+                    setConfirmDeleteOpen(false);
+                }}
+            />
         </CardWrapper>
     );
 }
@@ -267,46 +196,4 @@ const PostImage = styled.img`
     border-radius: 1rem;
     margin-top: 1rem;
     border: 1px solid #d1fae5;
-`;
-
-const PostActions = styled(Box)`
-    margin-top: 0.85rem;
-    display: flex;
-    gap: 0.75rem;
-`;
-
-const ActionButton = styled.button`
-    flex: 1;
-    height: 2.7rem;
-    border: none;
-    border-radius: 0.85rem;
-    background: #f0fdf4;
-    color: #334155;
-    font-size: 0.92rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.45rem;
-    cursor: pointer;
-    transition: 0.2s ease;
-
-    &:hover {
-        background: #dcfce7;
-        color: #065f46;
-    }
-`;
-
-const CountBadge = styled.span`
-    min-width: 1.35rem;
-    height: 1.35rem;
-    padding: 0 0.35rem;
-    border-radius: 999px;
-    background: #d1fae5;
-    color: #065f46;
-    font-size: 0.75rem;
-    font-weight: 700;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
 `;
