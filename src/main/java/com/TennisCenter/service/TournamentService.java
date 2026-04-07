@@ -8,8 +8,9 @@ import com.TennisCenter.model.*;
 import com.TennisCenter.model.enums.*;
 import com.TennisCenter.repository.LocationRepository;
 import com.TennisCenter.repository.TournamentLocationRepository;
-import com.TennisCenter.repository.TournamentRegistrationRepository;
 import com.TennisCenter.repository.TournamentRepository;
+import com.TennisCenter.service.tournament.TournamentMapper;
+import com.TennisCenter.service.tournament.TournamentStatusService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,41 +22,37 @@ import java.util.List;
 public class TournamentService {
 
     private final TournamentRepository tournamentRepository;
-    private final TournamentRegistrationRepository tournamentRegistrationRepository;
     private final TournamentLocationRepository tournamentLocationRepository;
     private final LocationRepository locationRepository;
+    private final TournamentMapper tournamentMapper;
+    private final TournamentStatusService tournamentStatusService;
 
     public List<TournamentResponse> getAllTournaments(User currentUser) {
         List<Tournament> tournaments = tournamentRepository.findAllByOrderByStartDateAsc();
-
-        tournaments.forEach(this::syncTournamentStatusWithDates);
+        tournaments.forEach(tournamentStatusService::syncWithDates);
         tournamentRepository.saveAll(tournaments);
-
-        return tournaments
-                .stream()
-                .map(tournament -> mapToResponse(tournament, currentUser))
+        return tournaments.stream()
+                .map(t -> tournamentMapper.toResponse(t, currentUser))
                 .toList();
     }
 
     public TournamentResponse getTournamentById(Long id, User currentUser) {
-        Tournament tournament = tournamentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
-
-        syncTournamentStatusWithDates(tournament);
+        Tournament tournament = findTournament(id);
+        tournamentStatusService.syncWithDates(tournament);
         tournamentRepository.save(tournament);
-
-        return mapToResponse(tournament, currentUser);
+        return tournamentMapper.toResponse(tournament, currentUser);
     }
 
-    public List<TournamentResponse> getTournamentsByStatus(TournamentStatus status, User currentUser) {
-        List<Tournament> allTournaments = tournamentRepository.findAllByOrderByStartDateAsc();
+    public List<TournamentResponse> getTournamentsByStatus(
+            TournamentStatus status, User currentUser) {
 
-        allTournaments.forEach(this::syncTournamentStatusWithDates);
+        List<Tournament> allTournaments = tournamentRepository.findAllByOrderByStartDateAsc();
+        allTournaments.forEach(tournamentStatusService::syncWithDates);
         tournamentRepository.saveAll(allTournaments);
 
         return allTournaments.stream()
-                .filter(tournament -> tournament.getStatus() == status)
-                .map(tournament -> mapToResponse(tournament, currentUser))
+                .filter(t -> t.getStatus() == status)
+                .map(t -> tournamentMapper.toResponse(t, currentUser))
                 .toList();
     }
 
@@ -74,26 +71,16 @@ public class TournamentService {
                 .bracketType(TournamentBracketType.valueOf(request.getBracketType().toUpperCase()))
                 .build();
 
-        Tournament savedTournament = tournamentRepository.save(tournament);
+        Tournament saved = tournamentRepository.save(tournament);
+        attachLocations(saved, request.getLocationIds());
 
-        if (request.getLocationIds() != null) {
-            for (Long locationId : request.getLocationIds()) {
-                locationRepository.findById(locationId).ifPresent(location -> {
-                    TournamentLocation tl = TournamentLocation.builder()
-                            .tournament(savedTournament)
-                            .location(location)
-                            .build();
-                    tournamentLocationRepository.save(tl);
-                });
-            }
-        }
-
-        return mapToResponse(savedTournament, currentUser);
+        return tournamentMapper.toResponse(saved, currentUser);
     }
 
-    public TournamentResponse updateTournament(Long id, CreateTournamentRequest request, User currentUser) {
-        Tournament tournament = tournamentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
+    public TournamentResponse updateTournament(
+            Long id, CreateTournamentRequest request, User currentUser) {
+
+        Tournament tournament = findTournament(id);
 
         tournament.setName(request.getName());
         tournament.setLevel(TournamentLevel.valueOf(request.getLevel().toUpperCase()));
@@ -102,145 +89,70 @@ public class TournamentService {
         tournament.setEndDate(LocalDate.parse(request.getEndDate()));
         tournament.setMaxPlayers(request.getMaxPlayers());
         tournament.setDescription(request.getDescription());
-        tournament.setBracketType(TournamentBracketType.valueOf(request.getBracketType().toUpperCase()));
+        tournament.setBracketType(
+                TournamentBracketType.valueOf(request.getBracketType().toUpperCase()));
 
-        updateTournamentFullStatus(tournament);
+        tournamentStatusService.syncFullStatus(tournament);
 
-        Tournament updatedTournament = tournamentRepository.save(tournament);
+        Tournament updated = tournamentRepository.save(tournament);
 
         tournamentLocationRepository.deleteAll(
-                tournamentLocationRepository.findByTournamentId(tournament.getId())
-        );
+                tournamentLocationRepository.findByTournamentId(tournament.getId()));
+        attachLocations(updated, request.getLocationIds());
 
-        if (request.getLocationIds() != null) {
-            for (Long locationId : request.getLocationIds()) {
-                locationRepository.findById(locationId).ifPresent(location -> {
-                    TournamentLocation tl = TournamentLocation.builder()
-                            .tournament(tournament)
-                            .location(location)
-                            .build();
-                    tournamentLocationRepository.save(tl);
-                });
-            }
-        }
-
-        return mapToResponse(updatedTournament, currentUser);
+        return tournamentMapper.toResponse(updated, currentUser);
     }
 
     public void deleteTournament(Long id) {
-        Tournament tournament = tournamentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
-
+        Tournament tournament = findTournament(id);
         tournamentRepository.delete(tournament);
     }
 
-    public Tournament getTournamentEntityById(Long id) {
-        return tournamentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
-    }
-
-    public void updateTournamentFullStatus(Tournament tournament) {
-        long currentPlayers = tournamentRegistrationRepository.countByTournamentId(tournament.getId());
-        tournament.setFull(currentPlayers >= tournament.getMaxPlayers());
-    }
-
     public TournamentResponse startTournament(Long id, User currentUser) {
-        Tournament tournament = tournamentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
+        Tournament tournament = findTournament(id);
 
         if (tournament.getStatus() != TournamentStatus.UPCOMING) {
             throw new ValidationException("Only upcoming tournaments can be started");
         }
 
         tournament.setStatus(TournamentStatus.ONGOING);
-
-        Tournament updatedTournament = tournamentRepository.save(tournament);
-        return mapToResponse(updatedTournament, currentUser);
+        return tournamentMapper.toResponse(tournamentRepository.save(tournament), currentUser);
     }
 
     public TournamentResponse finishTournament(Long id, User currentUser) {
-        Tournament tournament = tournamentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
+        Tournament tournament = findTournament(id);
 
         if (tournament.getStatus() != TournamentStatus.ONGOING) {
             throw new ValidationException("Only ongoing tournaments can be finished");
         }
 
         tournament.setStatus(TournamentStatus.FINISHED);
-
-        Tournament updatedTournament = tournamentRepository.save(tournament);
-        return mapToResponse(updatedTournament, currentUser);
+        return tournamentMapper.toResponse(tournamentRepository.save(tournament), currentUser);
     }
 
-    public TournamentResponse mapToResponse(Tournament tournament, User currentUser) {
-        int currentPlayers = (int) tournamentRegistrationRepository.countByTournamentId(tournament.getId());
-
-        boolean registeredByCurrentUser = currentUser != null &&
-                tournamentRegistrationRepository.existsByPlayerIdAndTournamentId(currentUser.getId(), tournament.getId());
-
-        boolean currentUserAdmin = currentUser != null && currentUser.getRole() == Role.ADMIN;
-
-        boolean registrationAllowedByLevel = false;
-
-        if (currentUser != null
-                && currentUser.getRole() == Role.PLAYER
-                && currentUser.getPlayerLevel() != null) {
-            registrationAllowedByLevel = currentUser.getPlayerLevel().ordinal() <= tournament.getLevel().ordinal();
-        }
-
-        boolean registrationOpen =
-                tournament.getStatus() == TournamentStatus.UPCOMING
-                        && !tournament.isFull()
-                        && !currentUserAdmin
-                        && registrationAllowedByLevel;
-
-        return TournamentResponse.builder()
-                .id(tournament.getId())
-                .name(tournament.getName())
-                .level(tournament.getLevel().getDisplayName())
-                .status(tournament.getStatus().getDisplayName())
-                .surface(tournament.getSurface().getDisplayName())
-                .startDate(tournament.getStartDate().toString())
-                .endDate(tournament.getEndDate().toString())
-                .maxPlayers(tournament.getMaxPlayers())
-                .currentPlayers(currentPlayers)
-                .description(tournament.getDescription())
-                .isFull(tournament.isFull())
-                .registeredByCurrentUser(registeredByCurrentUser)
-                .registrationOpen(registrationOpen)
-                .registrationAllowedByLevel(registrationAllowedByLevel)
-                .currentUserAdmin(currentUserAdmin)
-                .bracketType(tournament.getBracketType().getDisplayName())
-                .locationIds(
-                        tournamentLocationRepository.findByTournamentId(tournament.getId())
-                                .stream()
-                                .map(tl -> tl.getLocation().getId())
-                                .toList()
-                )
-                .locationNames(
-                        tournamentLocationRepository.findByTournamentId(tournament.getId())
-                                .stream()
-                                .map(tl -> tl.getLocation().getName())
-                                .toList()
-                )
-                .build();
+    public Tournament getTournamentEntityById(Long id) {
+        return findTournament(id);
     }
 
-    private void syncTournamentStatusWithDates(Tournament tournament) {
-        LocalDate today = LocalDate.now();
+    // -------------------------------------------------------------------------
+    // Private helpers
+    // -------------------------------------------------------------------------
 
-        if (tournament.getStatus() == TournamentStatus.FINISHED) {
-            return;
-        }
+    private Tournament findTournament(Long id) {
+        return tournamentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tournament not found"));
+    }
 
-        if (today.isAfter(tournament.getEndDate())) {
-            tournament.setStatus(TournamentStatus.FINISHED);
-        } else if (
-                (today.isEqual(tournament.getStartDate()) || today.isAfter(tournament.getStartDate()))
-                    && today.isBefore(tournament.getEndDate().plusDays(1))
-                    && tournament.getStatus() == TournamentStatus.UPCOMING
-        ) {
-            tournament.setStatus(TournamentStatus.ONGOING);
+    private void attachLocations(Tournament tournament, List<Long> locationIds) {
+        if (locationIds == null) return;
+        for (Long locationId : locationIds) {
+            locationRepository.findById(locationId).ifPresent(location -> {
+                TournamentLocation tl = TournamentLocation.builder()
+                        .tournament(tournament)
+                        .location(location)
+                        .build();
+                tournamentLocationRepository.save(tl);
+            });
         }
     }
 }
