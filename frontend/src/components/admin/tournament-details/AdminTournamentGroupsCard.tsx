@@ -44,8 +44,43 @@ function AdminTournamentGroupsCard({
     const groupMatches = matches.filter(m => m.phase === "GROUP_STAGE");
     const allGroupMatchesDone = groupMatches.length > 0 && groupMatches.every(m => m.status === "COMPLETED");
     const isRoundRobin = tournament?.bracketType === "Round Robin + Knockout";
-    const showKnockoutTab = isRoundRobin;
+    const isSingleElimination = tournament?.bracketType === "Single Elimination";
 
+    // Single elimination: skip groups UI entirely
+    if (isSingleElimination) {
+        return (
+            <SectionCard>
+                <SectionTitle>Knockout bracket</SectionTitle>
+                {knockoutMatches.length > 0 ? (
+                    <KnockoutBracketCard
+                        matches={matches}
+                        readOnly={readOnly}
+                        onUpdateScore={onUpdateScore}
+                        onScheduleMatch={onScheduleMatch}
+                        embedded
+                    />
+                ) : (
+                    <>
+                        <SectionText>
+                            Generate the bracket to set up the draw for this tournament.
+                        </SectionText>
+                        {!readOnly && (
+                            <ActionRow>
+                                <GenerateBracketButton onClick={onGenerateBracket}>
+                                    Generate bracket
+                                </GenerateBracketButton>
+                            </ActionRow>
+                        )}
+                        {readOnly && (
+                            <SectionText>The bracket has not been generated yet.</SectionText>
+                        )}
+                    </>
+                )}
+            </SectionCard>
+        );
+    }
+
+    // Round robin: show generate button if not generated yet
     if (!hasGeneratedBracket) {
         if (readOnly) {
             return (
@@ -66,9 +101,10 @@ function AdminTournamentGroupsCard({
         );
     }
 
+    // Round robin with bracket generated: show tabs
     return (
         <SectionCard>
-            {showKnockoutTab && (
+            {isRoundRobin && (
                 <TabsRow>
                     <TabButton $active={activeTab === "groups"} onClick={() => setActiveTab("groups")}>
                         Group stage
@@ -225,25 +261,25 @@ function AdminTournamentGroupsCard({
 export default AdminTournamentGroupsCard;
 
 const SectionCard = styled(Box)`
-  grid-column: 1 / -1;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 1.2rem;
-  padding: 1.3rem;
-  box-shadow: 0 0.45rem 1.2rem rgba(15, 23, 42, 0.03);
+    grid-column: 1 / -1;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 1.2rem;
+    padding: 1.3rem;
+    box-shadow: 0 0.45rem 1.2rem rgba(15, 23, 42, 0.03);
 `;
 
 const TabsRow = styled(Box)`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.25rem;
-  background: #ecfdf5;
-  border-radius: 0.65rem;
-  padding: 0.25rem;
-  margin-bottom: 1.25rem;
-  max-width: 22rem;
-  margin-left: auto;
-  margin-right: auto;  
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.25rem;
+    background: #ecfdf5;
+    border-radius: 0.65rem;
+    padding: 0.25rem;
+    margin-bottom: 1.25rem;
+    max-width: 22rem;
+    margin-left: auto;
+    margin-right: auto;
 `;
 
 const TabButton = styled.button<{ $active: boolean }>`
@@ -303,7 +339,6 @@ const ScrollableGroupsRow = styled(Box)`
 const GroupColumn = styled(Box)`
     min-width: 28rem;
     max-width: 28rem;
-    height: 100%;
     flex: 0 0 28rem;
     border: 1px solid #e5e7eb;
     border-radius: 1rem;

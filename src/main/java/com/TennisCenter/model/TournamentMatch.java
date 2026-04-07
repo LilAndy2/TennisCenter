@@ -67,4 +67,10 @@ public class TournamentMatch {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "court_id")
     private Court court;
+
+    @Column(name = "player_one_seed")
+    private Integer playerOneSeed;
+
+    @Column(name = "player_two_seed")
+    private Integer playerTwoSeed;
 }

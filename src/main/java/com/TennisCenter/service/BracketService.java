@@ -137,40 +137,70 @@ public class BracketService {
     private void generateSingleEliminationFirstRound(Tournament tournament, List<User> participants) {
         int bracketSize = nextPowerOfTwo(participants.size());
         int totalRounds = (int) (Math.log(bracketSize) / Math.log(2));
+        int numSeeds = bracketSize / 4;
 
-        // Pad with nulls for BYEs
-        List<User> seeded = new ArrayList<>(participants);
-        while (seeded.size() < bracketSize) {
-            seeded.add(null);
+        // Build slot array using seeded positions + random for the rest
+        int[] finalSlots = buildBracketSlots(bracketSize, participants.size(), numSeeds);
+
+        // Map slot positions to players (null = BYE)
+        User[] slots = new User[bracketSize];
+        for (int i = 0; i < bracketSize; i++) {
+            int participantIndex = finalSlots[i];
+            slots[i] = (participantIndex >= 0 && participantIndex < participants.size())
+                    ? participants.get(participantIndex)
+                    : null;
         }
 
-        // Generate Round 1
+        // Save all round 1 matches
+        List<TournamentMatch> round1Matches = new ArrayList<>();
         int matchOrder = 1;
-        for (int i = 0; i < bracketSize / 2; i++) {
-            User playerOne = seeded.get(i);
-            User playerTwo = seeded.get(bracketSize - 1 - i);
-            boolean isBye = playerTwo == null;
+        for (int i = 0; i < bracketSize; i += 2) {
+            User playerOne = slots[i];
+            User playerTwo = slots[i + 1];
+
+            Integer seedOne = null;
+            if (playerOne != null) {
+                int idx = participants.indexOf(playerOne);
+                if (idx >= 0 && idx < numSeeds) seedOne = idx + 1;
+            }
+            Integer seedTwo = null;
+            if (playerTwo != null) {
+                int idx = participants.indexOf(playerTwo);
+                if (idx >= 0 && idx < numSeeds) seedTwo = idx + 1;
+            }
+
+            User winner = null;
+            TournamentMatchStatus status = TournamentMatchStatus.SCHEDULED;
+            if (playerOne == null && playerTwo != null) {
+                winner = playerTwo;
+                status = TournamentMatchStatus.COMPLETED;
+            } else if (playerTwo == null && playerOne != null) {
+                winner = playerOne;
+                status = TournamentMatchStatus.COMPLETED;
+            }
 
             TournamentMatch match = TournamentMatch.builder()
                     .tournament(tournament)
                     .playerOne(playerOne)
                     .playerTwo(playerTwo)
-                    .winner(isBye ? playerOne : null)
+                    .playerOneSeed(seedOne)
+                    .playerTwoSeed(seedTwo)
+                    .winner(winner)
                     .phase(TournamentMatchPhase.KNOCKOUT)
-                    .status(isBye ? TournamentMatchStatus.COMPLETED : TournamentMatchStatus.SCHEDULED)
+                    .status(status)
                     .roundNumber(1)
                     .matchOrder(matchOrder++)
                     .matchDate(tournament.getStartDate())
                     .build();
 
-            tournamentMatchRepository.save(match);
+            round1Matches.add(tournamentMatchRepository.save(match));
         }
 
-        // Generate empty placeholder matches for all subsequent rounds
+        // Create placeholder matches for subsequent rounds
         for (int round = 2; round <= totalRounds; round++) {
             int matchesInRound = bracketSize / (int) Math.pow(2, round);
             for (int i = 1; i <= matchesInRound; i++) {
-                TournamentMatch placeholder = TournamentMatch.builder()
+                tournamentMatchRepository.save(TournamentMatch.builder()
                         .tournament(tournament)
                         .playerOne(null)
                         .playerTwo(null)
@@ -180,11 +210,146 @@ public class BracketService {
                         .roundNumber(round)
                         .matchOrder(i)
                         .matchDate(tournament.getStartDate())
-                        .build();
-
-                tournamentMatchRepository.save(placeholder);
+                        .build());
             }
         }
+
+        // Pre-place BYE winners into round 2 slots
+        if (totalRounds >= 2) {
+            List<TournamentMatch> round2Matches = tournamentMatchRepository
+                    .findByTournamentIdOrderByPhaseAscRoundNumberAscMatchOrderAsc(tournament.getId())
+                    .stream()
+                    .filter(m -> m.getPhase() == TournamentMatchPhase.KNOCKOUT && m.getRoundNumber() == 2)
+                    .sorted(Comparator.comparingInt(m -> m.getMatchOrder() == null ? 0 : m.getMatchOrder()))
+                    .toList();
+
+            for (TournamentMatch r1Match : round1Matches) {
+                if (r1Match.getWinner() == null) continue;
+                int r1Order = r1Match.getMatchOrder() == null ? 1 : r1Match.getMatchOrder();
+                int nextMatchIndex = (r1Order - 1) / 2;
+                if (nextMatchIndex >= round2Matches.size()) continue;
+                TournamentMatch nextMatch = round2Matches.get(nextMatchIndex);
+                if (r1Order % 2 == 1) {
+                    nextMatch.setPlayerOne(r1Match.getWinner());
+                } else {
+                    nextMatch.setPlayerTwo(r1Match.getWinner());
+                }
+                tournamentMatchRepository.save(nextMatch);
+            }
+        }
+    }
+
+    private int[] buildBracketSlots(int bracketSize, int numParticipants, int numSeeds) {
+        int numByes = bracketSize - numParticipants;
+
+        int[] seededPositions = buildSeededPositions(bracketSize, numSeeds);
+
+        int[] finalSlots = new int[bracketSize];
+        Arrays.fill(finalSlots, -1);
+
+        // Place seeds in their fixed positions
+        for (int i = 0; i < numSeeds; i++) {
+            finalSlots[seededPositions[i]] = i;
+        }
+
+        // Place BYEs — first against top seeds (up to min(numByes, numSeeds)),
+        // remaining BYEs go into random free slots
+        int byesPlacedAgainstSeeds = Math.min(numByes, numSeeds);
+        Set<Integer> takenSlots = new HashSet<>();
+        for (int i = 0; i < numSeeds; i++) {
+            takenSlots.add(seededPositions[i]);
+        }
+
+        // Place BYEs opposite the top seeds first
+        for (int i = 0; i < byesPlacedAgainstSeeds; i++) {
+            int seedSlot = seededPositions[i];
+            int pairedSlot = (seedSlot % 2 == 0) ? seedSlot + 1 : seedSlot - 1;
+            finalSlots[pairedSlot] = bracketSize; // BYE sentinel
+            takenSlots.add(pairedSlot);
+        }
+
+        // Collect remaining free slots
+        List<Integer> freeSlots = new ArrayList<>();
+        for (int i = 0; i < bracketSize; i++) {
+            if (finalSlots[i] == -1) freeSlots.add(i);
+        }
+        Collections.shuffle(freeSlots);
+
+        // Remaining BYEs go into random free slots (paired, so we pick pairs)
+        int remainingByes = numByes - byesPlacedAgainstSeeds;
+        List<Integer> freeSlotsForByes = new ArrayList<>();
+        // Pick slots in pairs so a BYE doesn't end up vs another BYE
+        // Group free slots into pairs by match
+        Map<Integer, List<Integer>> matchPairs = new LinkedHashMap<>();
+        for (int slot : freeSlots) {
+            int matchIndex = slot / 2;
+            matchPairs.computeIfAbsent(matchIndex, k -> new ArrayList<>()).add(slot);
+        }
+        // Only pick from pairs that have 2 free slots (both players TBD)
+        List<Integer> availableMatchIndices = matchPairs.entrySet().stream()
+                .filter(e -> e.getValue().size() == 2)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+        Collections.shuffle(availableMatchIndices);
+
+        for (int i = 0; i < remainingByes && i < availableMatchIndices.size(); i++) {
+            List<Integer> pair = matchPairs.get(availableMatchIndices.get(i));
+            // Pick one slot in the pair for the BYE, the other gets an unseeded player
+            int byeSlot = pair.get(0);
+            finalSlots[byeSlot] = bracketSize; // BYE sentinel
+            freeSlots.remove(Integer.valueOf(byeSlot));
+        }
+
+        // Refresh free slots after BYE placement
+        List<Integer> remainingFreeSlots = new ArrayList<>();
+        for (int i = 0; i < bracketSize; i++) {
+            if (finalSlots[i] == -1) remainingFreeSlots.add(i);
+        }
+        Collections.shuffle(remainingFreeSlots);
+
+        // Place unseeded players into remaining free slots
+        List<Integer> unseeded = new ArrayList<>();
+        for (int i = numSeeds; i < numParticipants; i++) unseeded.add(i);
+        Collections.shuffle(unseeded);
+
+        for (int i = 0; i < unseeded.size() && i < remainingFreeSlots.size(); i++) {
+            finalSlots[remainingFreeSlots.get(i)] = unseeded.get(i);
+        }
+
+        return finalSlots;
+    }
+
+    // Returns the fixed slot positions for the top N seeds
+    // Seed 1 → slot 0 (top), Seed 2 → slot size-1 (bottom)
+    // Seed 3 → top of bottom half, Seed 4 → bottom of top half
+    // Seeds 5-8 → quarter positions
+    private int[] buildSeededPositions(int size, int numSeeds) {
+        // All seed positions must be EVEN so their paired opponent slot is pos+1
+        int[] positions = new int[numSeeds];
+        if (numSeeds == 0) return positions;
+
+        positions[0] = 0;                    // Seed 1: slot 0 (top)
+        if (numSeeds == 1) return positions;
+
+        positions[1] = size - 2;            // Seed 2: slot size-2 (bottom pair, even)
+        if (numSeeds == 2) return positions;
+
+        if (numSeeds >= 4) {
+            positions[2] = size / 2;        // Seed 3: top of bottom half (even)
+            positions[3] = size / 2 - 2;    // Seed 4: bottom of top half (even)
+        } else {
+            positions[2] = Math.random() < 0.5 ? size / 2 : size / 2 - 2;
+        }
+        if (numSeeds == 4) return positions;
+
+        if (numSeeds >= 8) {
+            positions[4] = size / 4;        // Seed 5
+            positions[5] = size * 3 / 4;   // Seed 6
+            positions[6] = size / 4 - 2;   // Seed 7
+            positions[7] = size * 3 / 4 - 2; // Seed 8
+        }
+
+        return positions;
     }
 
     private void generateRoundRobinGroups(Tournament tournament, List<User> participants) {

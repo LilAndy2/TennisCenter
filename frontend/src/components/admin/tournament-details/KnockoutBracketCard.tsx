@@ -55,7 +55,14 @@ function KnockoutBracketCard({
                                 <MatchWrapper key={match.id}>
                                     <MatchCard $completed={match.status === "COMPLETED"}>
                                         <PlayerRow $winner={match.winnerId === match.playerOneId && match.winnerId != null}>
-                                            <PlayerName>{match.playerOneName ?? "TBD"}</PlayerName>
+                                            <PlayerInfo>
+                                                <PlayerName $isBye={false}>
+                                                    {match.playerOneName ?? "TBD"}
+                                                </PlayerName>
+                                                {match.playerOneSeed != null && (
+                                                    <SeedBadge>({match.playerOneSeed})</SeedBadge>
+                                                )}
+                                            </PlayerInfo>
                                             {match.sets.length > 0 && (
                                                 <ScoreChips>
                                                     {match.sets.map(s => (
@@ -73,7 +80,14 @@ function KnockoutBracketCard({
                                         </PlayerRow>
                                         <Divider />
                                         <PlayerRow $winner={match.winnerId === match.playerTwoId && match.winnerId != null}>
-                                            <PlayerName>{match.playerTwoName ?? "TBD"}</PlayerName>
+                                            <PlayerInfo>
+                                                <PlayerName $isBye={match.playerTwoName === null && match.roundNumber === 1}>
+                                                    {match.playerTwoName ?? (match.roundNumber === 1 ? "BYE" : "TBD")}
+                                                </PlayerName>
+                                                {match.playerTwoSeed != null && (
+                                                    <SeedBadge>({match.playerTwoSeed})</SeedBadge>
+                                                )}
+                                            </PlayerInfo>
                                             {match.sets.length > 0 && (
                                                 <ScoreChips>
                                                     {match.sets.map(s => (
@@ -224,10 +238,11 @@ const PlayerRow = styled(Box)<{ $winner: boolean }>`
     background: ${({ $winner }) => ($winner ? "#dcfce7" : "transparent")};
 `;
 
-const PlayerName = styled(Typography)`
+const PlayerName = styled(Typography)<{ $isBye?: boolean }>`
     font-size: 0.95rem !important;
-    font-weight: 600 !important;
-    color: #111827;
+    font-weight: ${({ $isBye }) => ($isBye ? "400" : "600")} !important;
+    color: ${({ $isBye }) => ($isBye ? "#94a3b8" : "#111827")};
+    font-style: ${({ $isBye }) => ($isBye ? "italic" : "normal")};
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -309,4 +324,20 @@ const ScheduleInfo = styled(Typography)`
     font-size: 0.72rem !important;
     color: #64748b;
     padding: 0 0.7rem 0.5rem !important;
+`;
+
+const PlayerInfo = styled(Box)`
+    display: flex;
+    align-items: baseline;
+    gap: 0.3rem;
+    overflow: hidden;
+    min-width: 0;
+`;
+
+const SeedBadge = styled.span`
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #94a3b8;
+    flex-shrink: 0;
+    line-height: 1;
 `;

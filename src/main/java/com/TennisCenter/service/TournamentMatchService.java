@@ -183,6 +183,8 @@ public class TournamentMatchService {
                 .courtNumber(match.getCourt() != null ? match.getCourt().getCourtNumber() : null)
                 .locationName(match.getCourt() != null
                         ? match.getCourt().getLocation().getName() : null)
+                .playerOneSeed(match.getPlayerOneSeed())
+                .playerTwoSeed(match.getPlayerTwoSeed())
                 .build();
     }
 

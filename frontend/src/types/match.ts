@@ -27,6 +27,8 @@ export type TournamentMatch = {
     courtId?: number | null;
     courtNumber?: number | null;
     locationName?: string | null;
+    playerOneSeed?: number | null;
+    playerTwoSeed?: number | null;
 };
 
 export type GroupStandingPlayer = {

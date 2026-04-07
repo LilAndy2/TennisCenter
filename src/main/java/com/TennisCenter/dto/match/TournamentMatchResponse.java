@@ -34,4 +34,7 @@ public class TournamentMatchResponse {
     private Long courtId;
     private Integer courtNumber;
     private String locationName;
+
+    private Integer playerOneSeed;
+    private Integer playerTwoSeed;
 }
