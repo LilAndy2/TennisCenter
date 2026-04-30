@@ -40,9 +40,7 @@ const StyledMotionDiv = styled(motion.div)`
     border-radius: ${radius.xl};
     cursor: ${({ onClick }) => (onClick ? "pointer" : "default")};
     will-change: transform, opacity;
-
-    /* Glow border on hover — uses a pseudo-element so
-       the glow doesn't affect layout or reflow */
+    
     position: relative;
 
     &::after {
