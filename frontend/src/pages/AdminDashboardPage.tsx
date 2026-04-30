@@ -5,6 +5,7 @@ import CreateTournamentModal from "../components/admin/CreateTournamentModal";
 import LocationCard from "../components/admin/LocationCard";
 import LocationModal from "../components/admin/LocationModal";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
+import {AnimatedCard, AnimatedPage} from "../components/animated";
 import TournamentCard from "../components/tournaments/TournamentCard";
 import {
     PageWrapper as BasePageWrapper,
@@ -44,93 +45,99 @@ function AdminDashboardPage() {
     } = useAdminDashboard();
 
     return (
-        <AuthenticatedLayout>
-            <PageWrapper>
-                <TopRow>
-                    <PageTitle>Admin dashboard</PageTitle>
-                    <ButtonsRow>
-                        <CreateButton onClick={openCreateLocation}>
-                            <Add sx={{ fontSize: 20 }} />
-                            <span>Add location</span>
-                        </CreateButton>
-                        <CreateButton onClick={() => setIsCreateModalOpen(true)}>
-                            <Add sx={{ fontSize: 20 }} />
-                            <span>Create tournament</span>
-                        </CreateButton>
-                    </ButtonsRow>
-                </TopRow>
+        <AnimatedPage>
+            <AuthenticatedLayout>
+                <PageWrapper>
+                    <TopRow>
+                        <PageTitle>Admin dashboard</PageTitle>
+                        <ButtonsRow>
+                            <CreateButton onClick={openCreateLocation}>
+                                <Add sx={{ fontSize: 20 }} />
+                                <span>Add location</span>
+                            </CreateButton>
+                            <CreateButton onClick={() => setIsCreateModalOpen(true)}>
+                                <Add sx={{ fontSize: 20 }} />
+                                <span>Create tournament</span>
+                            </CreateButton>
+                        </ButtonsRow>
+                    </TopRow>
 
-                {loading ? (
-                    <LoadingWrapper><CircularProgress /></LoadingWrapper>
-                ) : (
-                    <SectionsWrapper>
-                        <SectionBlock>
-                            <SectionTitle>Ongoing tournaments</SectionTitle>
-                            {ongoingTournaments.length === 0 ? (
-                                <EmptyText>No ongoing tournaments.</EmptyText>
-                            ) : (
-                                <HorizontalCardsRow>
-                                    {ongoingTournaments.map(t => (
-                                        <HorizontalCardItem key={t.id}>
-                                            <TournamentCard tournament={t} detailsPath={`/admin/tournaments/${t.id}`} />
-                                        </HorizontalCardItem>
-                                    ))}
-                                </HorizontalCardsRow>
-                            )}
-                        </SectionBlock>
+                    {loading ? (
+                        <LoadingWrapper><CircularProgress /></LoadingWrapper>
+                    ) : (
+                        <SectionsWrapper>
+                            <SectionBlock>
+                                <SectionTitle>Ongoing tournaments</SectionTitle>
+                                {ongoingTournaments.length === 0 ? (
+                                    <EmptyText>No ongoing tournaments.</EmptyText>
+                                ) : (
+                                    <HorizontalCardsRow>
+                                        {ongoingTournaments.map((t, index) => (
+                                            <HorizontalCardItem key={t.id}>
+                                                <AnimatedCard index={index}>
+                                                    <TournamentCard tournament={t} detailsPath={`/admin/tournaments/${t.id}`} />
+                                                </AnimatedCard>
+                                            </HorizontalCardItem>
+                                        ))}
+                                    </HorizontalCardsRow>
+                                )}
+                            </SectionBlock>
 
-                        <SectionBlock>
-                            <SectionTitle>Upcoming tournaments</SectionTitle>
-                            {upcomingTournaments.length === 0 ? (
-                                <EmptyText>No upcoming tournaments.</EmptyText>
-                            ) : (
-                                <HorizontalCardsRow>
-                                    {upcomingTournaments.map(t => (
-                                        <HorizontalCardItem key={t.id}>
-                                            <TournamentCard tournament={t} detailsPath={`/admin/tournaments/${t.id}`} />
-                                        </HorizontalCardItem>
-                                    ))}
-                                </HorizontalCardsRow>
-                            )}
-                        </SectionBlock>
+                            <SectionBlock>
+                                <SectionTitle>Upcoming tournaments</SectionTitle>
+                                {upcomingTournaments.length === 0 ? (
+                                    <EmptyText>No upcoming tournaments.</EmptyText>
+                                ) : (
+                                    <HorizontalCardsRow>
+                                        {upcomingTournaments.map((t, index) => (
+                                            <HorizontalCardItem key={t.id}>
+                                                <AnimatedCard index={index}>
+                                                    <TournamentCard tournament={t} detailsPath={`/admin/tournaments/${t.id}`} />
+                                                </AnimatedCard>
+                                            </HorizontalCardItem>
+                                        ))}
+                                    </HorizontalCardsRow>
+                                )}
+                            </SectionBlock>
 
-                        <SectionBlock>
-                            <SectionTitle>Locations</SectionTitle>
-                            {locations.length === 0 ? (
-                                <EmptyText>No locations added yet.</EmptyText>
-                            ) : (
-                                <LocationsGrid>
-                                    {locations.map(loc => (
-                                        <LocationCard
-                                            key={loc.id}
-                                            location={loc}
-                                            onEdit={openEditLocation}
-                                            onDelete={handleDeleteLocation}
-                                        />
-                                    ))}
-                                </LocationsGrid>
-                            )}
-                        </SectionBlock>
-                    </SectionsWrapper>
-                )}
-            </PageWrapper>
+                            <SectionBlock>
+                                <SectionTitle>Locations</SectionTitle>
+                                {locations.length === 0 ? (
+                                    <EmptyText>No locations added yet.</EmptyText>
+                                ) : (
+                                    <LocationsGrid>
+                                        {locations.map(loc => (
+                                            <LocationCard
+                                                key={loc.id}
+                                                location={loc}
+                                                onEdit={openEditLocation}
+                                                onDelete={handleDeleteLocation}
+                                            />
+                                        ))}
+                                    </LocationsGrid>
+                                )}
+                            </SectionBlock>
+                        </SectionsWrapper>
+                    )}
+                </PageWrapper>
 
-            <CreateTournamentModal
-                open={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-                onSubmit={handleCreateTournament}
-                locations={locations}
-            />
+                <CreateTournamentModal
+                    open={isCreateModalOpen}
+                    onClose={() => setIsCreateModalOpen(false)}
+                    onSubmit={handleCreateTournament}
+                    locations={locations}
+                />
 
-            <LocationModal
-                open={isLocationModalOpen}
-                editingLocation={editingLocation}
-                locationForm={locationForm}
-                onClose={closeLocationModal}
-                onSave={handleSaveLocation}
-                onChange={setLocationForm}
-            />
-        </AuthenticatedLayout>
+                <LocationModal
+                    open={isLocationModalOpen}
+                    editingLocation={editingLocation}
+                    locationForm={locationForm}
+                    onClose={closeLocationModal}
+                    onSave={handleSaveLocation}
+                    onChange={setLocationForm}
+                />
+            </AuthenticatedLayout>
+        </AnimatedPage>
     );
 }
 

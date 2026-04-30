@@ -11,6 +11,7 @@ import {
     transition,
     breakpoints,
 } from "../../styles/theme";
+import { GlassCard } from "../animated";
 
 type FeedHeroProps = {
     onCreatePost: () => void;
@@ -44,17 +45,16 @@ function FeedHero({ onCreatePost }: FeedHeroProps) {
 
 export default FeedHero;
 
-const HeroWrapper = styled(Box)`
-    width: 100%;
+const HeroWrapper = styled(GlassCard)`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: ${spacing.md};
-    padding: ${spacing.lg};
-    background: ${colors.surface};
-    border: 1px solid ${colors.borderGreenLight};
-    border-radius: ${radius.xl};
-    box-shadow: ${shadow.sm};
+    // gap: ${spacing.md};
+    // padding: ${spacing.lg};
+    // background: ${colors.surface};
+    // border: 1px solid ${colors.borderGreenLight};
+    // border-radius: ${radius.xl};
+    // box-shadow: ${shadow.sm};
 
     @media (max-width: ${breakpoints.md}) {
         flex-direction: column;

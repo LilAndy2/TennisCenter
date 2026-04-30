@@ -4,6 +4,8 @@ import styled from "styled-components";
 import axiosInstance from "../api/axiosInstance";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 import TournamentCard from "../components/tournaments/TournamentCard";
+import { AnimatedPage } from "../components/animated";
+import { AnimatedCard } from "../components/animated";
 import {
     PageWrapper as BasePageWrapper,
     PageHeader,
@@ -53,44 +55,48 @@ function TournamentsPage() {
     }, [selectedFilter, tournaments]);
 
     return (
-        <AuthenticatedLayout>
-            <PageWrapper>
-                <PageHeader>
-                    <PageTitle>Tournaments</PageTitle>
-                    <PageSubtitle>
-                        Explore available tournaments by level and filter them by current status.
-                    </PageSubtitle>
-                </PageHeader>
+        <AnimatedPage>
+            <AuthenticatedLayout>
+                <PageWrapper>
+                    <PageHeader>
+                        <PageTitle>Tournaments</PageTitle>
+                        <PageSubtitle>
+                            Explore available tournaments by level and filter them by current status.
+                        </PageSubtitle>
+                    </PageHeader>
 
-                <FiltersRow>
-                    {filterOptions.map((option) => (
-                        <FilterButton
-                            key={option}
-                            $active={selectedFilter === option}
-                            onClick={() => setSelectedFilter(option)}
-                        >
-                            {option}
-                        </FilterButton>
-                    ))}
-                </FiltersRow>
-
-                {loading ? (
-                    <LoadingWrapper>
-                        <CircularProgress />
-                    </LoadingWrapper>
-                ) : filteredTournaments.length === 0 ? (
-                    <EmptyText>
-                        No {selectedFilter.toLowerCase()} tournaments found.
-                    </EmptyText>
-                ) : (
-                    <CardsGrid>
-                        {filteredTournaments.map((tournament) => (
-                            <TournamentCard key={tournament.id} tournament={tournament} />
+                    <FiltersRow>
+                        {filterOptions.map((option) => (
+                            <FilterButton
+                                key={option}
+                                $active={selectedFilter === option}
+                                onClick={() => setSelectedFilter(option)}
+                            >
+                                {option}
+                            </FilterButton>
                         ))}
-                    </CardsGrid>
-                )}
-            </PageWrapper>
-        </AuthenticatedLayout>
+                    </FiltersRow>
+
+                    {loading ? (
+                        <LoadingWrapper>
+                            <CircularProgress />
+                        </LoadingWrapper>
+                    ) : filteredTournaments.length === 0 ? (
+                        <EmptyText>
+                            No {selectedFilter.toLowerCase()} tournaments found.
+                        </EmptyText>
+                    ) : (
+                        <CardsGrid>
+                            {filteredTournaments.map((tournament, index) => (
+                                <AnimatedCard key={tournament.id} index={index}>
+                                    <TournamentCard tournament={tournament} />
+                                </AnimatedCard>
+                            ))}
+                        </CardsGrid>
+                    )}
+                </PageWrapper>
+            </AuthenticatedLayout>
+        </AnimatedPage>
     );
 }
 

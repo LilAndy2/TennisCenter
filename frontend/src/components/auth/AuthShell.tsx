@@ -27,6 +27,7 @@ import {
 import AuthAnimatedHeroContent from "./AuthAnimatedHeroContent";
 import AuthAnimatedFormCard from "./AuthAnimatedFormCard";
 import { useNavigate } from "react-router-dom";
+import { AnimatedBackground } from "../animated";
 
 type AuthShellProps = {
     heroTitle: ReactNode;
@@ -62,6 +63,8 @@ function AuthShell({
 
             <AuthContent>
                 <HeroSection backgroundimage={tennisAuthImage}>
+                    <AnimatedBackground />
+
                     <AnimatePresence mode="wait">
                         <AuthAnimatedHeroContent key={isLogin ? "login-hero" : "register-hero"}>
                             <HeroContent>

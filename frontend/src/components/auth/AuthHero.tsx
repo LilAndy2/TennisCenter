@@ -26,6 +26,8 @@ export const HeroContent = styled(Box)`
     max-width: 34rem;
     text-align: center;
     color: white;
+    position: relative;
+    z-index: 2;
 `;
 
 export const HeroIconContainer = styled(Box)`

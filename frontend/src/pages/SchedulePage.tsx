@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import axiosInstance from "../api/axiosInstance";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
+import { AnimatedPage } from "../components/animated";
 import {
     NarrowPageWrapper,
     PageTitle,
@@ -64,48 +65,50 @@ function SchedulePage() {
     const sortedDates = Object.keys(grouped).sort();
 
     return (
-        <AuthenticatedLayout>
-            <NarrowPageWrapper>
-                <PageTitle>Schedule</PageTitle>
-                <PageSubtitle>All scheduled matches across ongoing tournaments.</PageSubtitle>
+        <AnimatedPage>
+            <AuthenticatedLayout>
+                <NarrowPageWrapper>
+                    <PageTitle>Schedule</PageTitle>
+                    <PageSubtitle>All scheduled matches across ongoing tournaments.</PageSubtitle>
 
-                {loading ? (
-                    <LoadingWrapper>
-                        <CircularProgress />
-                    </LoadingWrapper>
-                ) : sortedDates.length === 0 ? (
-                    <EmptyText>No scheduled matches found.</EmptyText>
-                ) : (
-                    <ScheduleList>
-                        {sortedDates.map((date) => (
-                            <DateBlock key={date}>
-                                <DateHeader>
-                                    {new Date(date).toLocaleDateString("en-GB", {
-                                        weekday: "long",
-                                        day: "2-digit",
-                                        month: "long",
-                                        year: "numeric",
-                                    })}
-                                </DateHeader>
+                    {loading ? (
+                        <LoadingWrapper>
+                            <CircularProgress />
+                        </LoadingWrapper>
+                    ) : sortedDates.length === 0 ? (
+                        <EmptyText>No scheduled matches found.</EmptyText>
+                    ) : (
+                        <ScheduleList>
+                            {sortedDates.map((date) => (
+                                <DateBlock key={date}>
+                                    <DateHeader>
+                                        {new Date(date).toLocaleDateString("en-GB", {
+                                            weekday: "long",
+                                            day: "2-digit",
+                                            month: "long",
+                                            year: "numeric",
+                                        })}
+                                    </DateHeader>
 
-                                {Object.entries(grouped[date]).map(([locId, courts]) => (
-                                    <ScheduleLocationSection
-                                        key={locId}
-                                        locKey={locId}
-                                        locationName={
-                                            locId === "__no_location__"
-                                                ? "Unassigned"
-                                                : locationNames[locId] ?? `Location ${locId}`
-                                        }
-                                        courts={courts}
-                                    />
-                                ))}
-                            </DateBlock>
-                        ))}
-                    </ScheduleList>
-                )}
-            </NarrowPageWrapper>
-        </AuthenticatedLayout>
+                                    {Object.entries(grouped[date]).map(([locId, courts]) => (
+                                        <ScheduleLocationSection
+                                            key={locId}
+                                            locKey={locId}
+                                            locationName={
+                                                locId === "__no_location__"
+                                                    ? "Unassigned"
+                                                    : locationNames[locId] ?? `Location ${locId}`
+                                            }
+                                            courts={courts}
+                                        />
+                                    ))}
+                                </DateBlock>
+                            ))}
+                        </ScheduleList>
+                    )}
+                </NarrowPageWrapper>
+            </AuthenticatedLayout>
+        </AnimatedPage>
     );
 }
 

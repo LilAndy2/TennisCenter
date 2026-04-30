@@ -13,6 +13,7 @@ import useAdminTournamentDetails from "../hooks/useAdminTournamentDetails";
 import AdminTournamentGroupsCard from "../components/admin/tournament-details/AdminTournamentGroupsCard.tsx";
 import UpdateMatchScoreDialog from "../components/admin/tournament-details/UpdateMatchScoreDialog.tsx";
 import ScheduleMatchDialog from "../components/admin/tournament-details/ScheduleMatchDialog.tsx";
+import { AnimatedPage } from "../components/animated";
 import {
     NarrowPageWrapper,
     LoadingWrapper,
@@ -67,105 +68,111 @@ function AdminTournamentDetailsPage() {
 
     if (loading) {
         return (
-            <AuthenticatedLayout>
-                <NarrowPageWrapper>
-                    <LoadingWrapper>
-                        <CircularProgress />
-                    </LoadingWrapper>
-                </NarrowPageWrapper>
-            </AuthenticatedLayout>
+            <AnimatedPage>
+                <AuthenticatedLayout>
+                    <NarrowPageWrapper>
+                        <LoadingWrapper>
+                            <CircularProgress />
+                        </LoadingWrapper>
+                    </NarrowPageWrapper>
+                </AuthenticatedLayout>
+            </AnimatedPage>
         );
     }
 
     if (!tournament) {
         return (
-            <AuthenticatedLayout>
-                <NarrowPageWrapper>
-                    <NotFoundCard>
-                        <NotFoundTitle>Tournament not found</NotFoundTitle>
-                        <NotFoundText>
-                            The tournament you are trying to manage does not exist.
-                        </NotFoundText>
-                    </NotFoundCard>
-                </NarrowPageWrapper>
-            </AuthenticatedLayout>
+            <AnimatedPage>
+                <AuthenticatedLayout>
+                    <NarrowPageWrapper>
+                        <NotFoundCard>
+                            <NotFoundTitle>Tournament not found</NotFoundTitle>
+                            <NotFoundText>
+                                The tournament you are trying to manage does not exist.
+                            </NotFoundText>
+                        </NotFoundCard>
+                    </NarrowPageWrapper>
+                </AuthenticatedLayout>
+            </AnimatedPage>
         );
     }
 
     return (
-        <AuthenticatedLayout>
-            <NarrowPageWrapper>
-                <AdminTournamentHeader
-                    onBack={() => navigate("/admin")}
-                    onEdit={() => setIsEditModalOpen(true)}
-                    onDelete={() => setIsDeleteDialogOpen(true)}
-                    extraActions={
-                        <AdminTournamentStatusActions
-                            tournament={tournament}
-                            onStart={handleStartTournament}
-                            onFinish={handleFinishTournament}
+        <AnimatedPage>
+            <AuthenticatedLayout>
+                <NarrowPageWrapper>
+                    <AdminTournamentHeader
+                        onBack={() => navigate("/admin")}
+                        onEdit={() => setIsEditModalOpen(true)}
+                        onDelete={() => setIsDeleteDialogOpen(true)}
+                        extraActions={
+                            <AdminTournamentStatusActions
+                                tournament={tournament}
+                                onStart={handleStartTournament}
+                                onFinish={handleFinishTournament}
+                            />
+                        }
+                    />
+
+                    <AdminTournamentInfoCard tournament={tournament} />
+
+                    <SectionsGrid>
+                        <AdminTournamentParticipantsCard
+                            participants={participants}
+                            onRemoveParticipant={handleOpenRemoveParticipantDialog}
                         />
-                    }
+
+                        <AdminTournamentGroupsCard
+                            groupStandings={groupStandings}
+                            matches={matches}
+                            tournament={tournament}
+                            onGenerateBracket={handleGenerateBracket}
+                            onGenerateKnockout={handleGenerateKnockout}
+                            hasGeneratedBracket={matches.length > 0}
+                            onUpdateScore={handleOpenUpdateScoreDialog}
+                            onScheduleMatch={handleOpenScheduleDialog}
+                        />
+                    </SectionsGrid>
+                </NarrowPageWrapper>
+
+                <CreateTournamentModal
+                    open={isEditModalOpen}
+                    onClose={() => setIsEditModalOpen(false)}
+                    onSubmit={handleEditTournament}
+                    initialData={initialEditData}
+                    mode="edit"
+                    locations={locations}
                 />
 
-                <AdminTournamentInfoCard tournament={tournament} />
+                <DeleteTournamentDialog
+                    open={isDeleteDialogOpen}
+                    onClose={() => setIsDeleteDialogOpen(false)}
+                    onConfirm={() => handleDeleteTournament(() => navigate("/admin"))}
+                />
 
-                <SectionsGrid>
-                    <AdminTournamentParticipantsCard
-                        participants={participants}
-                        onRemoveParticipant={handleOpenRemoveParticipantDialog}
-                    />
+                <RemoveParticipantDialog
+                    open={Boolean(participantToRemove)}
+                    participantName={participantToRemove?.fullName}
+                    onClose={handleCloseRemoveParticipantDialog}
+                    onConfirm={handleConfirmRemoveParticipant}
+                />
 
-                    <AdminTournamentGroupsCard
-                        groupStandings={groupStandings}
-                        matches={matches}
-                        tournament={tournament}
-                        onGenerateBracket={handleGenerateBracket}
-                        onGenerateKnockout={handleGenerateKnockout}
-                        hasGeneratedBracket={matches.length > 0}
-                        onUpdateScore={handleOpenUpdateScoreDialog}
-                        onScheduleMatch={handleOpenScheduleDialog}
-                    />
-                </SectionsGrid>
-            </NarrowPageWrapper>
+                <UpdateMatchScoreDialog
+                    open={isUpdateScoreDialogOpen}
+                    match={selectedMatch}
+                    onClose={handleCloseUpdateScoreDialog}
+                    onSubmit={handleSubmitMatchScore}
+                />
 
-            <CreateTournamentModal
-                open={isEditModalOpen}
-                onClose={() => setIsEditModalOpen(false)}
-                onSubmit={handleEditTournament}
-                initialData={initialEditData}
-                mode="edit"
-                locations={locations}
-            />
-
-            <DeleteTournamentDialog
-                open={isDeleteDialogOpen}
-                onClose={() => setIsDeleteDialogOpen(false)}
-                onConfirm={() => handleDeleteTournament(() => navigate("/admin"))}
-            />
-
-            <RemoveParticipantDialog
-                open={Boolean(participantToRemove)}
-                participantName={participantToRemove?.fullName}
-                onClose={handleCloseRemoveParticipantDialog}
-                onConfirm={handleConfirmRemoveParticipant}
-            />
-
-            <UpdateMatchScoreDialog
-                open={isUpdateScoreDialogOpen}
-                match={selectedMatch}
-                onClose={handleCloseUpdateScoreDialog}
-                onSubmit={handleSubmitMatchScore}
-            />
-
-            <ScheduleMatchDialog
-                open={isScheduleDialogOpen}
-                match={matchToSchedule}
-                locations={locations}
-                onClose={handleCloseScheduleDialog}
-                onSubmit={handleScheduleMatch}
-            />
-        </AuthenticatedLayout>
+                <ScheduleMatchDialog
+                    open={isScheduleDialogOpen}
+                    match={matchToSchedule}
+                    locations={locations}
+                    onClose={handleCloseScheduleDialog}
+                    onSubmit={handleScheduleMatch}
+                />
+            </AuthenticatedLayout>
+        </AnimatedPage>
     );
 }
 

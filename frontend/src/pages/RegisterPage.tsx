@@ -13,6 +13,7 @@ import { FieldLabel, FieldWrapper } from "../components/auth/AuthField";
 import AuthInput from "../components/auth/AuthInput";
 import AuthShell from "../components/auth/AuthShell";
 import AuthTabButton from "../components/auth/AuthTabButton";
+import { AnimatedPage } from "../components/animated";
 import {
     FooterText,
     FormSubtitle,
@@ -202,18 +203,20 @@ function RegisterPage() {
     );
 
     return (
-        <AuthShell
-            isLogin={false}
-            heroTitle={
-                <>
-                    Join. Play.
-                    <br />
-                    Improve.
-                </>
-            }
-            heroDescription="Create your account and become part of your local tennis community. Track your results, enter tournaments, and build your profile."
-            formCard={formCard}
-        />
+        <AnimatedPage>
+            <AuthShell
+                isLogin={false}
+                heroTitle={
+                    <>
+                        Join. Play.
+                        <br />
+                        Improve.
+                    </>
+                }
+                heroDescription="Create your account and become part of your local tennis community. Track your results, enter tournaments, and build your profile."
+                formCard={formCard}
+            />
+        </AnimatedPage>
     );
 }
 

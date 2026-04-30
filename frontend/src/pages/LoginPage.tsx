@@ -8,6 +8,7 @@ import { FieldLabel, FieldWrapper } from "../components/auth/AuthField";
 import AuthInput from "../components/auth/AuthInput";
 import AuthShell from "../components/auth/AuthShell";
 import AuthTabButton from "../components/auth/AuthTabButton";
+import { AnimatedPage } from "../components/animated";
 import {
     FooterText,
     FormSubtitle,
@@ -113,18 +114,20 @@ function LoginPage() {
     );
 
     return (
-        <AuthShell
-            isLogin
-            heroTitle={
-                <>
-                    Compete. Connect.
-                    <br />
-                    Conquer.
-                </>
-            }
-            heroDescription="Join the fastest growing local tennis community. Organize tournaments, find matches, and track your stats."
-            formCard={formCard}
-        />
+        <AnimatedPage>
+            <AuthShell
+                isLogin
+                heroTitle={
+                    <>
+                        Compete. Connect.
+                        <br />
+                        Conquer.
+                    </>
+                }
+                heroDescription="Join the fastest growing local tennis community. Organize tournaments, find matches, and track your stats."
+                formCard={formCard}
+            />
+        </AnimatedPage>
     );
 }
 

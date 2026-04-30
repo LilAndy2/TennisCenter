@@ -6,6 +6,7 @@ import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 import TournamentInfoCard from "../components/tournaments/TournamentInfoCard";
 import AdminTournamentGroupsCard from "../components/admin/tournament-details/AdminTournamentGroupsCard";
 import useTournamentDetails from "../hooks/useTournamentDetails";
+import { AnimatedPage } from "../components/animated";
 import {
     NarrowPageWrapper,
     BackButton,
@@ -45,28 +46,32 @@ function TournamentDetailsPage() {
 
     if (loading) {
         return (
-            <AuthenticatedLayout>
-                <NarrowPageWrapper>
-                    <LoadingWrapper><CircularProgress /></LoadingWrapper>
-                </NarrowPageWrapper>
-            </AuthenticatedLayout>
+            <AnimatedPage>
+                <AuthenticatedLayout>
+                    <NarrowPageWrapper>
+                        <LoadingWrapper><CircularProgress /></LoadingWrapper>
+                    </NarrowPageWrapper>
+                </AuthenticatedLayout>
+            </AnimatedPage>
         );
     }
 
     if (!tournament) {
         return (
-            <AuthenticatedLayout>
-                <NarrowPageWrapper>
-                    <BackButton onClick={() => navigate("/tournaments")}>
-                        <ArrowBack sx={{ fontSize: 18 }} />
-                        <span>Back to tournaments</span>
-                    </BackButton>
-                    <NotFoundCard>
-                        <NotFoundTitle>Tournament not found</NotFoundTitle>
-                        <NotFoundText>The tournament you are trying to access does not exist.</NotFoundText>
-                    </NotFoundCard>
-                </NarrowPageWrapper>
-            </AuthenticatedLayout>
+            <AnimatedPage>
+                <AuthenticatedLayout>
+                    <NarrowPageWrapper>
+                        <BackButton onClick={() => navigate("/tournaments")}>
+                            <ArrowBack sx={{ fontSize: 18 }} />
+                            <span>Back to tournaments</span>
+                        </BackButton>
+                        <NotFoundCard>
+                            <NotFoundTitle>Tournament not found</NotFoundTitle>
+                            <NotFoundText>The tournament you are trying to access does not exist.</NotFoundText>
+                        </NotFoundCard>
+                    </NarrowPageWrapper>
+                </AuthenticatedLayout>
+            </AnimatedPage>
         );
     }
 
@@ -83,42 +88,44 @@ function TournamentDetailsPage() {
     ) : null;
 
     return (
-        <AuthenticatedLayout>
-            <NarrowPageWrapper>
-                <BackButton onClick={() => navigate("/tournaments")}>
-                    <ArrowBack sx={{ fontSize: 18 }} />
-                    <span>Back to tournaments</span>
-                </BackButton>
+        <AnimatedPage>
+            <AuthenticatedLayout>
+                <NarrowPageWrapper>
+                    <BackButton onClick={() => navigate("/tournaments")}>
+                        <ArrowBack sx={{ fontSize: 18 }} />
+                        <span>Back to tournaments</span>
+                    </BackButton>
 
-                <TournamentInfoCard tournament={tournament} actions={actions} />
+                    <TournamentInfoCard tournament={tournament} actions={actions} />
 
-                <BottomSectionsGrid>
-                    <SectionCard>
-                        <SectionTitle>Participants</SectionTitle>
-                        {participants.length === 0 ? (
-                            <SectionText>No players registered yet.</SectionText>
-                        ) : (
-                            <ParticipantsList>
-                                {participants.map(p => (
-                                    <ParticipantItem key={p.id}>
-                                        <ParticipantName>{p.fullName}</ParticipantName>
-                                        <ParticipantEmail>{p.email}</ParticipantEmail>
-                                    </ParticipantItem>
-                                ))}
-                            </ParticipantsList>
-                        )}
-                    </SectionCard>
+                    <BottomSectionsGrid>
+                        <SectionCard>
+                            <SectionTitle>Participants</SectionTitle>
+                            {participants.length === 0 ? (
+                                <SectionText>No players registered yet.</SectionText>
+                            ) : (
+                                <ParticipantsList>
+                                    {participants.map(p => (
+                                        <ParticipantItem key={p.id}>
+                                            <ParticipantName>{p.fullName}</ParticipantName>
+                                            <ParticipantEmail>{p.email}</ParticipantEmail>
+                                        </ParticipantItem>
+                                    ))}
+                                </ParticipantsList>
+                            )}
+                        </SectionCard>
 
-                    <AdminTournamentGroupsCard
-                        groupStandings={groupStandings}
-                        matches={matches}
-                        tournament={tournament}
-                        hasGeneratedBracket={matches.length > 0}
-                        readOnly
-                    />
-                </BottomSectionsGrid>
-            </NarrowPageWrapper>
-        </AuthenticatedLayout>
+                        <AdminTournamentGroupsCard
+                            groupStandings={groupStandings}
+                            matches={matches}
+                            tournament={tournament}
+                            hasGeneratedBracket={matches.length > 0}
+                            readOnly
+                        />
+                    </BottomSectionsGrid>
+                </NarrowPageWrapper>
+            </AuthenticatedLayout>
+        </AnimatedPage>
     );
 }
 

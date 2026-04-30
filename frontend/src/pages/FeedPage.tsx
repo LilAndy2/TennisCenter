@@ -8,6 +8,8 @@ import PostCard, { type FeedPostType } from "../components/feed/PostCard";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 import { getErrorMessage } from "../utils/getErrorMessage.ts";
 import { useToast } from "../context/ToastContext.tsx";
+import { AnimatedPage } from "../components/animated";
+import { AnimatedList, AnimatedListItem } from "../components/animated";
 
 function FeedPage() {
     const { showToast } = useToast();
@@ -128,42 +130,47 @@ function FeedPage() {
     };
 
     return (
-        <AuthenticatedLayout>
-            <FeedPageWrapper>
-                <FeedCenterColumn>
-                    <FeedHero onCreatePost={handleOpenCreatePostModal} />
+        <AnimatedPage>
+            <AuthenticatedLayout>
+                <FeedPageWrapper>
+                    <FeedCenterColumn>
+                        <FeedHero onCreatePost={handleOpenCreatePostModal} />
 
-                    <PostsSection>
-                        {posts.map((post) => (
-                            <PostCard
-                                key={post.id}
-                                post={post}
-                                onDelete={handleDeletePost}
-                                onEdit={handleEditPost}
-                                onCommentAdded={(postId) =>
-                                    setPosts((previousPost) =>
-                                        previousPost.map((post) =>
-                                            post.id === postId
-                                                ? { ...post, commentsCount: post.commentsCount + 1}
-                                                : post
-                                        )
-                                    )
-                                }
-                                onToggleLike={handleToggleLike}
-                            />
-                        ))}
-                    </PostsSection>
-                </FeedCenterColumn>
-            </FeedPageWrapper>
+                        <PostsSection>
+                            <AnimatedList style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                                {posts.map((post) => (
+                                    <AnimatedListItem key={post.id}>
+                                        <PostCard
+                                            post={post}
+                                            onDelete={handleDeletePost}
+                                            onEdit={handleEditPost}
+                                            onCommentAdded={(postId) =>
+                                                setPosts((previousPost) =>
+                                                    previousPost.map((post) =>
+                                                        post.id === postId
+                                                            ? { ...post, commentsCount: post.commentsCount + 1 }
+                                                            : post
+                                                    )
+                                                )
+                                            }
+                                            onToggleLike={handleToggleLike}
+                                        />
+                                    </AnimatedListItem>
+                                ))}
+                            </AnimatedList>
+                        </PostsSection>
+                    </FeedCenterColumn>
+                </FeedPageWrapper>
 
-            <CreatePostModal
-                open={isCreatePostModalOpen}
-                onClose={handleCloseCreatePostModal}
-                onSubmit={editingPost ? handleUpdatePost : handleCreatePost}
-                initialContent={editingPost?.content}
-                mode={editingPost ? "edit" : "create"}
-            />
-        </AuthenticatedLayout>
+                <CreatePostModal
+                    open={isCreatePostModalOpen}
+                    onClose={handleCloseCreatePostModal}
+                    onSubmit={editingPost ? handleUpdatePost : handleCreatePost}
+                    initialContent={editingPost?.content}
+                    mode={editingPost ? "edit" : "create"}
+                />
+            </AuthenticatedLayout>
+        </AnimatedPage>
     );
 }
 
