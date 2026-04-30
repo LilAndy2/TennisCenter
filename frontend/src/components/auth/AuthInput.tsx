@@ -1,17 +1,23 @@
 import { TextField } from "@mui/material";
 import styled from "styled-components";
+import { colors, radius, transition } from "../../styles/theme";
 
 const AuthInput = styled(TextField)`
     .MuiOutlinedInput-root {
-        border-radius: 0.65rem;
+        border-radius: ${radius.sm};
         background: white;
+        transition: box-shadow ${transition.normal};
 
         &:hover .MuiOutlinedInput-notchedOutline {
-            border-color: #86efac;
+            border-color: ${colors.borderGreenLight};
+        }
+
+        &.Mui-focused {
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
         }
 
         &.Mui-focused .MuiOutlinedInput-notchedOutline {
-            border-color: #10b981;
+            border-color: ${colors.primary};
             border-width: 2px;
         }
     }
@@ -26,7 +32,7 @@ const AuthInput = styled(TextField)`
     }
 
     .MuiInputLabel-root.Mui-focused {
-        color: #047857;
+        color: ${colors.primaryActive};
     }
 `;
 

@@ -1,58 +1,31 @@
 import { Typography } from "@mui/material";
 import styled from "styled-components";
 import type { TournamentLevel } from "../../types/tournament.ts";
+import { colors, fontSize, fontWeight, radius } from "../../styles/theme";
 
 type TournamentLevelBadgeProps = {
     level: TournamentLevel;
 };
 
 function TournamentLevelBadge({ level }: TournamentLevelBadgeProps) {
-    return <BadgeWrapper $level={level}>{level}</BadgeWrapper>;
+    const levelColors = colors.levels[level] ?? { bg: "#f8fafc", text: "#334155" };
+
+    return (
+        <BadgeWrapper $bg={levelColors.bg} $color={levelColors.text}>
+            {level}
+        </BadgeWrapper>
+    );
 }
 
 export default TournamentLevelBadge;
 
-const BadgeWrapper = styled(Typography)<{ $level: TournamentLevel} >`
+const BadgeWrapper = styled(Typography)<{ $bg: string; $color: string }>`
     width: fit-content;
-    padding: 0.35rem 0.75rem;
-    border-radius: 999px;
-    font-size: 0.78rem !important;
-    font-weight: 800 !important;
+    padding: 0.3rem 0.7rem;
+    border-radius: ${radius.pill};
+    font-size: ${fontSize.xs} !important;
+    font-weight: ${fontWeight.black} !important;
     letter-spacing: 0.02em;
-    background: ${({ $level }) => {
-        switch ($level) {
-            case "Entry":
-                return "#ecfeff";
-            case "Starter":
-                return "#f0fdf4";
-            case "Medium":
-                return "#eff6ff";
-            case "Master":
-                return "#faf5ff";
-            case "Expert":
-                return "#fff7ed";
-            case "Stellar":
-                return "#fef2f2";
-            default:
-                return "#f8fafc";
-        }
-    }};
-    color: ${({ $level }) => {
-        switch ($level) {
-            case "Entry":
-                return "#0f766e";
-            case "Starter":
-                return "#15803d";
-            case "Medium":
-                return "#1d4ed8";
-            case "Master":
-                return "#7e22ce";
-            case "Expert":
-                return "#c2410c";
-            case "Stellar":
-                return "#b91c1c";
-            default:
-                return "#334155";
-        }
-    }};
+    background: ${({ $bg }) => $bg};
+    color: ${({ $color }) => $color};
 `;

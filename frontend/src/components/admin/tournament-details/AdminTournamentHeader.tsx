@@ -2,6 +2,16 @@ import { ArrowBack, DeleteOutline, EditOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import type { ReactNode } from "react";
 import styled from "styled-components";
+import {
+    colors,
+    spacing,
+    fontSize,
+    fontWeight,
+    radius,
+    shadow,
+    transition,
+    breakpoints,
+} from "../../../styles/theme";
 
 type AdminTournamentHeaderProps = {
     onBack: () => void;
@@ -43,79 +53,94 @@ function AdminTournamentHeader({
 export default AdminTournamentHeader;
 
 const TopBar = styled(Box)`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: ${spacing.md};
+    margin-bottom: ${spacing.md};
 
-  @media (max-width: 64rem) {
-    flex-direction: column;
-    align-items: stretch;
-  }
+    @media (max-width: ${breakpoints.lg}) {
+        flex-direction: column;
+        align-items: stretch;
+    }
 `;
 
 const TopBarActions = styled(Box)`
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+    gap: ${spacing.sm};
+    flex-wrap: wrap;
 `;
 
 const BackButton = styled.button`
-  height: 2.8rem;
-  padding: 0 1rem;
-  border: none;
-  border-radius: 999px;
-  background: #f1f5f9;
-  color: #334155;
-  font-size: 0.92rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  cursor: pointer;
-  transition: 0.2s ease;
+    height: 2.75rem;
+    padding: 0 ${spacing.md};
+    border: none;
+    border-radius: ${radius.pill};
+    background: ${colors.surfaceAlt};
+    color: ${colors.textSecondary};
+    font-size: ${fontSize.sm};
+    font-weight: ${fontWeight.bold};
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    transition: all ${transition.normal};
 
-  &:hover {
-    background: #e2e8f0;
-  }
+    &:hover {
+        background: ${colors.surfaceAltHover};
+    }
+
+    &:active {
+        transform: scale(0.97);
+    }
 `;
 
 const SecondaryActionButton = styled.button`
-  height: 2.8rem;
-  padding: 0 1rem;
-  border: none;
-  border-radius: 999px;
-  background: #10b981;
-  color: white;
-  font-size: 0.92rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  cursor: pointer;
+    height: 2.75rem;
+    padding: 0 ${spacing.md};
+    border: none;
+    border-radius: ${radius.pill};
+    background: ${colors.primary};
+    color: white;
+    font-size: ${fontSize.sm};
+    font-weight: ${fontWeight.bold};
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    transition: all ${transition.normal};
 
-  &:hover {
-    background: #059669;
-  }
+    &:hover {
+        background: ${colors.primaryHover};
+        box-shadow: ${shadow.green};
+    }
+
+    &:active {
+        transform: scale(0.97);
+    }
 `;
 
 const DangerActionButton = styled.button`
-  height: 2.8rem;
-  padding: 0 1rem;
-  border: none;
-  border-radius: 999px;
-  background: #fee2e2;
-  color: #b91c1c;
-  font-size: 0.92rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  cursor: pointer;
+    height: 2.75rem;
+    padding: 0 ${spacing.md};
+    border: none;
+    border-radius: ${radius.pill};
+    background: ${colors.dangerBg};
+    color: ${colors.danger};
+    font-size: ${fontSize.sm};
+    font-weight: ${fontWeight.bold};
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    transition: all ${transition.normal};
 
-  &:hover {
-    background: #fecaca;
-  }
+    &:hover {
+        background: ${colors.dangerBgHover};
+    }
+
+    &:active {
+        transform: scale(0.97);
+    }
 `;

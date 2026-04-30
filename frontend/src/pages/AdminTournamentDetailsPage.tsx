@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, CircularProgress} from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import CreateTournamentModal from "../components/admin/CreateTournamentModal";
@@ -13,6 +13,19 @@ import useAdminTournamentDetails from "../hooks/useAdminTournamentDetails";
 import AdminTournamentGroupsCard from "../components/admin/tournament-details/AdminTournamentGroupsCard.tsx";
 import UpdateMatchScoreDialog from "../components/admin/tournament-details/UpdateMatchScoreDialog.tsx";
 import ScheduleMatchDialog from "../components/admin/tournament-details/ScheduleMatchDialog.tsx";
+import {
+    NarrowPageWrapper,
+    LoadingWrapper,
+} from "../components/common/PageLayout";
+import {
+    NotFoundCard,
+    NotFoundTitle,
+    NotFoundText,
+} from "../components/common/SectionCard";
+import {
+    spacing,
+    breakpoints,
+} from "../styles/theme";
 
 function AdminTournamentDetailsPage() {
     const navigate = useNavigate();
@@ -55,11 +68,11 @@ function AdminTournamentDetailsPage() {
     if (loading) {
         return (
             <AuthenticatedLayout>
-                <PageWrapper>
+                <NarrowPageWrapper>
                     <LoadingWrapper>
                         <CircularProgress />
                     </LoadingWrapper>
-                </PageWrapper>
+                </NarrowPageWrapper>
             </AuthenticatedLayout>
         );
     }
@@ -67,21 +80,21 @@ function AdminTournamentDetailsPage() {
     if (!tournament) {
         return (
             <AuthenticatedLayout>
-                <PageWrapper>
+                <NarrowPageWrapper>
                     <NotFoundCard>
                         <NotFoundTitle>Tournament not found</NotFoundTitle>
                         <NotFoundText>
                             The tournament you are trying to manage does not exist.
                         </NotFoundText>
                     </NotFoundCard>
-                </PageWrapper>
+                </NarrowPageWrapper>
             </AuthenticatedLayout>
         );
     }
 
     return (
         <AuthenticatedLayout>
-            <PageWrapper>
+            <NarrowPageWrapper>
                 <AdminTournamentHeader
                     onBack={() => navigate("/admin")}
                     onEdit={() => setIsEditModalOpen(true)}
@@ -114,7 +127,7 @@ function AdminTournamentDetailsPage() {
                         onScheduleMatch={handleOpenScheduleDialog}
                     />
                 </SectionsGrid>
-            </PageWrapper>
+            </NarrowPageWrapper>
 
             <CreateTournamentModal
                 open={isEditModalOpen}
@@ -158,42 +171,12 @@ function AdminTournamentDetailsPage() {
 
 export default AdminTournamentDetailsPage;
 
-const PageWrapper = styled(Box)`
-  width: 100%;
-  max-width: 72rem;
-  margin: 0 auto;
-`;
-
 const SectionsGrid = styled(Box)`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: ${spacing.md};
 
-  @media (max-width: 64rem) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const NotFoundCard = styled(Box)`
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 1.25rem;
-  padding: 1.5rem;
-`;
-
-const NotFoundTitle = styled(Typography)`
-  font-size: 1.4rem !important;
-  font-weight: 800 !important;
-  color: #111827;
-  margin-bottom: 0.4rem !important;
-`;
-
-const NotFoundText = styled(Typography)`
-  color: #64748b;
-`;
-
-const LoadingWrapper = styled(Box)`
-  display: flex;
-  justify-content: center;
-  padding: 2rem 0;
+    @media (max-width: ${breakpoints.lg}) {
+        grid-template-columns: 1fr;
+    }
 `;

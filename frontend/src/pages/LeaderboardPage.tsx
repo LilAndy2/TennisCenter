@@ -4,11 +4,28 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import axiosInstance from "../api/axiosInstance";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
+import {
+    PageWrapper as BasePageWrapper,
+    PageTitle,
+    PageSubtitle,
+    PageHeader,
+    LoadingWrapper,
+} from "../components/common/PageLayout";
 import type {
     LeaderboardLevel,
     LeaderboardPlayer,
     LeaderboardResponse,
 } from "../types/leaderboard";
+import {
+    colors,
+    spacing,
+    fontSize,
+    fontWeight,
+    radius,
+    shadow,
+    transition,
+    breakpoints,
+} from "../styles/theme";
 
 const levels: LeaderboardLevel[] = [
     "ENTRY",
@@ -18,6 +35,12 @@ const levels: LeaderboardLevel[] = [
     "EXPERT",
     "STELLAR",
 ];
+
+const medalColors: Record<number, string> = {
+    1: "#f59e0b", // gold
+    2: "#94a3b8", // silver
+    3: "#d97706", // bronze
+};
 
 function LeaderboardPage() {
     const [selectedLevel, setSelectedLevel] = useState<LeaderboardLevel>("ENTRY");
@@ -70,13 +93,13 @@ function LeaderboardPage() {
     return (
         <AuthenticatedLayout>
             <PageWrapper>
-                <HeaderSection>
+                <PageHeader>
                     <PageTitle>Leaderboard</PageTitle>
                     <PageSubtitle>
                         Explore the rankings for each player level and track performance
                         across the tennis community.
                     </PageSubtitle>
-                </HeaderSection>
+                </PageHeader>
 
                 <ControlsCard>
                     <LevelsRow>
@@ -93,7 +116,7 @@ function LeaderboardPage() {
 
                     <SearchRow>
                         <SearchInputWrapper>
-                            <Search sx={{ fontSize: 18 }} />
+                            <Search sx={{ fontSize: 18, color: colors.textHint }} />
                             <SearchInput
                                 placeholder="Search players by name, username or email"
                                 value={search}
@@ -120,7 +143,7 @@ function LeaderboardPage() {
                             <StyledTable>
                                 <thead>
                                 <tr>
-                                    <th>Rank</th>
+                                    <th style={{ width: "4rem" }}>Rank</th>
                                     <th>Player</th>
                                     <th>Wins</th>
                                     <th>Losses</th>
@@ -137,12 +160,26 @@ function LeaderboardPage() {
                                 ) : (
                                     players.map((player) => (
                                         <tr key={player.id}>
-                                            <td>{player.rank}</td>
-                                            <td>{player.fullName}</td>
-                                            <td>{player.wins}</td>
-                                            <td>{player.losses}</td>
-                                            <td>{player.winRate}%</td>
-                                            <td>{player.points}</td>
+                                            <td>
+                                                <RankCell>
+                                                    {player.rank <= 3 ? (
+                                                        <MedalBadge $color={medalColors[player.rank]}>
+                                                            {player.rank}
+                                                        </MedalBadge>
+                                                    ) : (
+                                                        <span className="tabular-nums">{player.rank}</span>
+                                                    )}
+                                                </RankCell>
+                                            </td>
+                                            <td>
+                                                <PlayerNameCell>{player.fullName}</PlayerNameCell>
+                                            </td>
+                                            <td className="tabular-nums">{player.wins}</td>
+                                            <td className="tabular-nums">{player.losses}</td>
+                                            <td className="tabular-nums">{player.winRate}%</td>
+                                            <td className="tabular-nums">
+                                                <strong>{player.points}</strong>
+                                            </td>
                                         </tr>
                                     ))
                                 )}
@@ -151,7 +188,7 @@ function LeaderboardPage() {
 
                             <PaginationRow>
                                 <PaginationButton
-                                    onClick={() => setPage((previous) => Math.max(previous - 1, 0))}
+                                    onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
                                     disabled={page === 0}
                                 >
                                     Previous
@@ -163,8 +200,8 @@ function LeaderboardPage() {
 
                                 <PaginationButton
                                     onClick={() =>
-                                        setPage((previous) =>
-                                            totalPages === 0 ? previous : Math.min(previous + 1, totalPages - 1)
+                                        setPage((prev) =>
+                                            totalPages === 0 ? prev : Math.min(prev + 1, totalPages - 1)
                                         )
                                     }
                                     disabled={totalPages === 0 || page >= totalPages - 1}
@@ -182,187 +219,228 @@ function LeaderboardPage() {
 
 export default LeaderboardPage;
 
-const PageWrapper = styled(Box)`
-  width: 100%;
-  max-width: 80rem;
-  margin: 0 auto;
-`;
+/* ─── Styled Components ─── */
 
-const HeaderSection = styled(Box)`
-  margin-bottom: 1.25rem;
-`;
-
-const PageTitle = styled(Typography)`
-  font-size: 2rem !important;
-  font-weight: 800 !important;
-  color: #111827;
-  margin-bottom: 0.35rem !important;
-`;
-
-const PageSubtitle = styled(Typography)`
-  color: #64748b;
-  font-size: 0.98rem !important;
-  line-height: 1.6 !important;
+const PageWrapper = styled(BasePageWrapper)`
+    max-width: 80rem;
 `;
 
 const ControlsCard = styled(Box)`
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 1.2rem;
-  padding: 1.1rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 0.45rem 1.2rem rgba(15, 23, 42, 0.03);
+    background: ${colors.surface};
+    border: 1px solid ${colors.border};
+    border-radius: ${radius.xl};
+    padding: ${spacing.lg};
+    margin-bottom: ${spacing.md};
+    box-shadow: ${shadow.sm};
 `;
 
 const LevelsRow = styled(Box)`
-  display: flex;
-  gap: 0.65rem;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
+    display: flex;
+    gap: ${spacing.xs};
+    flex-wrap: wrap;
+    margin-bottom: ${spacing.md};
 `;
 
 const LevelButton = styled.button<{ $active: boolean }>`
-  height: 2.6rem;
-  padding: 0 1rem;
-  border: none;
-  border-radius: 999px;
-  background: ${({ $active }) => ($active ? "#10b981" : "#f1f5f9")};
-  color: ${({ $active }) => ($active ? "white" : "#334155")};
-  font-size: 0.88rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.2s ease;
+    height: 2.5rem;
+    padding: 0 ${spacing.md};
+    border: none;
+    border-radius: ${radius.pill};
+    background: ${({ $active }) => ($active ? colors.primary : colors.surfaceAlt)};
+    color: ${({ $active }) => ($active ? "white" : colors.textSecondary)};
+    font-size: ${fontSize.sm};
+    font-weight: ${fontWeight.bold};
+    cursor: pointer;
+    transition: all ${transition.normal};
 
-  &:hover {
-    background: ${({ $active }) => ($active ? "#059669" : "#e2e8f0")};
-  }
+    &:hover {
+        background: ${({ $active }) => ($active ? colors.primaryHover : colors.surfaceAltHover)};
+    }
+
+    &:active {
+        transform: scale(0.97);
+    }
 `;
 
 const SearchRow = styled(Box)`
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
+    display: flex;
+    gap: ${spacing.sm};
+    align-items: center;
 
-  @media (max-width: 48rem) {
-    flex-direction: column;
-    align-items: stretch;
-  }
+    @media (max-width: ${breakpoints.md}) {
+        flex-direction: column;
+        align-items: stretch;
+    }
 `;
 
 const SearchInputWrapper = styled(Box)`
-  flex: 1;
-  height: 3rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 999px;
-  padding: 0 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  color: #64748b;
+    flex: 1;
+    height: 2.85rem;
+    border: 1px solid ${colors.border};
+    border-radius: ${radius.pill};
+    padding: 0 ${spacing.md};
+    display: flex;
+    align-items: center;
+    gap: ${spacing.xs};
+    transition: border-color ${transition.normal};
+
+    &:focus-within {
+        border-color: ${colors.primary};
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.08);
+    }
 `;
 
 const SearchInput = styled.input`
-  width: 100%;
-  border: none;
-  outline: none;
-  font-size: 0.94rem;
-  background: transparent;
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: ${fontSize.sm};
+    background: transparent;
+    color: ${colors.textPrimary};
+
+    &::placeholder {
+        color: ${colors.textHint};
+    }
 `;
 
 const SearchButton = styled.button`
-  height: 3rem;
-  padding: 0 1.2rem;
-  border: none;
-  border-radius: 999px;
-  background: #10b981;
-  color: white;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
+    height: 2.85rem;
+    padding: 0 ${spacing.lg};
+    border: none;
+    border-radius: ${radius.pill};
+    background: ${colors.primary};
+    color: white;
+    font-size: ${fontSize.sm};
+    font-weight: ${fontWeight.bold};
+    cursor: pointer;
+    transition: all ${transition.normal};
 
-  &:hover {
-    background: #059669;
-  }
+    &:hover {
+        background: ${colors.primaryHover};
+    }
+
+    &:active {
+        transform: scale(0.97);
+    }
 `;
 
 const TableCard = styled(Box)`
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 1.2rem;
-  padding: 1rem;
-  box-shadow: 0 0.45rem 1.2rem rgba(15, 23, 42, 0.03);
+    background: ${colors.surface};
+    border: 1px solid ${colors.border};
+    border-radius: ${radius.xl};
+    padding: ${spacing.md};
+    box-shadow: ${shadow.sm};
+    overflow-x: auto;
 `;
 
 const StyledTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
+    width: 100%;
+    border-collapse: collapse;
 
-  th,
-  td {
-    text-align: left;
-    padding: 0.9rem 0.75rem;
-    border-bottom: 1px solid #e5e7eb;
-    font-size: 0.93rem;
-  }
+    th,
+    td {
+        text-align: left;
+        padding: ${spacing.sm} ${spacing.sm};
+        border-bottom: 1px solid ${colors.border};
+        font-size: ${fontSize.sm};
+    }
 
-  th {
-    color: #475569;
-    font-weight: 800;
-  }
+    th {
+        color: ${colors.textSecondary};
+        font-weight: ${fontWeight.black};
+        font-size: ${fontSize.xs};
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
 
-  td {
-    color: #111827;
-    font-weight: 500;
-  }
+    td {
+        color: ${colors.textPrimary};
+        font-weight: ${fontWeight.medium};
+    }
+
+    tbody tr {
+        transition: background ${transition.fast};
+    }
+
+    tbody tr:hover {
+        background: ${colors.surfaceHover};
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+`;
+
+const RankCell = styled(Box)`
+    display: flex;
+    align-items: center;
+`;
+
+const MedalBadge = styled.span<{ $color: string }>`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: ${({ $color }) => $color}18;
+    color: ${({ $color }) => $color};
+    font-weight: ${fontWeight.black};
+    font-size: ${fontSize.xs};
+    border: 1.5px solid ${({ $color }) => $color}40;
+`;
+
+const PlayerNameCell = styled.span`
+    font-weight: ${fontWeight.bold};
 `;
 
 const EmptyCell = styled.td`
-  text-align: center !important;
-  color: #64748b !important;
-  padding: 2rem 0.75rem !important;
+    text-align: center !important;
+    color: ${colors.textMuted} !important;
+    padding: ${spacing.xl} ${spacing.sm} !important;
 `;
 
 const PaginationRow = styled(Box)`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 1rem;
-  gap: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: ${spacing.md};
+    gap: ${spacing.md};
 
-  @media (max-width: 40rem) {
-    flex-direction: column;
-  }
+    @media (max-width: ${breakpoints.sm}) {
+        flex-direction: column;
+    }
 `;
 
 const PaginationInfo = styled(Typography)`
-  color: #64748b;
-  font-size: 0.9rem !important;
+    color: ${colors.textMuted};
+    font-size: ${fontSize.sm} !important;
 `;
 
 const PaginationButton = styled.button`
-  height: 2.6rem;
-  padding: 0 1rem;
-  border: none;
-  border-radius: 999px;
-  background: #f1f5f9;
-  color: #334155;
-  font-size: 0.88rem;
-  font-weight: 700;
-  cursor: pointer;
+    height: 2.5rem;
+    padding: 0 ${spacing.md};
+    border: none;
+    border-radius: ${radius.pill};
+    background: ${colors.surfaceAlt};
+    color: ${colors.textSecondary};
+    font-size: ${fontSize.sm};
+    font-weight: ${fontWeight.bold};
+    cursor: pointer;
+    transition: all ${transition.normal};
 
-  &:hover:not(:disabled) {
-    background: #e2e8f0;
-  }
+    &:hover:not(:disabled) {
+        background: ${colors.surfaceAltHover};
+    }
 
-  &:disabled {
-    background: #e5e7eb;
-    color: #94a3b8;
-    cursor: not-allowed;
-  }
-`;
+    &:active:not(:disabled) {
+        transform: scale(0.97);
+    }
 
-const LoadingWrapper = styled(Box)`
-  display: flex;
-  justify-content: center;
-  padding: 2rem 0;
+    &:disabled {
+        background: ${colors.surfaceAlt};
+        color: ${colors.textHint};
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
 `;

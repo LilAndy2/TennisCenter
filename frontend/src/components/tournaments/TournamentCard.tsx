@@ -5,6 +5,15 @@ import styled from "styled-components";
 import type { TournamentType } from "../../types/tournament.ts";
 import { formatTournamentDateRange } from "../../utils/formatTournamentDateRange";
 import TournamentLevelBadge from "./TournamentLevelBadge";
+import {
+    colors,
+    spacing,
+    fontSize,
+    fontWeight,
+    radius,
+    shadow,
+    transition,
+} from "../../styles/theme";
 
 type TournamentCardProps = {
     tournament: TournamentType;
@@ -35,31 +44,27 @@ function TournamentCard({ tournament, detailsPath }: TournamentCardProps) {
             <TournamentName>{tournament.name}</TournamentName>
             <TournamentDescription>{tournament.description}</TournamentDescription>
 
-            <DetailsGrid>
-                <DetailItem>
-                    <CalendarMonth sx={{ fontSize: 18 }} />
-                    <DetailText>
-                        {formatTournamentDateRange(tournament.startDate, tournament.endDate)}
-                    </DetailText>
-                </DetailItem>
+            <DetailsRow>
+                <DetailChip>
+                    <CalendarMonth sx={{ fontSize: 16 }} />
+                    <span>{formatTournamentDateRange(tournament.startDate, tournament.endDate)}</span>
+                </DetailChip>
 
-                <DetailItem>
-                    <Group sx={{ fontSize: 18 }} />
-                    <DetailText>
-                        Max {tournament.maxPlayers} players
-                    </DetailText>
-                </DetailItem>
+                <DetailChip>
+                    <Group sx={{ fontSize: 16 }} />
+                    <span>{tournament.maxPlayers} players</span>
+                </DetailChip>
 
-                <DetailItem>
-                    <LocationOn sx={{ fontSize: 18 }} />
-                    <DetailText>{tournament.locationNames?.join(", ") || "No locations assigned"}</DetailText>
-                </DetailItem>
+                <DetailChip>
+                    <LocationOn sx={{ fontSize: 16 }} />
+                    <span>{tournament.locationNames?.join(", ") || "TBD"}</span>
+                </DetailChip>
 
-                <DetailItem>
-                    <SportsTennis sx={{ fontSize: 18 }} />
-                    <DetailText>{tournament.surface}</DetailText>
-                </DetailItem>
-            </DetailsGrid>
+                <DetailChip>
+                    <SportsTennis sx={{ fontSize: 16 }} />
+                    <span>{tournament.surface}</span>
+                </DetailChip>
+            </DetailsRow>
         </CardWrapper>
     );
 }
@@ -67,18 +72,22 @@ function TournamentCard({ tournament, detailsPath }: TournamentCardProps) {
 export default TournamentCard;
 
 const CardWrapper = styled(Box)`
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 1.25rem;
-    padding: 1.2rem;
-    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+    background: ${colors.surface};
+    border: 1px solid ${colors.border};
+    border-radius: ${radius.xl};
+    padding: ${spacing.lg};
+    box-shadow: ${shadow.sm};
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all ${transition.normal};
 
     &:hover {
-        transform: translateY(-0.2rem);
-        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
-        border-color: #d1fae5;
+        transform: translateY(-2px);
+        box-shadow: ${shadow.lg};
+        border-color: ${colors.borderGreen};
+    }
+
+    &:active {
+        transform: translateY(0);
     }
 `;
 
@@ -86,92 +95,69 @@ const TopSection = styled(Box)`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 0.9rem;
+    gap: ${spacing.md};
+    margin-bottom: ${spacing.sm};
 `;
 
 const StatusBadge = styled(Typography)<{ $status: string }>`
     width: fit-content;
-    padding: 0.35rem 0.8rem;
-    border-radius: 999px;
-    font-size: 0.78rem !important;
-    font-weight: 800 !important;
-    background: ${({ $status }) => {
-        switch ($status) {
-            case "Upcoming":
-                return "#dcfce7";
-            case "Ongoing":
-                return "#ecfdf5";
-            case "Finished":
-                return "#f1f5f9";
-            default:
-                return "#f8fafc";
-        }
-    }};
-    color: ${({ $status }) => {
-        switch ($status) {
-            case "Upcoming":
-                return "#047857";
-            case "Ongoing":
-                return "#059669";
-            case "Finished":
-                return "#64748b";
-            default:
-                return "#334155";
-        }
-    }};
+    padding: 0.3rem 0.7rem;
+    border-radius: ${radius.pill};
+    font-size: ${fontSize.xs} !important;
+    font-weight: ${fontWeight.black} !important;
+    background: ${({ $status }) => colors.status[$status]?.bg ?? colors.surfaceAlt};
+    color: ${({ $status }) => colors.status[$status]?.text ?? colors.textSecondary};
 `;
 
 const TournamentName = styled(Typography)`
-    font-size: 1.15rem !important;
-    font-weight: 800 !important;
-    color: #111827;
-    margin-bottom: 0.45rem !important;
+    font-size: ${fontSize.lg} !important;
+    font-weight: ${fontWeight.black} !important;
+    color: ${colors.textPrimary};
+    margin-bottom: 0.35rem !important;
 `;
 
 const TournamentDescription = styled(Typography)`
-    font-size: 0.92rem !important;
-    color: #64748b;
+    font-size: ${fontSize.sm} !important;
+    color: ${colors.textMuted};
     line-height: 1.6 !important;
-    margin-bottom: 1rem !important;
+    margin-bottom: ${spacing.md} !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 `;
 
-const DetailsGrid = styled(Box)`
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-
-    @media (max-width: 40rem) {
-        grid-template-columns: 1fr;
-    }
-`;
-
-const DetailItem = styled(Box)`
+const DetailsRow = styled(Box)`
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #334155;
+    flex-wrap: wrap;
+    gap: ${spacing.xs};
 `;
 
-const DetailText = styled(Typography)`
-  font-size: 0.9rem !important;
-  font-weight: 500 !important;
-  color: #334155;
-  letter-spacing: 0.01em;
+const DetailChip = styled(Box)`
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: ${radius.pill};
+    background: ${colors.surfaceAlt};
+    color: ${colors.textSecondary};
+    font-size: ${fontSize.xs};
+    font-weight: ${fontWeight.medium};
+    white-space: nowrap;
 `;
 
 const RightBadges = styled(Box)`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: ${spacing.xs};
 `;
 
 const FullBadge = styled(Typography)`
-  width: fit-content;
-  padding: 0.35rem 0.8rem;
-  border-radius: 999px;
-  font-size: 0.78rem !important;
-  font-weight: 800 !important;
-  background: #fee2e2;
-  color: #b91c1c;
+    width: fit-content;
+    padding: 0.3rem 0.7rem;
+    border-radius: ${radius.pill};
+    font-size: ${fontSize.xs} !important;
+    font-weight: ${fontWeight.black} !important;
+    background: ${colors.dangerBg};
+    color: ${colors.danger};
 `;

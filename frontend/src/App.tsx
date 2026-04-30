@@ -17,19 +17,94 @@ import PrivateRoute from "./routes/PrivateRoute";
 import LeaderboardPage from "./pages/LeaderboardPage.tsx";
 
 const GlobalStyle = createGlobalStyle`
+    :root {
+        --color-primary: #10b981;
+        --color-primary-hover: #059669;
+        --color-primary-light: #d1fae5;
+        --color-primary-lighter: #ecfdf5;
+
+        --color-text-primary: #111827;
+        --color-text-secondary: #475569;
+        --color-text-muted: #64748b;
+        --color-text-hint: #94a3b8;
+
+        --color-surface: #ffffff;
+        --color-surface-hover: #f8fafc;
+        --color-surface-alt: #f1f5f9;
+        --color-border: #e5e7eb;
+        --color-border-green: #d1fae5;
+
+        --radius-sm: 0.5rem;
+        --radius-md: 0.75rem;
+        --radius-lg: 1rem;
+        --radius-xl: 1.25rem;
+        --radius-pill: 999px;
+
+        --shadow-sm: 0 1px 4px rgba(15, 23, 42, 0.06);
+        --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.08);
+        --shadow-lg: 0 8px 24px rgba(15, 23, 42, 0.10);
+
+        --transition-fast: 0.15s ease;
+        --transition-normal: 0.2s ease;
+
+        --navbar-height: 4.25rem;
+    }
+
     * {
         box-sizing: border-box;
     }
 
     body {
         margin: 0;
-        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+        font-feature-settings: 'cv11', 'ss01';
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
         color: #0f172a;
-        background: linear-gradient(180deg, #f0fdf4 0%, #f8fafc 26rem);
+        background: linear-gradient(180deg, #f0fdf4 0%, #f8fafc 40%);
+        line-height: 1.6;
     }
 
     button, input, textarea, select {
         font-family: inherit;
+    }
+    
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    :focus-visible {
+        outline: 2px solid #10b981;
+        outline-offset: 2px;
+    }
+    
+    .tabular-nums {
+        font-variant-numeric: tabular-nums;
+    }
+    
+    ::selection {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    
+    ::-webkit-scrollbar {
+        width: 0.45rem;
+        height: 0.45rem;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 999px;
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
     }
 `;
 

@@ -3,9 +3,15 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import axiosInstance from "../api/axiosInstance";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
-import { PageWrapper, PageTitle, LoadingWrapper } from "../components/common/PageLayout";
+import {
+    NarrowPageWrapper,
+    PageTitle,
+    PageSubtitle,
+    LoadingWrapper,
+} from "../components/common/PageLayout";
 import ScheduleLocationSection from "../components/schedule/ScheduleLocationSection";
 import type { ScheduledMatch } from "../types/schedule";
+import { colors, spacing, fontSize } from "../styles/theme";
 
 type ScheduleGroup = Record<string, Record<string, Record<string, ScheduledMatch[]>>>;
 
@@ -59,7 +65,7 @@ function SchedulePage() {
 
     return (
         <AuthenticatedLayout>
-            <PageWrapper>
+            <NarrowPageWrapper>
                 <PageTitle>Schedule</PageTitle>
                 <PageSubtitle>All scheduled matches across ongoing tournaments.</PageSubtitle>
 
@@ -68,63 +74,68 @@ function SchedulePage() {
                         <CircularProgress />
                     </LoadingWrapper>
                 ) : sortedDates.length === 0 ? (
-                    <EmptyState>No matches have been scheduled yet.</EmptyState>
+                    <EmptyText>No scheduled matches found.</EmptyText>
                 ) : (
-                    sortedDates.map((date) => {
-                        const locationsOnDay = grouped[date];
-                        const sortedLocations = Object.keys(locationsOnDay).sort();
-
-                        return (
-                            <DaySection key={date}>
-                                <DateHeading>
+                    <ScheduleList>
+                        {sortedDates.map((date) => (
+                            <DateBlock key={date}>
+                                <DateHeader>
                                     {new Date(date).toLocaleDateString("en-GB", {
                                         weekday: "long",
-                                        day: "numeric",
+                                        day: "2-digit",
                                         month: "long",
                                         year: "numeric",
                                     })}
-                                </DateHeading>
+                                </DateHeader>
 
-                                {sortedLocations.map((locKey) => (
+                                {Object.entries(grouped[date]).map(([locId, courts]) => (
                                     <ScheduleLocationSection
-                                        key={locKey}
-                                        locKey={locKey}
-                                        locationName={locationNames[locKey] ?? "Unassigned"}
-                                        courts={locationsOnDay[locKey]}
+                                        key={locId}
+                                        locKey={locId}
+                                        locationName={
+                                            locId === "__no_location__"
+                                                ? "Unassigned"
+                                                : locationNames[locId] ?? `Location ${locId}`
+                                        }
+                                        courts={courts}
                                     />
                                 ))}
-                            </DaySection>
-                        );
-                    })
+                            </DateBlock>
+                        ))}
+                    </ScheduleList>
                 )}
-            </PageWrapper>
+            </NarrowPageWrapper>
         </AuthenticatedLayout>
     );
 }
 
 export default SchedulePage;
 
-const PageSubtitle = styled(Typography)`
-  color: #64748b;
-  margin-bottom: 2rem !important;
+const ScheduleList = styled(Box)`
+    display: flex;
+    flex-direction: column;
+    gap: ${spacing.xl};
+    margin-top: ${spacing.lg};
 `;
 
-const EmptyState = styled(Typography)`
-  color: #94a3b8;
-  font-size: 1rem !important;
-  text-align: center;
-  padding: 3rem 0;
+const DateBlock = styled(Box)`
+    display: flex;
+    flex-direction: column;
+    gap: ${spacing.md};
 `;
 
-const DaySection = styled(Box)`
-  margin-bottom: 2.5rem;
+const DateHeader = styled(Typography)`
+    font-size: ${fontSize.lg} !important;
+    font-weight: 800 !important;
+    color: ${colors.textPrimary};
+    padding-bottom: ${spacing.xs};
+    border-bottom: 2px solid ${colors.primaryLight};
 `;
 
-const DateHeading = styled(Typography)`
-  font-size: 1.25rem !important;
-  font-weight: 800 !important;
-  color: #111827;
-  margin-bottom: 1rem !important;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #e5e7eb;
+const EmptyText = styled(Typography)`
+    color: ${colors.textHint};
+    font-size: ${fontSize.base} !important;
+    text-align: center;
+    padding: ${spacing.xl} 0;
+    margin-top: ${spacing.md};
 `;

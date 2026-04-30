@@ -6,7 +6,22 @@ import LocationCard from "../components/admin/LocationCard";
 import LocationModal from "../components/admin/LocationModal";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 import TournamentCard from "../components/tournaments/TournamentCard";
+import {
+    PageWrapper as BasePageWrapper,
+    PageTitle,
+    LoadingWrapper,
+} from "../components/common/PageLayout";
 import useAdminDashboard from "../hooks/useAdminDashboard";
+import {
+    colors,
+    spacing,
+    fontSize,
+    fontWeight,
+    radius,
+    shadow,
+    transition,
+    breakpoints,
+} from "../styles/theme";
 
 function AdminDashboardPage() {
     const {
@@ -51,24 +66,32 @@ function AdminDashboardPage() {
                     <SectionsWrapper>
                         <SectionBlock>
                             <SectionTitle>Ongoing tournaments</SectionTitle>
-                            <HorizontalCardsRow>
-                                {ongoingTournaments.map(t => (
-                                    <HorizontalCardItem key={t.id}>
-                                        <TournamentCard tournament={t} detailsPath={`/admin/tournaments/${t.id}`} />
-                                    </HorizontalCardItem>
-                                ))}
-                            </HorizontalCardsRow>
+                            {ongoingTournaments.length === 0 ? (
+                                <EmptyText>No ongoing tournaments.</EmptyText>
+                            ) : (
+                                <HorizontalCardsRow>
+                                    {ongoingTournaments.map(t => (
+                                        <HorizontalCardItem key={t.id}>
+                                            <TournamentCard tournament={t} detailsPath={`/admin/tournaments/${t.id}`} />
+                                        </HorizontalCardItem>
+                                    ))}
+                                </HorizontalCardsRow>
+                            )}
                         </SectionBlock>
 
                         <SectionBlock>
                             <SectionTitle>Upcoming tournaments</SectionTitle>
-                            <HorizontalCardsRow>
-                                {upcomingTournaments.map(t => (
-                                    <HorizontalCardItem key={t.id}>
-                                        <TournamentCard tournament={t} detailsPath={`/admin/tournaments/${t.id}`} />
-                                    </HorizontalCardItem>
-                                ))}
-                            </HorizontalCardsRow>
+                            {upcomingTournaments.length === 0 ? (
+                                <EmptyText>No upcoming tournaments.</EmptyText>
+                            ) : (
+                                <HorizontalCardsRow>
+                                    {upcomingTournaments.map(t => (
+                                        <HorizontalCardItem key={t.id}>
+                                            <TournamentCard tournament={t} detailsPath={`/admin/tournaments/${t.id}`} />
+                                        </HorizontalCardItem>
+                                    ))}
+                                </HorizontalCardsRow>
+                            )}
                         </SectionBlock>
 
                         <SectionBlock>
@@ -113,82 +136,108 @@ function AdminDashboardPage() {
 
 export default AdminDashboardPage;
 
-const PageWrapper = styled(Box)`
-  width: 100%;
-  max-width: 80rem;
-  margin: 0 auto;
+const PageWrapper = styled(BasePageWrapper)`
+    max-width: 80rem;
 `;
+
 const TopRow = styled(Box)`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: ${spacing.lg};
+    gap: ${spacing.md};
+
+    @media (max-width: ${breakpoints.md}) {
+        flex-direction: column;
+        align-items: stretch;
+    }
 `;
+
 const ButtonsRow = styled(Box)`
-  display: flex;
-  gap: 0.75rem;
+    display: flex;
+    gap: ${spacing.sm};
 `;
-const PageTitle = styled(Typography)`
-  font-size: 2rem !important;
-  font-weight: 800 !important;
-  color: #111827;
-`;
+
 const CreateButton = styled.button`
-  height: 2.8rem;
-  padding: 0 1rem;
-  border: none;
-  border-radius: 999px;
-  background: #10b981;
-  color: white;
-  font-size: 0.92rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  cursor: pointer;
-  &:hover { background: #059669; }
+    height: 2.75rem;
+    padding: 0 ${spacing.md};
+    border: none;
+    border-radius: ${radius.pill};
+    background: ${colors.primary};
+    color: white;
+    font-size: ${fontSize.sm};
+    font-weight: ${fontWeight.bold};
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    transition: all ${transition.normal};
+
+    &:hover {
+        background: ${colors.primaryHover};
+        box-shadow: ${shadow.green};
+    }
+
+    &:active {
+        transform: scale(0.97);
+    }
 `;
+
 const SectionsWrapper = styled(Box)`
-  display: flex;
-  flex-direction: column;
-  gap: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: ${spacing.xl};
 `;
+
 const SectionBlock = styled(Box)`
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
+    display: flex;
+    flex-direction: column;
+    gap: ${spacing.sm};
 `;
+
 const SectionTitle = styled(Typography)`
-  font-size: 1.2rem !important;
-  font-weight: 800 !important;
-  color: #111827;
+    font-size: 1.2rem !important;
+    font-weight: ${fontWeight.black} !important;
+    color: ${colors.textPrimary};
 `;
+
 const HorizontalCardsRow = styled(Box)`
-  display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-  padding-top: 0.35rem;
-  &::-webkit-scrollbar { height: 0.45rem; }
-  &::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+    display: flex;
+    gap: ${spacing.md};
+    overflow-x: auto;
+    padding-top: 0.35rem;
+    padding-bottom: ${spacing.xs};
+
+    /* Scroll fade hint */
+    mask-image: linear-gradient(to right, black calc(100% - 2rem), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 2rem), transparent 100%);
 `;
+
 const HorizontalCardItem = styled(Box)`
-  flex: 0 0 calc(50% - 0.5rem);
-  min-width: calc(50% - 0.5rem);
-  @media (max-width: 72rem) { flex: 0 0 100%; min-width: 100%; }
+    flex: 0 0 calc(50% - 0.5rem);
+    min-width: calc(50% - 0.5rem);
+
+    @media (max-width: 72rem) {
+        flex: 0 0 100%;
+        min-width: 100%;
+    }
 `;
-const LoadingWrapper = styled(Box)`
-  display: flex;
-  justify-content: center;
-  padding: 2rem 0;
-`;
+
 const EmptyText = styled(Typography)`
-  color: #94a3b8;
-  font-size: 0.94rem !important;
+    color: ${colors.textHint};
+    font-size: ${fontSize.base} !important;
 `;
+
 const LocationsGrid = styled(Box)`
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-  @media (max-width: 72rem) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  @media (max-width: 48rem) { grid-template-columns: 1fr; }
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: ${spacing.md};
+
+    @media (max-width: 72rem) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (max-width: ${breakpoints.md}) {
+        grid-template-columns: 1fr;
+    }
 `;

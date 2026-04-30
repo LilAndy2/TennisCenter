@@ -4,7 +4,23 @@ import styled from "styled-components";
 import axiosInstance from "../api/axiosInstance";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 import TournamentCard from "../components/tournaments/TournamentCard";
+import {
+    PageWrapper as BasePageWrapper,
+    PageHeader,
+    PageTitle,
+    PageSubtitle,
+    LoadingWrapper,
+} from "../components/common/PageLayout";
 import type { TournamentStatus, TournamentType } from "../types/tournament";
+import {
+    colors,
+    spacing,
+    fontSize,
+    fontWeight,
+    radius,
+    transition,
+    breakpoints,
+} from "../styles/theme";
 
 type FilterOption = TournamentStatus;
 
@@ -62,6 +78,10 @@ function TournamentsPage() {
                     <LoadingWrapper>
                         <CircularProgress />
                     </LoadingWrapper>
+                ) : filteredTournaments.length === 0 ? (
+                    <EmptyText>
+                        No {selectedFilter.toLowerCase()} tournaments found.
+                    </EmptyText>
                 ) : (
                     <CardsGrid>
                         {filteredTournaments.map((tournament) => (
@@ -76,65 +96,52 @@ function TournamentsPage() {
 
 export default TournamentsPage;
 
-const PageWrapper = styled(Box)`
-    width: 100%;
+const PageWrapper = styled(BasePageWrapper)`
     max-width: 72rem;
-    margin: 0 auto;
-`;
-
-const PageHeader = styled(Box)`
-    margin-bottom: 1.2rem;
-`;
-
-const PageTitle = styled(Typography)`
-    font-size: 2rem !important;
-    font-weight: 800 !important;
-    color: #111827;
-    margin-bottom: 0.45rem !important;
-`;
-
-const PageSubtitle = styled(Typography)`
-    color: #64748b;
-    font-size: 0.98rem !important;
 `;
 
 const FiltersRow = styled(Box)`
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: ${spacing.xs};
     flex-wrap: wrap;
-    margin-bottom: 1.5rem;
+    margin-bottom: ${spacing.lg};
 `;
 
 const FilterButton = styled.button<{ $active: boolean }>`
     height: 2.6rem;
-    padding: 0 1rem;
+    padding: 0 ${spacing.md};
     border: none;
-    border-radius: 999px;
-    background: ${({ $active }) => ($active ? "#10b981" : "#f1f5f9")};
-    color: ${({ $active }) => ($active ? "white" : "#334155")};
-    font-size: 0.9rem;
-    font-weight: 700;
+    border-radius: ${radius.pill};
+    background: ${({ $active }) => ($active ? colors.primary : colors.surfaceAlt)};
+    color: ${({ $active }) => ($active ? "white" : colors.textSecondary)};
+    font-size: ${fontSize.sm};
+    font-weight: ${fontWeight.bold};
     cursor: pointer;
-    transition: 0.2s ease;
+    transition: all ${transition.normal};
 
     &:hover {
-        background: ${({ $active }) => ($active ? "#059669" : "#e2e8f0")};
+        background: ${({ $active }) => ($active ? colors.primaryHover : colors.surfaceAltHover)};
+    }
+
+    &:active {
+        transform: scale(0.97);
     }
 `;
 
 const CardsGrid = styled(Box)`
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
+    gap: ${spacing.md};
 
-    @media (max-width: 64rem) {
+    @media (max-width: ${breakpoints.lg}) {
         grid-template-columns: 1fr;
     }
 `;
 
-const LoadingWrapper = styled(Box)`
-  display: flex;
-  justify-content: center;
-  padding: 2rem 0;
+const EmptyText = styled(Typography)`
+    color: ${colors.textHint};
+    font-size: ${fontSize.base} !important;
+    text-align: center;
+    padding: ${spacing.xl} 0;
 `;

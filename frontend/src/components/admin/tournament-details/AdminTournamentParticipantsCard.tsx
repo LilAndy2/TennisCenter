@@ -1,10 +1,30 @@
 import { Box, Typography } from "@mui/material";
 import styled from "styled-components";
-import type { TournamentParticipantType } from "../../../types/tournament";
+import {
+    SectionCard as BaseSectionCard,
+    SectionTitle as BaseSectionTitle,
+    SectionText,
+} from "../../common/SectionCard";
+import {
+    colors,
+    spacing,
+    fontSize,
+    fontWeight,
+    radius,
+    transition,
+    breakpoints,
+} from "../../../styles/theme";
+
+type Participant = {
+    id: number;
+    fullName: string;
+    email: string;
+    registeredAt: string;
+};
 
 type AdminTournamentParticipantsCardProps = {
-    participants: TournamentParticipantType[];
-    onRemoveParticipant: (participant: TournamentParticipantType) => void;
+    participants: Participant[];
+    onRemoveParticipant: (participant: Participant) => void;
 };
 
 function AdminTournamentParticipantsCard({
@@ -12,29 +32,31 @@ function AdminTournamentParticipantsCard({
                                              onRemoveParticipant,
                                          }: AdminTournamentParticipantsCardProps) {
     return (
-        <SectionCard>
-            <SectionTitle>Registered players</SectionTitle>
+        <BaseSectionCard>
+            <BaseSectionTitle>
+                Participants ({participants.length})
+            </BaseSectionTitle>
 
             {participants.length === 0 ? (
                 <SectionText>No players registered yet.</SectionText>
             ) : (
                 <ParticipantsList>
-                    {participants.map((participant) => (
-                        <ParticipantItem key={participant.id}>
+                    {participants.map((p) => (
+                        <ParticipantItem key={p.id}>
                             <ParticipantLeftColumn>
-                                <ParticipantName>{participant.fullName}</ParticipantName>
-                                <ParticipantEmail>{participant.email}</ParticipantEmail>
+                                <ParticipantName>{p.fullName}</ParticipantName>
+                                <ParticipantEmail>{p.email}</ParticipantEmail>
                             </ParticipantLeftColumn>
 
                             <ParticipantRightColumn>
                                 <ParticipantDate>
-                                    Registered on{" "}
-                                    {new Date(participant.registeredAt).toLocaleDateString()}
+                                    {new Date(p.registeredAt).toLocaleDateString("en-GB", {
+                                        day: "2-digit",
+                                        month: "short",
+                                        year: "numeric",
+                                    })}
                                 </ParticipantDate>
-
-                                <RemoveParticipantButton
-                                    onClick={() => onRemoveParticipant(participant)}
-                                >
+                                <RemoveParticipantButton onClick={() => onRemoveParticipant(p)}>
                                     Remove
                                 </RemoveParticipantButton>
                             </ParticipantRightColumn>
@@ -42,126 +64,105 @@ function AdminTournamentParticipantsCard({
                     ))}
                 </ParticipantsList>
             )}
-        </SectionCard>
+        </BaseSectionCard>
     );
 }
 
 export default AdminTournamentParticipantsCard;
 
-const SectionCard = styled(Box)`
-  grid-column: 1 / -1;  
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 1.2rem;
-  padding: 1.3rem;
-  box-shadow: 0 0.45rem 1.2rem rgba(15, 23, 42, 0.03);
-`;
-
-const SectionTitle = styled(Typography)`
-  font-size: 1.1rem !important;
-  font-weight: 800 !important;
-  color: #111827;
-  margin-bottom: 0.45rem !important;
-`;
-
-const SectionText = styled(Typography)`
-  color: #64748b;
-  line-height: 1.65 !important;
-`;
-
 const ParticipantsList = styled(Box)`
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.8rem;
-  max-height: 12.5rem;
-  overflow-y: auto;
-  padding-right: 0.35rem;
-    
-  @media (max-width: 72rem) {  
-    grid-template-columns: repeat(2, minmax(0, 1fr));  
-  } 
-    
-  @media (max-width: 48rem) {
-    grid-template-columns: 1fr;  
-  }  
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: ${spacing.sm};
+    max-height: 12.5rem;
+    overflow-y: auto;
+    padding-right: 0.35rem;
 
-  &::-webkit-scrollbar {
-    width: 0.4rem;
-  }
+    @media (max-width: 72rem) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 
-  &::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 999px;
-  }
+    @media (max-width: ${breakpoints.md}) {
+        grid-template-columns: 1fr;
+    }
 `;
 
 const ParticipantItem = styled(Box)`
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  min-height: 5.4rem;  
-  padding: 0.9rem 1rem;
-  border-radius: 0.9rem;
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: ${spacing.md};
+    min-height: 5.4rem;
+    padding: ${spacing.sm} ${spacing.md};
+    border-radius: ${radius.md};
+    background: ${colors.surfaceHover};
+    border: 1px solid ${colors.border};
+    transition: border-color ${transition.normal};
+
+    &:hover {
+        border-color: ${colors.borderGreen};
+    }
 `;
 
 const ParticipantLeftColumn = styled(Box)`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.3rem;
-  min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    min-width: 0;
 `;
 
 const ParticipantRightColumn = styled(Box)`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.45rem;
-  flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.45rem;
+    flex-shrink: 0;
 
-  @media (max-width: 40rem) {
-    align-items: flex-start;
-  }
+    @media (max-width: ${breakpoints.sm}) {
+        align-items: flex-start;
+    }
 `;
 
 const ParticipantName = styled(Typography)`
-  font-size: 0.96rem !important;
-  font-weight: 700 !important;
-  color: #111827;
+    font-size: ${fontSize.base} !important;
+    font-weight: ${fontWeight.bold} !important;
+    color: ${colors.textPrimary};
 `;
 
 const ParticipantEmail = styled(Typography)`
-  font-size: 0.86rem !important;
-  color: #475569;
+    font-size: ${fontSize.xs} !important;
+    color: ${colors.textSecondary};
 `;
 
 const ParticipantDate = styled(Typography)`
-  font-size: 0.8rem !important;
-  color: #64748b;
-  text-align: right;
+    font-size: ${fontSize.xs} !important;
+    color: ${colors.textMuted};
+    text-align: right;
 
-  @media (max-width: 40rem) {
-    text-align: left;
-  }
+    @media (max-width: ${breakpoints.sm}) {
+        text-align: left;
+    }
 `;
 
 const RemoveParticipantButton = styled.button`
-  width: fit-content;
-  height: 2.2rem;
-  padding: 0 0.9rem;
-  border: none;
-  border-radius: 999px;
-  background: #fee2e2;
-  color: #b91c1c;
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.2s ease;
+    width: fit-content;
+    height: 2.2rem;
+    padding: 0 0.9rem;
+    border: none;
+    border-radius: ${radius.pill};
+    background: ${colors.dangerBg};
+    color: ${colors.danger};
+    font-size: ${fontSize.xs};
+    font-weight: ${fontWeight.bold};
+    cursor: pointer;
+    transition: all ${transition.normal};
 
-  &:hover {
-    background: #fecaca;
-  }
+    &:hover {
+        background: ${colors.dangerBgHover};
+    }
+
+    &:active {
+        transform: scale(0.95);
+    }
 `;

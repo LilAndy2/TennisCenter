@@ -1,116 +1,139 @@
 import { Box, Typography } from "@mui/material";
 import styled from "styled-components";
+import {
+    colors,
+    spacing,
+    fontSize,
+    fontWeight,
+    radius,
+    shadow,
+    transition,
+} from "../../styles/theme";
 
 export const SectionCard = styled(Box)`
-  grid-column: 1 / -1;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 1.2rem;
-  padding: 1.3rem;
-  box-shadow: 0 0.45rem 1.2rem rgba(15, 23, 42, 0.03);
+    grid-column: 1 / -1;
+    background: ${colors.surface};
+    border: 1px solid ${colors.border};
+    border-radius: ${radius.xl};
+    padding: ${spacing.lg};
+    box-shadow: ${shadow.sm};
+    transition: box-shadow ${transition.normal};
 `;
 
 export const SectionTitle = styled(Typography)`
-  font-size: 1.1rem !important;
-  font-weight: 800 !important;
-  color: #111827;
-  margin-bottom: 0.75rem !important;
+    font-size: ${fontSize.md} !important;
+    font-weight: ${fontWeight.black} !important;
+    color: ${colors.textPrimary};
+    margin-bottom: ${spacing.sm} !important;
 `;
 
 export const SectionText = styled(Typography)`
-  color: #64748b;
-  line-height: 1.65 !important;
+    color: ${colors.textMuted};
+    line-height: 1.65 !important;
 `;
 
 export const ControlsCard = styled(Box)`
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 1.2rem;
-  padding: 1.1rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 0.45rem 1.2rem rgba(15, 23, 42, 0.03);
+    background: ${colors.surface};
+    border: 1px solid ${colors.border};
+    border-radius: ${radius.xl};
+    padding: ${spacing.md};
+    margin-bottom: ${spacing.md};
+    box-shadow: ${shadow.sm};
 `;
 
 export const ActionRow = styled(Box)`
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
+    display: flex;
+    gap: ${spacing.sm};
+    margin-top: ${spacing.xs};
 `;
 
 export const GreenActionButton = styled.button`
-  height: 2.8rem;
-  padding: 0 1rem;
-  border: none;
-  border-radius: 999px;
-  background: #10b981;
-  color: white;
-  font-size: 0.92rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  cursor: pointer;
-  transition: 0.2s ease;
+    height: 2.75rem;
+    padding: 0 ${spacing.md};
+    border: none;
+    border-radius: ${radius.pill};
+    background: ${colors.primary};
+    color: white;
+    font-size: ${fontSize.sm};
+    font-weight: ${fontWeight.bold};
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    transition: all ${transition.normal};
 
-  &:hover {
-    background: #059669;
-  }
+    &:hover {
+        background: ${colors.primaryHover};
+        box-shadow: ${shadow.green};
+    }
+
+    &:active {
+        transform: scale(0.97);
+    }
 `;
 
 export const DangerButton = styled.button`
-  height: 2.8rem;
-  padding: 0 1rem;
-  border: none;
-  border-radius: 999px;
-  background: #fee2e2;
-  color: #b91c1c;
-  font-size: 0.92rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  cursor: pointer;
-  transition: 0.2s ease;
+    height: 2.75rem;
+    padding: 0 ${spacing.md};
+    border: none;
+    border-radius: ${radius.pill};
+    background: ${colors.dangerBg};
+    color: ${colors.danger};
+    font-size: ${fontSize.sm};
+    font-weight: ${fontWeight.bold};
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    transition: all ${transition.normal};
 
-  &:hover {
-    background: #fecaca;
-  }
+    &:hover {
+        background: ${colors.dangerBgHover};
+    }
+
+    &:active {
+        transform: scale(0.97);
+    }
 `;
 
 export const NeutralButton = styled.button`
-  height: 2.8rem;
-  padding: 0 1rem;
-  border: none;
-  border-radius: 999px;
-  background: #f1f5f9;
-  color: #334155;
-  font-size: 0.92rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  cursor: pointer;
-  transition: 0.2s ease;
+    height: 2.75rem;
+    padding: 0 ${spacing.md};
+    border: none;
+    border-radius: ${radius.pill};
+    background: ${colors.surfaceAlt};
+    color: ${colors.textSecondary};
+    font-size: ${fontSize.sm};
+    font-weight: ${fontWeight.bold};
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    transition: all ${transition.normal};
 
-  &:hover {
-    background: #e2e8f0;
-  }
+    &:hover {
+        background: ${colors.surfaceAltHover};
+    }
+
+    &:active {
+        transform: scale(0.97);
+    }
 `;
 
 export const NotFoundCard = styled(Box)`
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 1.25rem;
-  padding: 1.5rem;
+    background: ${colors.surface};
+    border: 1px solid ${colors.border};
+    border-radius: ${radius.xl};
+    padding: ${spacing.lg};
 `;
 
 export const NotFoundTitle = styled(Typography)`
-  font-size: 1.4rem !important;
-  font-weight: 800 !important;
-  color: #111827;
-  margin-bottom: 0.4rem !important;
+    font-size: 1.4rem !important;
+    font-weight: ${fontWeight.black} !important;
+    color: ${colors.textPrimary};
+    margin-bottom: 0.4rem !important;
 `;
 
 export const NotFoundText = styled(Typography)`
-  color: #64748b;
+    color: ${colors.textMuted};
 `;

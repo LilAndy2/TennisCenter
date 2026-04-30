@@ -1,5 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import styled from "styled-components";
+import { colors, fontSize, fontWeight } from "../../styles/theme";
 
 export const FieldWrapper = styled(Box)`
     display: flex;
@@ -8,7 +9,7 @@ export const FieldWrapper = styled(Box)`
 `;
 
 export const FieldLabel = styled(Typography)`
-    font-size: 0.95rem !important;
-    font-weight: 600 !important;
-    color: #1f2937;
+    font-size: ${fontSize.base} !important;
+    font-weight: ${fontWeight.semibold} !important;
+    color: ${colors.textPrimary};
 `;
