@@ -41,6 +41,7 @@ public class PlayerProfileService {
     private final UserRepository userRepository;
     private final TournamentMatchRepository tournamentMatchRepository;
     private final MatchSetRepository matchSetRepository;
+    private final RankingService rankingService;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -54,8 +55,9 @@ public class PlayerProfileService {
 
         int rank = calculateRank(user);
 
-        int wins = user.getWins() == null ? 0 : user.getWins();
-        int losses = user.getLosses() == null ? 0 : user.getLosses();
+        int wins = rankingService.getWins(userId);
+        int losses = rankingService.getLosses(userId);
+        int activePoints = rankingService.getActivePoints(userId);
         int totalMatches = wins + losses;
         double winRate = totalMatches == 0 ? 0.0 : ((double) wins / totalMatches) * 100.0;
 
@@ -66,7 +68,7 @@ public class PlayerProfileService {
                 .username(user.getDisplayUsername())
                 .email(user.getEmail())
                 .playerLevel(user.getPlayerLevel() != null ? user.getPlayerLevel().getDisplayName() : "-")
-                .rankingPoints(user.getRankingPoints() == null ? 0 : user.getRankingPoints())
+                .rankingPoints(activePoints)
                 .wins(wins)
                 .losses(losses)
                 .winRate(Math.round(winRate * 10.0) / 10.0)

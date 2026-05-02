@@ -31,6 +31,7 @@ public class TournamentMatchService {
     private final CourtRepository courtRepository;
     private final SetScoreValidator setScoreValidator;
     private final TournamentMatchMapper tournamentMatchMapper;
+    private final RankingService rankingService;
 
     public List<TournamentMatchResponse> getTournamentMatches(Long tournamentId, User currentUser) {
         return tournamentMatchRepository
@@ -75,6 +76,9 @@ public class TournamentMatchService {
         }
 
         User winner = resolveWinner(match, playerOneSetsWon, playerTwoSetsWon);
+        User loser = winner.getId().equals(match.getPlayerOne().getId())
+                ? match.getPlayerTwo()
+                : match.getPlayerOne();
 
         matchSetRepository.deleteByMatchId(matchId);
 
@@ -94,6 +98,8 @@ public class TournamentMatchService {
         match.setStatus(TournamentMatchStatus.COMPLETED);
         match.setReportedBy(currentUser);
         TournamentMatch saved = tournamentMatchRepository.save(match);
+
+        rankingService.awardMatchPoints(saved, winner, loser);
 
         advanceWinnerToNextRound(match, winner);
 
@@ -121,10 +127,6 @@ public class TournamentMatchService {
         TournamentMatch saved = tournamentMatchRepository.save(match);
         return tournamentMatchMapper.toResponse(saved, currentUser);
     }
-
-    // -------------------------------------------------------------------------
-    // Private helpers
-    // -------------------------------------------------------------------------
 
     private TournamentMatch findMatch(Long matchId) {
         return tournamentMatchRepository.findById(matchId)
