@@ -191,6 +191,15 @@ function AnimatedRoutes() {
                 />
 
                 <Route
+                    path="/profile/:userId"
+                    element={
+                        <PrivateRoute>
+                            <ProfilePage />
+                        </PrivateRoute>
+                    }
+                />
+
+                <Route
                     path="/settings"
                     element={
                         <PrivateRoute>

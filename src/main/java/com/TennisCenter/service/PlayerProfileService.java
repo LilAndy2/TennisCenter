@@ -89,7 +89,11 @@ public class PlayerProfileService {
                 .filter(m -> m.getStatus() == TournamentMatchStatus.COMPLETED)
                 .filter(m -> m.getWinner() != null)
                 .sorted(Comparator.comparing(
-                        (TournamentMatch m) -> m.getMatchDate() != null ? m.getMatchDate() : m.getTournament().getStartDate()
+                        (TournamentMatch m) -> {
+                            if (m.getScheduledTime() != null) return m.getScheduledTime();
+                            if (m.getMatchDate() != null) return m.getMatchDate().atStartOfDay();
+                            return m.getTournament().getStartDate().atStartOfDay();
+                        }
                 ).reversed())
                 .toList();
 
@@ -110,7 +114,9 @@ public class PlayerProfileService {
 
             result.add(MatchHistoryResponse.builder()
                     .matchId(match.getId())
-                    .matchDate(match.getMatchDate() != null
+                    .matchDate(match.getScheduledTime() != null
+                            ? match.getScheduledTime().toLocalDate().toString()
+                            : match.getMatchDate() != null
                             ? match.getMatchDate().toString()
                             : match.getTournament().getStartDate().toString())
                     .round(round)
@@ -125,6 +131,7 @@ public class PlayerProfileService {
                     .surface(match.getTournament().getSurface() != null
                             ? match.getTournament().getSurface().getDisplayName()
                             : null)
+                    .tournamentStartYear(match.getTournament().getStartDate().getYear())
                     .build());
         }
 

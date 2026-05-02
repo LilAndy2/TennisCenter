@@ -1,6 +1,6 @@
-import { CameraAlt, EmojiEvents, MilitaryTech } from "@mui/icons-material";
+import { CameraAlt, Edit, Check, Close, EmojiEvents, MilitaryTech } from "@mui/icons-material";
 import { Avatar, Box, CircularProgress, Typography } from "@mui/material";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import styled from "styled-components";
 import type { PlayerProfile } from "../../types/profile";
 import {
@@ -19,6 +19,7 @@ type ProfileInfoCardProps = {
     isOwnProfile: boolean;
     uploadingImage: boolean;
     onUploadImage: (file: File) => void;
+    onUpdateBio: (bio: string) => void;
 };
 
 function ProfileInfoCard({
@@ -26,8 +27,11 @@ function ProfileInfoCard({
                              isOwnProfile,
                              uploadingImage,
                              onUploadImage,
+                             onUpdateBio,
                          }: ProfileInfoCardProps) {
     const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const [editingBio, setEditingBio] = useState(false);
+    const [bioText, setBioText] = useState(profile.bio ?? "");
 
     const handleAvatarClick = () => {
         if (isOwnProfile && fileInputRef.current) {
@@ -93,7 +97,49 @@ function ProfileInfoCard({
                         </LevelBadge>
                     </NameRow>
                     <Username>@{profile.username}</Username>
-                    {profile.bio && <Bio>{profile.bio}</Bio>}
+
+                    {editingBio ? (
+                        <BioEditRow>
+                            <BioTextarea
+                                value={bioText}
+                                onChange={(e) => setBioText(e.target.value)}
+                                placeholder="Write something about yourself..."
+                                autoFocus
+                                maxLength={300}
+                            />
+                            <BioEditActions>
+                                <BioActionButton
+                                    $variant="confirm"
+                                    onClick={() => {
+                                        onUpdateBio(bioText);
+                                        setEditingBio(false);
+                                    }}
+                                >
+                                    <Check sx={{ fontSize: 16 }} />
+                                </BioActionButton>
+                                <BioActionButton
+                                    $variant="cancel"
+                                    onClick={() => {
+                                        setBioText(profile.bio ?? "");
+                                        setEditingBio(false);
+                                    }}
+                                >
+                                    <Close sx={{ fontSize: 16 }} />
+                                </BioActionButton>
+                            </BioEditActions>
+                        </BioEditRow>
+                    ) : isOwnProfile ? (
+                        <BioClickable onClick={() => setEditingBio(true)}>
+                            {profile.bio ? (
+                                <BioText>{profile.bio}</BioText>
+                            ) : (
+                                <BioPlaceholder>Add a bio...</BioPlaceholder>
+                            )}
+                            <Edit sx={{ fontSize: 14, color: colors.textHint }} />
+                        </BioClickable>
+                    ) : profile.bio ? (
+                        <Bio>{profile.bio}</Bio>
+                    ) : null}
                 </InfoSection>
             </TopSection>
 
@@ -183,8 +229,8 @@ const AvatarWrapper = styled(Box)<{ $clickable: boolean }>`
 
     &:hover {
         ${({ $clickable }) =>
-    $clickable &&
-    `
+                $clickable &&
+                `
             transform: scale(1.03);
             box-shadow: ${shadow.md};
         `}
@@ -274,6 +320,96 @@ const Bio = styled(Typography)`
     color: ${colors.textSecondary};
     margin-top: ${spacing.xs} !important;
     line-height: 1.5 !important;
+`;
+
+const BioClickable = styled(Box)`
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: ${spacing.xs};
+    cursor: pointer;
+    padding: 0.3rem 0.5rem;
+    margin-left: -0.5rem;
+    border-radius: ${radius.md};
+    transition: background ${transition.fast};
+
+    &:hover {
+        background: ${colors.surfaceAlt};
+    }
+`;
+
+const BioText = styled(Typography)`
+    font-size: ${fontSize.sm} !important;
+    color: ${colors.textSecondary};
+    line-height: 1.5 !important;
+`;
+
+const BioPlaceholder = styled(Typography)`
+    font-size: ${fontSize.sm} !important;
+    color: ${colors.textHint};
+    font-style: italic;
+    line-height: 1.5 !important;
+`;
+
+const BioEditRow = styled(Box)`
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: ${spacing.xs};
+`;
+
+const BioTextarea = styled.textarea`
+    width: 100%;
+    min-height: 4rem;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid ${colors.border};
+    border-radius: ${radius.md};
+    font-family: inherit;
+    font-size: ${fontSize.sm};
+    color: ${colors.textPrimary};
+    line-height: 1.5;
+    resize: vertical;
+    outline: none;
+    transition: border-color ${transition.fast};
+
+    &::placeholder {
+        color: ${colors.textHint};
+    }
+
+    &:focus {
+        border-color: ${colors.primary};
+    }
+`;
+
+const BioEditActions = styled(Box)`
+    display: flex;
+    gap: 0.35rem;
+    align-self: flex-end;
+`;
+
+const BioActionButton = styled.button<{ $variant: "confirm" | "cancel" }>`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: none;
+    border-radius: ${radius.sm};
+    cursor: pointer;
+    transition: all ${transition.fast};
+    background: ${({ $variant }) =>
+    $variant === "confirm" ? colors.primary : colors.surfaceAlt};
+    color: ${({ $variant }) =>
+    $variant === "confirm" ? "white" : colors.textMuted};
+
+    &:hover {
+        background: ${({ $variant }) =>
+    $variant === "confirm" ? colors.primaryHover : colors.border};
+    }
+
+    &:active {
+        transform: scale(0.93);
+    }
 `;
 
 const StatsGrid = styled(Box)`

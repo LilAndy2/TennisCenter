@@ -20,6 +20,7 @@ public class MatchHistoryResponse {
     private Long tournamentId;
     private String tournamentName;
     private String surface;
+    private Integer tournamentStartYear;
 
     @Data
     @Builder

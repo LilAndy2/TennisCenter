@@ -1,5 +1,6 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 import ProfileInfoCard from "../components/profile/ProfileInfoCard";
@@ -20,18 +21,37 @@ import {
     spacing,
     fontSize,
     fontWeight,
+    radius,
+    transition,
 } from "../styles/theme";
 
 function ProfilePage() {
+    const { userId: userIdParam } = useParams<{ userId: string }>();
+    const parsedUserId = userIdParam ? Number(userIdParam) : undefined;
+
     const {
         profile,
         matchHistory,
         loading,
         uploadingImage,
         uploadProfileImage,
-    } = usePlayerProfile();
+        updateBio,
+    } = usePlayerProfile(parsedUserId);
 
     const [activeTab, setActiveTab] = useState<ProfileTab>("match-history");
+    const [selectedYear, setSelectedYear] = useState<number | null>(null);
+
+    // Compute available years from match history (based on tournament start date)
+    const availableYears = useMemo(() => {
+        const years = [...new Set(matchHistory.map((m) => m.tournamentStartYear))];
+        return years.sort((a, b) => b - a);
+    }, [matchHistory]);
+
+    // Filter matches by selected year
+    const filteredMatches = useMemo(() => {
+        if (selectedYear === null) return matchHistory;
+        return matchHistory.filter((m) => m.tournamentStartYear === selectedYear);
+    }, [matchHistory, selectedYear]);
 
     // Check if this is the current user's own profile
     const storedUser = localStorage.getItem("user");
@@ -86,6 +106,7 @@ function ProfilePage() {
                         isOwnProfile={isOwnProfile}
                         uploadingImage={uploadingImage}
                         onUploadImage={uploadProfileImage}
+                        onUpdateBio={updateBio}
                     />
 
                     {/* Section 2: Tabs Content */}
@@ -99,12 +120,26 @@ function ProfilePage() {
                             <SectionCard>
                                 <SectionHeader>
                                     <SectionTitle>Match History</SectionTitle>
-                                    <MatchCount>
-                                        {matchHistory.length} match{matchHistory.length !== 1 ? "es" : ""}
-                                    </MatchCount>
+                                    <YearSelect
+                                        value={selectedYear ?? "all"}
+                                        onChange={(e) =>
+                                            setSelectedYear(
+                                                e.target.value === "all"
+                                                    ? null
+                                                    : Number(e.target.value)
+                                            )
+                                        }
+                                    >
+                                        <option value="all">All years</option>
+                                        {availableYears.map((year) => (
+                                            <option key={year} value={year}>
+                                                {year}
+                                            </option>
+                                        ))}
+                                    </YearSelect>
                                 </SectionHeader>
                                 <MatchHistoryTable
-                                    matches={matchHistory}
+                                    matches={filteredMatches}
                                     profileUserId={profile.userId}
                                 />
                             </SectionCard>
@@ -153,10 +188,30 @@ const SectionHeader = styled(Box)`
     margin-bottom: ${spacing.md};
 `;
 
-const MatchCount = styled(Typography)`
-    font-size: ${fontSize.sm} !important;
-    color: ${colors.textMuted};
-    font-weight: ${fontWeight.medium} !important;
+const YearSelect = styled.select`
+    height: 2.25rem;
+    padding: 0 2rem 0 0.75rem;
+    border: 1px solid ${colors.border};
+    border-radius: ${radius.md};
+    background: ${colors.surface};
+    color: ${colors.textPrimary};
+    font-size: ${fontSize.sm};
+    font-weight: ${fontWeight.semibold};
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.6rem center;
+    transition: border-color ${transition.fast};
+
+    &:hover {
+        border-color: ${colors.textHint};
+    }
+
+    &:focus {
+        border-color: ${colors.primary};
+    }
 `;
 
 const PlaceholderText = styled(Typography)`

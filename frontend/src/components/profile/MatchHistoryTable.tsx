@@ -1,5 +1,6 @@
 import { CheckCircle, Cancel } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import type { MatchHistoryEntry } from "../../types/profile";
 import {
@@ -24,6 +25,8 @@ type TournamentGroup = {
 };
 
 function MatchHistoryTable({ matches, profileUserId }: MatchHistoryTableProps) {
+    const navigate = useNavigate();
+
     // Group matches by tournament, preserving order (most recent first)
     const tournamentGroups: TournamentGroup[] = [];
     let currentGroup: TournamentGroup | null = null;
@@ -40,6 +43,9 @@ function MatchHistoryTable({ matches, profileUserId }: MatchHistoryTableProps) {
         }
         currentGroup.matches.push(match);
     }
+
+    // Build a flat list with global row index for alternating colors
+    let globalRowIndex = 0;
 
     if (matches.length === 0) {
         return (
@@ -76,13 +82,14 @@ function MatchHistoryTable({ matches, profileUserId }: MatchHistoryTableProps) {
                         const isFirstInGroup = matchIndex === 0;
                         const isLastInGroup = matchIndex === group.matches.length - 1;
                         const groupSize = group.matches.length;
+                        const rowIndex = globalRowIndex++;
 
                         const formattedDate = formatDate(match.matchDate);
 
                         return (
                             <MatchRow
                                 key={match.matchId}
-                                $won={match.profilePlayerWon}
+                                $rowIndex={rowIndex}
                                 $isLastInGroup={isLastInGroup}
                             >
                                 <Td>{formattedDate}</Td>
@@ -90,18 +97,30 @@ function MatchHistoryTable({ matches, profileUserId }: MatchHistoryTableProps) {
                                     <RoundText>{match.round}</RoundText>
                                 </Td>
                                 <Td>
-                                    <PlayerNameCell
-                                        $bold={match.winnerId === profileUserId}
-                                    >
-                                        {match.winnerName}
-                                    </PlayerNameCell>
+                                    {match.winnerId === profileUserId ? (
+                                        <PlayerNameCell $bold>
+                                            {match.winnerName}
+                                        </PlayerNameCell>
+                                    ) : (
+                                        <PlayerNameLink
+                                            onClick={() => navigate(`/profile/${match.winnerId}`)}
+                                        >
+                                            {match.winnerName}
+                                        </PlayerNameLink>
+                                    )}
                                 </Td>
                                 <Td>
-                                    <PlayerNameCell
-                                        $bold={match.loserId === profileUserId}
-                                    >
-                                        {match.loserName}
-                                    </PlayerNameCell>
+                                    {match.loserId === profileUserId ? (
+                                        <PlayerNameCell $bold>
+                                            {match.loserName}
+                                        </PlayerNameCell>
+                                    ) : (
+                                        <PlayerNameLink
+                                            onClick={() => navigate(`/profile/${match.loserId}`)}
+                                        >
+                                            {match.loserName}
+                                        </PlayerNameLink>
+                                    )}
                                 </Td>
                                 <Td>
                                     <ScoreText>
@@ -146,9 +165,11 @@ function MatchHistoryTable({ matches, profileUserId }: MatchHistoryTableProps) {
                                 {isFirstInGroup ? (
                                     <TournamentTd rowSpan={groupSize}>
                                         <TournamentCell>
-                                            <TournamentName>
+                                            <TournamentNameLink
+                                                onClick={() => navigate(`/tournaments/${group.tournamentId}`)}
+                                            >
                                                 {group.tournamentName}
-                                            </TournamentName>
+                                            </TournamentNameLink>
                                         </TournamentCell>
                                     </TournamentTd>
                                 ) : null}
@@ -188,8 +209,6 @@ function formatDate(dateStr: string): string {
 
 export default MatchHistoryTable;
 
-/* ─── Styled Components ─── */
-
 const TableWrapper = styled(Box)`
     overflow-x: auto;
     border-radius: ${radius.lg};
@@ -224,16 +243,11 @@ const Th = styled.th<{ $width?: string; $center?: boolean }>`
     width: ${({ $width }) => $width ?? "auto"};
 `;
 
-const MatchRow = styled.tr<{ $won: boolean; $isLastInGroup: boolean }>`
-    background: ${({ $won }) => ($won ? colors.primaryLighter : "#fff")};
+const MatchRow = styled.tr<{ $rowIndex: number; $isLastInGroup: boolean }>`
+    background: ${({ $rowIndex }) => ($rowIndex % 2 === 0 ? "#ecfdf5" : "#ffffff")};
     border-bottom: ${({ $isLastInGroup }) =>
             $isLastInGroup ? `2px solid ${colors.border}` : `1px solid ${colors.borderLight}`};
     transition: background ${transition.fast};
-
-    &:hover {
-        background: ${({ $won }) =>
-                $won ? colors.primaryLight : colors.surfaceHover};
-    }
 
     &:last-child {
         border-bottom: none;
@@ -266,6 +280,18 @@ const SurfaceTd = styled.td<{ $center?: boolean }>`
 const PlayerNameCell = styled.span<{ $bold: boolean }>`
     font-weight: ${({ $bold }) => ($bold ? fontWeight.black : fontWeight.regular)};
     color: ${({ $bold }) => ($bold ? colors.textPrimary : colors.textSecondary)};
+`;
+
+const PlayerNameLink = styled.span`
+    font-weight: ${fontWeight.regular};
+    color: ${colors.primaryDark};
+    cursor: pointer;
+    transition: color ${transition.fast};
+
+    &:hover {
+        color: ${colors.primary};
+        text-decoration: underline;
+    }
 `;
 
 const RoundText = styled.span`
@@ -314,11 +340,18 @@ const TournamentCell = styled(Box)`
     gap: 0.15rem;
 `;
 
-const TournamentName = styled(Typography)`
+const TournamentNameLink = styled(Typography)`
     font-size: ${fontSize.sm} !important;
     font-weight: ${fontWeight.bold} !important;
-    color: ${colors.textPrimary};
+    color: ${colors.primaryDark};
     line-height: 1.3 !important;
+    cursor: pointer;
+    transition: color ${transition.fast};
+
+    &:hover {
+        color: ${colors.primary};
+        text-decoration: underline;
+    }
 `;
 
 const SurfaceBadge = styled.span<{ $color: string }>`
