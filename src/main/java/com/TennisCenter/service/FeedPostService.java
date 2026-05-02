@@ -4,9 +4,11 @@ import com.TennisCenter.dto.feed.FeedPostResponse;
 import com.TennisCenter.exception.ResourceNotFoundException;
 import com.TennisCenter.exception.UnauthorizedActionException;
 import com.TennisCenter.model.FeedPost;
+import com.TennisCenter.model.PlayerProfile;
 import com.TennisCenter.model.User;
 import com.TennisCenter.repository.CommentRepository;
 import com.TennisCenter.repository.FeedPostRepository;
+import com.TennisCenter.repository.PlayerProfileRepository;
 import com.TennisCenter.repository.PostLikeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +28,7 @@ public class FeedPostService {
     private final FeedPostRepository feedPostRepository;
     private final CommentRepository commentRepository;
     private final PostLikeRepository postLikeRepository;
+    private final PlayerProfileRepository playerProfileRepository;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -92,10 +95,15 @@ public class FeedPostService {
     }
 
     private FeedPostResponse mapToResponse(FeedPost post, User currentUser) {
+        String authorImageUrl = playerProfileRepository.findByUserId(post.getAuthor().getId())
+                .map(PlayerProfile::getProfileImageUrl)
+                .orElse(null);
+
         return FeedPostResponse.builder()
                 .id(post.getId())
                 .authorName(post.getAuthor().getFirstName() + " " + post.getAuthor().getLastName())
                 .authorRole(post.getAuthor().getRole().getDisplayName())
+                .authorProfileImageUrl(authorImageUrl)
                 .content(post.getContent())
                 .imageUrl(post.getImageUrl())
                 .createdAt(post.getCreatedAt().toString())

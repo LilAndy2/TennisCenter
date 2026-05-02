@@ -5,9 +5,11 @@ import com.TennisCenter.dto.auth.AuthResponse;
 import com.TennisCenter.dto.auth.LoginRequest;
 import com.TennisCenter.dto.auth.RegisterRequest;
 import com.TennisCenter.exception.ConflictException;
+import com.TennisCenter.model.PlayerProfile;
 import com.TennisCenter.model.enums.PlayerLevel;
 import com.TennisCenter.model.enums.Role;
 import com.TennisCenter.model.User;
+import com.TennisCenter.repository.PlayerProfileRepository;
 import com.TennisCenter.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,6 +24,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final PlayerProfileRepository playerProfileRepository;
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -53,6 +56,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .role(user.getRole())
                 .playerLevel(user.getPlayerLevel() != null ? user.getPlayerLevel().getDisplayName() : null)
+                .profileImageUrl(null)
                 .build();
     }
 
@@ -69,6 +73,10 @@ public class AuthService {
 
         String token = jwtService.generateToken(user);
 
+        String profileImageUrl = playerProfileRepository.findByUserId(user.getId())
+                .map(PlayerProfile::getProfileImageUrl)
+                .orElse(null);
+
         return AuthResponse.builder()
                 .token(token)
                 .id(user.getId())
@@ -76,6 +84,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .role(user.getRole())
                 .playerLevel(user.getPlayerLevel() != null ? user.getPlayerLevel().getDisplayName() : null)
+                .profileImageUrl(profileImageUrl)
                 .build();
     }
 }

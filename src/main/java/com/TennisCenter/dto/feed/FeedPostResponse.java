@@ -9,6 +9,7 @@ public class FeedPostResponse {
     private Long id;
     private String authorName;
     private String authorRole;
+    private String authorProfileImageUrl;
     private String content;
     private String imageUrl;
     private String createdAt;

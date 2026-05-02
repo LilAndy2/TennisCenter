@@ -37,3 +37,15 @@ export type MatchHistoryEntry = {
     surface: string | null;
     tournamentStartYear: number;
 };
+
+export type TitleFinal = {
+    tournamentId: number;
+    tournamentName: string;
+    surface: string | null;
+    tournamentLevel: string | null;
+    date: string;
+    opponentName: string;
+    opponentId: number;
+    result: string;
+    won: boolean;
+};

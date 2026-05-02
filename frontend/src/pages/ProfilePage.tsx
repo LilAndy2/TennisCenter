@@ -6,6 +6,7 @@ import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 import ProfileInfoCard from "../components/profile/ProfileInfoCard";
 import ProfileTabs, { type ProfileTab } from "../components/profile/ProfileTabs";
 import MatchHistoryTable from "../components/profile/MatchHistoryTable";
+import TitlesFinalsTable from "../components/profile/TitlesFinalsTable";
 import usePlayerProfile from "../hooks/usePlayerProfile";
 import { AnimatedPage } from "../components/animated";
 import {
@@ -32,6 +33,7 @@ function ProfilePage() {
     const {
         profile,
         matchHistory,
+        titlesAndFinals,
         loading,
         uploadingImage,
         uploadProfileImage,
@@ -148,9 +150,7 @@ function ProfilePage() {
                         {activeTab === "titles-finals" && (
                             <SectionCard>
                                 <SectionTitle>Titles &amp; Finals</SectionTitle>
-                                <PlaceholderText>
-                                    Titles and finals tracking will be available soon.
-                                </PlaceholderText>
+                                <TitlesFinalsTable entries={titlesAndFinals} />
                             </SectionCard>
                         )}
 

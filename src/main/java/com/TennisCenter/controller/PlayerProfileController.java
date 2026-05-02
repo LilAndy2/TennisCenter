@@ -2,6 +2,7 @@ package com.TennisCenter.controller;
 
 import com.TennisCenter.dto.profile.MatchHistoryResponse;
 import com.TennisCenter.dto.profile.PlayerProfileResponse;
+import com.TennisCenter.dto.profile.TitleFinalsResponse;
 import com.TennisCenter.dto.profile.UpdateProfileRequest;
 import com.TennisCenter.model.User;
 import com.TennisCenter.service.PlayerProfileService;
@@ -32,6 +33,11 @@ public class PlayerProfileController {
     @GetMapping("/{userId}/match-history")
     public List<MatchHistoryResponse> getMatchHistory(@PathVariable Long userId) {
         return playerProfileService.getMatchHistory(userId);
+    }
+
+    @GetMapping("/{userId}/titles-finals")
+    public List<TitleFinalsResponse> getTitlesAndFinals(@PathVariable Long userId) {
+        return playerProfileService.getTitlesAndFinals(userId);
     }
 
     @PutMapping("/{userId}")

@@ -1,5 +1,6 @@
+import { History } from "@mui/icons-material";
 import { Box, CircularProgress, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 import axiosInstance from "../api/axiosInstance";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
@@ -12,7 +13,14 @@ import {
 } from "../components/common/PageLayout";
 import ScheduleLocationSection from "../components/schedule/ScheduleLocationSection";
 import type { ScheduledMatch } from "../types/schedule";
-import { colors, spacing, fontSize } from "../styles/theme";
+import {
+    colors,
+    spacing,
+    fontSize,
+    fontWeight,
+    radius,
+    transition,
+} from "../styles/theme";
 
 type ScheduleGroup = Record<string, Record<string, Record<string, ScheduledMatch[]>>>;
 
@@ -40,9 +48,27 @@ function buildLocationNames(matches: ScheduledMatch[]): Record<string, string> {
     return map;
 }
 
+function getTodayString(): string {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+}
+
 function SchedulePage() {
     const [matches, setMatches] = useState<ScheduledMatch[]>([]);
     const [loading, setLoading] = useState(true);
+    const [showPast, setShowPast] = useState(false);
+    const pastBottomRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (showPast && !loading && pastMatches.length > 0) {
+            setTimeout(() => {
+                pastBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+            }, 50);
+        }
+    }, [showPast, loading]);
 
     useEffect(() => {
         const load = async () => {
@@ -60,23 +86,64 @@ function SchedulePage() {
         load();
     }, []);
 
-    const grouped = buildScheduleGroups(matches);
-    const locationNames = buildLocationNames(matches);
-    const sortedDates = Object.keys(grouped).sort();
+    const today = getTodayString();
+
+    const upcomingMatches = useMemo(
+        () => matches.filter((m) => m.matchDate >= today),
+        [matches, today]
+    );
+
+    const pastMatches = useMemo(
+        () => matches.filter((m) => m.matchDate < today),
+        [matches, today]
+    );
+
+    const displayedMatches = showPast ? pastMatches : upcomingMatches;
+
+    const grouped = buildScheduleGroups(displayedMatches);
+    const locationNames = buildLocationNames(displayedMatches);
+
+    // Upcoming: ascending (soonest first). Past: ascending (oldest at top, scroll down to recent).
+    const sortedDates = Object.keys(grouped).sort((a, b) =>
+        showPast ? a.localeCompare(b) : a.localeCompare(b)
+    );
+
+    const hasPastMatches = pastMatches.length > 0;
 
     return (
         <AnimatedPage>
             <AuthenticatedLayout>
                 <NarrowPageWrapper>
-                    <PageTitle>Schedule</PageTitle>
-                    <PageSubtitle>All scheduled matches across ongoing tournaments.</PageSubtitle>
+                    <HeaderRow>
+                        <div>
+                            <PageTitle>Schedule</PageTitle>
+                            <PageSubtitle>
+                                {showPast
+                                    ? "Past scheduled matches."
+                                    : "Upcoming scheduled matches."}
+                            </PageSubtitle>
+                        </div>
+                        {hasPastMatches && (
+                            <ToggleButton
+                                $active={showPast}
+                                onClick={() => setShowPast((prev) => !prev)}
+                            >
+                                <History sx={{ fontSize: 18 }} />
+                                {showPast ? "Show upcoming" : "Show past"}
+                            </ToggleButton>
+                        )}
+                    </HeaderRow>
 
                     {loading ? (
                         <LoadingWrapper>
                             <CircularProgress />
                         </LoadingWrapper>
                     ) : sortedDates.length === 0 ? (
-                        <EmptyText>No scheduled matches found.</EmptyText>
+                        <EmptyText>
+                            {showPast
+                                ? "No past matches found."
+                                : "No upcoming matches scheduled."}
+                        </EmptyText>
                     ) : (
                         <ScheduleList>
                             {sortedDates.map((date) => (
@@ -104,6 +171,7 @@ function SchedulePage() {
                                     ))}
                                 </DateBlock>
                             ))}
+                            {showPast && <div ref={pastBottomRef} />}
                         </ScheduleList>
                     )}
                 </NarrowPageWrapper>
@@ -113,6 +181,41 @@ function SchedulePage() {
 }
 
 export default SchedulePage;
+
+const HeaderRow = styled(Box)`
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: ${spacing.md};
+    flex-wrap: wrap;
+`;
+
+const ToggleButton = styled.button<{ $active: boolean }>`
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 2.25rem;
+    padding: 0 1rem;
+    border: 1px solid ${({ $active }) => ($active ? colors.primary : colors.border)};
+    border-radius: ${radius.pill};
+    background: ${({ $active }) => ($active ? colors.primaryLighter : colors.surface)};
+    color: ${({ $active }) => ($active ? colors.primary : colors.textSecondary)};
+    font-size: ${fontSize.sm};
+    font-weight: ${fontWeight.bold};
+    cursor: pointer;
+    transition: all ${transition.normal};
+    white-space: nowrap;
+    margin-top: 0.25rem;
+
+    &:hover {
+        background: ${({ $active }) => ($active ? colors.primaryLight : colors.surfaceAlt)};
+        border-color: ${({ $active }) => ($active ? colors.primaryHover : colors.textHint)};
+    }
+
+    &:active {
+        transform: scale(0.97);
+    }
+`;
 
 const ScheduleList = styled(Box)`
     display: flex;

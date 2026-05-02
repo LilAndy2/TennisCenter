@@ -25,6 +25,7 @@ import {
 import { useMemo, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { resolveImageUrl } from "../../utils/resolveImageUrl";
 import {
     colors,
     spacing,
@@ -58,6 +59,8 @@ function TopNavbar() {
         () => (storedUser ? JSON.parse(storedUser) : null),
         [storedUser]
     );
+
+    const avatarUrl = resolveImageUrl(parsedUser?.profileImageUrl);
 
     const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -168,8 +171,8 @@ function TopNavbar() {
                         </UserTextSection>
 
                         <IconButton onClick={handleOpenMenu} aria-label="Open user menu">
-                            {parsedUser?.profileImageUrl ? (
-                                <StyledAvatar src={parsedUser.profileImageUrl} alt="Profile" />
+                            {avatarUrl ? (
+                                <StyledAvatar src={avatarUrl} alt="Profile" />
                             ) : (
                                 <StyledAvatar>
                                     <AccountCircle sx={{ fontSize: 28 }} />
@@ -364,7 +367,7 @@ const StyledNavLink = styled(NavLink)`
         font-weight: ${fontWeight.bold};
         background: ${colors.primaryLighter};
     }
-    
+
     &.active::after {
         content: "";
         position: absolute;

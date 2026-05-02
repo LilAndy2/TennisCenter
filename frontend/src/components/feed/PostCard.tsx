@@ -11,6 +11,7 @@ export type FeedPostType = {
     id: number;
     authorName: string;
     authorRole: string;
+    authorProfileImageUrl?: string | null;
     content: string;
     imageUrl?: string;
     createdAt: string;
@@ -52,7 +53,16 @@ function PostCard({ post, onDelete, onEdit, onCommentAdded, onToggleLike }: Post
         <CardWrapper>
             <PostHeader>
                 <PostHeaderLeft>
-                    <StyledAvatar />
+                    {post.authorProfileImageUrl ? (
+                        <StyledAvatar
+                            src={`http://localhost:8080${post.authorProfileImageUrl}`}
+                            alt={post.authorName}
+                        />
+                    ) : (
+                        <StyledAvatar>
+                            {post.authorName.charAt(0)}
+                        </StyledAvatar>
+                    )}
                     <AuthorInfo>
                         <AuthorName>{post.authorName}</AuthorName>
                         <AuthorMeta>
@@ -164,6 +174,8 @@ const StyledAvatar = styled(Avatar)`
     height: 2.8rem !important;
     background: #ecfdf5 !important;
     color: #059669 !important;
+    font-weight: 700 !important;
+    font-size: 1.1rem !important;
 `;
 
 const AuthorInfo = styled(Box)`

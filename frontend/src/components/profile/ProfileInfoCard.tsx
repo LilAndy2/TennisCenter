@@ -1,4 +1,4 @@
-import { CameraAlt, Edit, Check, Close, EmojiEvents, MilitaryTech } from "@mui/icons-material";
+import { CameraAlt, Edit, Check, Close } from "@mui/icons-material";
 import { Avatar, Box, CircularProgress, Typography } from "@mui/material";
 import { useRef, useState } from "react";
 import styled from "styled-components";
@@ -169,23 +169,6 @@ function ProfileInfoCard({
                     <StatLabel>Win Rate</StatLabel>
                 </StatItem>
             </StatsGrid>
-
-            <QuickStatsRow>
-                <QuickStat>
-                    <EmojiEvents sx={{ fontSize: 18, color: "#f59e0b" }} />
-                    <QuickStatText>
-                        <QuickStatValue>{profile.titlesCount}</QuickStatValue>
-                        <QuickStatLabel>Titles</QuickStatLabel>
-                    </QuickStatText>
-                </QuickStat>
-                <QuickStat>
-                    <MilitaryTech sx={{ fontSize: 18, color: "#94a3b8" }} />
-                    <QuickStatText>
-                        <QuickStatValue>{profile.finalsCount}</QuickStatValue>
-                        <QuickStatLabel>Finals</QuickStatLabel>
-                    </QuickStatText>
-                </QuickStat>
-            </QuickStatsRow>
         </CardWrapper>
     );
 }
@@ -398,13 +381,13 @@ const BioActionButton = styled.button<{ $variant: "confirm" | "cancel" }>`
     cursor: pointer;
     transition: all ${transition.fast};
     background: ${({ $variant }) =>
-    $variant === "confirm" ? colors.primary : colors.surfaceAlt};
+            $variant === "confirm" ? colors.primary : colors.surfaceAlt};
     color: ${({ $variant }) =>
-    $variant === "confirm" ? "white" : colors.textMuted};
+            $variant === "confirm" ? "white" : colors.textMuted};
 
     &:hover {
         background: ${({ $variant }) =>
-    $variant === "confirm" ? colors.primaryHover : colors.border};
+                $variant === "confirm" ? colors.primaryHover : colors.border};
     }
 
     &:active {
@@ -453,37 +436,4 @@ const StatDivider = styled(Box)`
     width: 1px;
     height: 2rem;
     background: ${colors.borderLight};
-`;
-
-const QuickStatsRow = styled(Box)`
-    display: flex;
-    gap: ${spacing.lg};
-    padding-top: ${spacing.md};
-
-    @media (max-width: ${breakpoints.sm}) {
-        justify-content: center;
-    }
-`;
-
-const QuickStat = styled(Box)`
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-`;
-
-const QuickStatText = styled(Box)`
-    display: flex;
-    align-items: baseline;
-    gap: 0.25rem;
-`;
-
-const QuickStatValue = styled(Typography)`
-    font-size: ${fontSize.base} !important;
-    font-weight: ${fontWeight.bold} !important;
-    color: ${colors.textPrimary};
-`;
-
-const QuickStatLabel = styled(Typography)`
-    font-size: ${fontSize.xs} !important;
-    color: ${colors.textMuted};
 `;

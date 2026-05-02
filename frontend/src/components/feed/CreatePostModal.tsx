@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import {useMemo, useRef, useState, useEffect} from "react";
 import styled from "styled-components";
+import { resolveImageUrl } from "../../utils/resolveImageUrl";
 
 type StoredUser = {
     username: string;
@@ -35,6 +36,8 @@ function CreatePostModal({open, onClose, onSubmit, initialContent, mode}: Create
         () => (storedUser ? JSON.parse(storedUser) : null),
         [storedUser]
     );
+
+    const avatarUrl = resolveImageUrl(parsedUser?.profileImageUrl);
 
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -123,8 +126,8 @@ function CreatePostModal({open, onClose, onSubmit, initialContent, mode}: Create
                 </HeaderRow>
 
                 <UserRow>
-                    {parsedUser?.profileImageUrl ? (
-                        <StyledAvatar src={parsedUser.profileImageUrl} alt="Profile"/>
+                    {avatarUrl ? (
+                        <StyledAvatar src={avatarUrl} alt="Profile"/>
                     ) : (
                         <StyledAvatar/>
                     )}

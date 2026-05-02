@@ -2,6 +2,7 @@ package com.TennisCenter.service;
 
 import com.TennisCenter.dto.profile.MatchHistoryResponse;
 import com.TennisCenter.dto.profile.PlayerProfileResponse;
+import com.TennisCenter.dto.profile.TitleFinalsResponse;
 import com.TennisCenter.dto.profile.UpdateProfileRequest;
 import com.TennisCenter.exception.ResourceNotFoundException;
 import com.TennisCenter.model.MatchSet;
@@ -31,6 +32,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -138,6 +140,103 @@ public class PlayerProfileService {
         }
 
         return result;
+    }
+
+    public List<TitleFinalsResponse> getTitlesAndFinals(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        // Get all matches where this user participated
+        List<TournamentMatch> allMatches = tournamentMatchRepository
+                .findByPlayerOneIdOrPlayerTwoId(userId, userId);
+
+        // Find final matches (highest roundNumber in knockout phase per tournament)
+        // where this player participated and the match is completed
+        Map<Long, TournamentMatch> finalsByTournament = new java.util.HashMap<>();
+
+        for (TournamentMatch match : allMatches) {
+            if (match.getPhase() != TournamentMatchPhase.KNOCKOUT) continue;
+            if (match.getStatus() != TournamentMatchStatus.COMPLETED) continue;
+            if (match.getWinner() == null) continue;
+
+            Long tournamentId = match.getTournament().getId();
+            TournamentMatch existing = finalsByTournament.get(tournamentId);
+
+            if (existing == null || (match.getRoundNumber() != null && existing.getRoundNumber() != null
+                    && match.getRoundNumber() > existing.getRoundNumber())) {
+                finalsByTournament.put(tournamentId, match);
+            }
+        }
+
+        // Now verify each candidate is actually the final (highest round in tournament)
+        List<TitleFinalsResponse> results = new ArrayList<>();
+
+        for (TournamentMatch candidateFinal : finalsByTournament.values()) {
+            // Check this is truly the last round of the tournament
+            List<TournamentMatch> allKnockout = tournamentMatchRepository
+                    .findByTournamentIdOrderByPhaseAscRoundNumberAscMatchOrderAsc(
+                            candidateFinal.getTournament().getId())
+                    .stream()
+                    .filter(m -> m.getPhase() == TournamentMatchPhase.KNOCKOUT)
+                    .toList();
+
+            int maxRound = allKnockout.stream()
+                    .mapToInt(m -> m.getRoundNumber() != null ? m.getRoundNumber() : 0)
+                    .max()
+                    .orElse(0);
+
+            if (candidateFinal.getRoundNumber() == null
+                    || candidateFinal.getRoundNumber() != maxRound) {
+                continue;
+            }
+
+            User winner = candidateFinal.getWinner();
+            User loser = getLoser(candidateFinal);
+            if (loser == null) continue;
+
+            boolean playerWon = winner.getId().equals(userId);
+            User opponent = playerWon ? loser : winner;
+
+            // Build score string for display
+            List<MatchSet> sets = matchSetRepository.findByMatchIdOrderBySetNumberAsc(candidateFinal.getId());
+            List<MatchHistoryResponse.SetScoreResponse> setScores = buildSetScores(sets, candidateFinal);
+            StringBuilder scoreStr = new StringBuilder();
+            for (int i = 0; i < setScores.size(); i++) {
+                MatchHistoryResponse.SetScoreResponse s = setScores.get(i);
+                scoreStr.append(s.getWinnerGames()).append("-").append(s.getLoserGames());
+                if (s.getLoserTiebreakPoints() != null) {
+                    scoreStr.append("(").append(s.getLoserTiebreakPoints()).append(")");
+                }
+                if (i < setScores.size() - 1) scoreStr.append(", ");
+            }
+
+            String date = candidateFinal.getScheduledTime() != null
+                    ? candidateFinal.getScheduledTime().toLocalDate().toString()
+                    : candidateFinal.getMatchDate() != null
+                    ? candidateFinal.getMatchDate().toString()
+                    : candidateFinal.getTournament().getStartDate().toString();
+
+            results.add(TitleFinalsResponse.builder()
+                    .tournamentId(candidateFinal.getTournament().getId())
+                    .tournamentName(candidateFinal.getTournament().getName())
+                    .surface(candidateFinal.getTournament().getSurface() != null
+                            ? candidateFinal.getTournament().getSurface().getDisplayName()
+                            : null)
+                    .tournamentLevel(candidateFinal.getTournament().getLevel() != null
+                            ? candidateFinal.getTournament().getLevel().getDisplayName()
+                            : null)
+                    .date(date)
+                    .opponentName(opponent.getFirstName() + " " + opponent.getLastName())
+                    .opponentId(opponent.getId())
+                    .result(scoreStr.toString())
+                    .won(playerWon)
+                    .build());
+        }
+
+        // Sort by date descending
+        results.sort((a, b) -> b.getDate().compareTo(a.getDate()));
+
+        return results;
     }
 
     @Transactional

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import axiosInstance from "../api/axiosInstance";
-import type { PlayerProfile, MatchHistoryEntry } from "../types/profile";
+import type { PlayerProfile, MatchHistoryEntry, TitleFinal } from "../types/profile";
 
 function usePlayerProfile(userId?: number) {
     const [profile, setProfile] = useState<PlayerProfile | null>(null);
     const [matchHistory, setMatchHistory] = useState<MatchHistoryEntry[]>([]);
+    const [titlesAndFinals, setTitlesAndFinals] = useState<TitleFinal[]>([]);
     const [loading, setLoading] = useState(true);
     const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -25,15 +26,19 @@ function usePlayerProfile(userId?: number) {
                 ? `/player/profile/${resolvedUserId}`
                 : "/player/profile/me";
 
-            const [profileRes, historyRes] = await Promise.all([
+            const [profileRes, historyRes, titlesRes] = await Promise.all([
                 axiosInstance.get<PlayerProfile>(profileUrl),
                 axiosInstance.get<MatchHistoryEntry[]>(
                     `/player/profile/${resolvedUserId}/match-history`
+                ),
+                axiosInstance.get<TitleFinal[]>(
+                    `/player/profile/${resolvedUserId}/titles-finals`
                 ),
             ]);
 
             setProfile(profileRes.data);
             setMatchHistory(historyRes.data);
+            setTitlesAndFinals(titlesRes.data);
         } catch (error) {
             console.error("Failed to load profile", error);
         } finally {
@@ -56,6 +61,16 @@ function usePlayerProfile(userId?: number) {
                 formData
             );
             setProfile(res.data);
+
+            // Sync localStorage so navbar avatar updates immediately
+            const stored = localStorage.getItem("user");
+            if (stored) {
+                const userData = JSON.parse(stored);
+                userData.profileImageUrl = res.data.profileImageUrl
+                    ? `http://localhost:8080${res.data.profileImageUrl}`
+                    : null;
+                localStorage.setItem("user", JSON.stringify(userData));
+            }
         } catch (error) {
             console.error("Failed to upload profile image", error);
         } finally {
@@ -79,6 +94,7 @@ function usePlayerProfile(userId?: number) {
     return {
         profile,
         matchHistory,
+        titlesAndFinals,
         loading,
         uploadingImage,
         uploadProfileImage,
