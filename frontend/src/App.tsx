@@ -15,6 +15,7 @@ import AdminDashboardPage from "./pages/AdminDashboardPage.tsx";
 import AdminTournamentDetailsPage from "./pages/AdminTournamentDetailsPage.tsx";
 import PrivateRoute from "./routes/PrivateRoute";
 import LeaderboardPage from "./pages/LeaderboardPage.tsx";
+import ChatPage from "./pages/ChatPage.tsx";
 
 const GlobalStyle = createGlobalStyle`
     :root {
@@ -191,15 +192,6 @@ function AnimatedRoutes() {
                 />
 
                 <Route
-                    path="/profile/:userId"
-                    element={
-                        <PrivateRoute>
-                            <ProfilePage />
-                        </PrivateRoute>
-                    }
-                />
-
-                <Route
                     path="/settings"
                     element={
                         <PrivateRoute>
@@ -222,6 +214,24 @@ function AnimatedRoutes() {
                     element={
                         <PrivateRoute>
                             <AdminTournamentDetailsPage />
+                        </PrivateRoute>
+                    }
+                />
+
+                <Route
+                    path="/chat"
+                    element={
+                        <PrivateRoute>
+                            <ChatPage />
+                        </PrivateRoute>
+                    }
+                />
+
+                <Route
+                    path="/chat/:conversationId"
+                    element={
+                        <PrivateRoute>
+                            <ChatPage />
                         </PrivateRoute>
                     }
                 />

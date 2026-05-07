@@ -11,6 +11,7 @@ import {
     Settings,
     SportsTennis,
     AdminPanelSettings,
+    ChatBubbleOutline,
 } from "@mui/icons-material";
 import {
     Avatar,
@@ -165,6 +166,10 @@ function TopNavbar() {
                     </LeftSection>
 
                     <RightSection>
+                        <ChatIconButton onClick={() => navigate("/chat")} aria-label="Open chat">
+                            <ChatBubbleOutline sx={{ fontSize: 20 }} />
+                        </ChatIconButton>
+
                         <UserTextSection>
                             <UserNameText>{parsedUser?.username ?? "Player"}</UserNameText>
                             <UserRoleText>{parsedUser?.role ?? "USER"}</UserRoleText>
@@ -514,4 +519,14 @@ const DrawerUserInfo = styled(Box)`
     display: flex;
     flex-direction: column;
     gap: 0.1rem;
+`;
+
+const ChatIconButton = styled(IconButton)`
+    color: ${colors.textSecondary} !important;
+    transition: all ${transition.normal} !important;
+
+    &:hover {
+        color: ${colors.primary} !important;
+        background: ${colors.primaryLighter} !important;
+    }
 `;
