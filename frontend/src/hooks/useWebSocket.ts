@@ -19,6 +19,15 @@ function useWebSocket({
     const clientRef = useRef<Client | null>(null);
     const [connected, setConnected] = useState(false);
 
+    // Use refs for callbacks so subscriptions always call the latest version
+    const onMessageRef = useRef(onMessageReceived);
+    const onReadReceiptRef = useRef(onReadReceipt);
+    const onOnlineStatusRef = useRef(onOnlineStatus);
+
+    useEffect(() => { onMessageRef.current = onMessageReceived; }, [onMessageReceived]);
+    useEffect(() => { onReadReceiptRef.current = onReadReceipt; }, [onReadReceipt]);
+    useEffect(() => { onOnlineStatusRef.current = onOnlineStatus; }, [onOnlineStatus]);
+
     useEffect(() => {
         if (!userId) return;
 
@@ -37,28 +46,28 @@ function useWebSocket({
             onConnect: () => {
                 setConnected(true);
 
-                // Subscribe to personal message queue
+                // Subscribe to personal message topic
                 client.subscribe(
-                    `/user/${userId}/queue/messages`,
+                    `/topic/chat.user.${userId}`,
                     (frame) => {
                         const message: ChatMessage = JSON.parse(frame.body);
-                        onMessageReceived(message);
+                        onMessageRef.current(message);
                     }
                 );
 
                 // Subscribe to read receipts
                 client.subscribe(
-                    `/user/${userId}/queue/read-receipt`,
+                    `/topic/chat.read.${userId}`,
                     (frame) => {
                         const data = JSON.parse(frame.body);
-                        onReadReceipt?.(data);
+                        onReadReceiptRef.current?.(data);
                     }
                 );
 
                 // Subscribe to online status broadcast
                 client.subscribe("/topic/online-status", (frame) => {
                     const data = JSON.parse(frame.body);
-                    onOnlineStatus?.(data);
+                    onOnlineStatusRef.current?.(data);
                 });
             },
 

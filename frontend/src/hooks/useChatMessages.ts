@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import axiosInstance from "../api/axiosInstance";
 import type { ChatConversation, ChatMessage, ChatUserSearch } from "../types/chat";
 
@@ -10,9 +10,20 @@ function useChatMessages(currentUserId: number | null) {
     const [loadingMessages, setLoadingMessages] = useState(false);
     const [onlineUsers, setOnlineUsers] = useState<Set<number>>(new Set());
 
+    // Keep a ref of activeConversationId so the WebSocket callback always sees the latest value
+    const activeConvRef = useRef(activeConversationId);
+    useEffect(() => {
+        activeConvRef.current = activeConversationId;
+    }, [activeConversationId]);
+
+    const currentUserRef = useRef(currentUserId);
+    useEffect(() => {
+        currentUserRef.current = currentUserId;
+    }, [currentUserId]);
+
     // Load conversations
     const loadConversations = useCallback(async () => {
-        if (!currentUserId) return;
+        if (!currentUserRef.current) return;
         try {
             setLoadingConversations(true);
             const response = await axiosInstance.get<ChatConversation[]>("/player/chat/conversations");
@@ -22,7 +33,7 @@ function useChatMessages(currentUserId: number | null) {
         } finally {
             setLoadingConversations(false);
         }
-    }, [currentUserId]);
+    }, []);
 
     // Load messages for a conversation
     const loadMessages = useCallback(async (conversationId: number) => {
@@ -68,8 +79,11 @@ function useChatMessages(currentUserId: number | null) {
     // Handle incoming message from WebSocket
     const handleIncomingMessage = useCallback(
         (message: ChatMessage) => {
+            const currentActiveId = activeConvRef.current;
+            const currentUser = currentUserRef.current;
+
             // If this message belongs to the active conversation, add it
-            if (message.conversationId === activeConversationId) {
+            if (message.conversationId === currentActiveId) {
                 setMessages((prev) => {
                     // Avoid duplicates
                     if (prev.some((m) => m.id === message.id)) return prev;
@@ -89,10 +103,10 @@ function useChatMessages(currentUserId: number | null) {
                     conv.lastMessage = message.content;
                     conv.lastMessageAt = message.sentAt;
 
-                    // If not the active conversation, or sender is not the current user
+                    // If not the active conversation and sender is not the current user
                     if (
-                        message.conversationId !== activeConversationId &&
-                        message.senderId !== currentUserId
+                        message.conversationId !== currentActiveId &&
+                        message.senderId !== currentUser
                     ) {
                         conv.unreadCount = (conv.unreadCount || 0) + 1;
                     }
@@ -106,7 +120,7 @@ function useChatMessages(currentUserId: number | null) {
                 return prev;
             });
         },
-        [activeConversationId, currentUserId, loadConversations]
+        [loadConversations]
     );
 
     // Handle online status change

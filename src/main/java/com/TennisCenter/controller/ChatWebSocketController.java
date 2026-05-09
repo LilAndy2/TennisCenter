@@ -4,9 +4,10 @@ import com.TennisCenter.dto.chat.ChatMessageResponse;
 import com.TennisCenter.dto.chat.SendMessageRequest;
 import com.TennisCenter.model.User;
 import com.TennisCenter.service.ChatService;
+import lombok.Data;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.*;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -21,7 +22,6 @@ import java.security.Principal;
 public class ChatWebSocketController {
 
     private final ChatService chatService;
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/chat.send")
@@ -30,17 +30,15 @@ public class ChatWebSocketController {
 
         ChatMessageResponse response = chatService.sendMessage(sender.getId(), request);
 
-        // Send to the recipient's personal queue
-        messagingTemplate.convertAndSendToUser(
-                String.valueOf(request.getRecipientId()),
-                "/queue/messages",
+        // Send to the recipient's topic
+        messagingTemplate.convertAndSend(
+                "/topic/chat.user." + request.getRecipientId(),
                 response
         );
 
         // Also send back to sender (for multi-tab / confirmation)
-        messagingTemplate.convertAndSendToUser(
-                String.valueOf(sender.getId()),
-                "/queue/messages",
+        messagingTemplate.convertAndSend(
+                "/topic/chat.user." + sender.getId(),
                 response
         );
 
@@ -53,9 +51,8 @@ public class ChatWebSocketController {
         chatService.markAsRead(request.getConversationId(), reader.getId());
 
         // Notify the other participant about read receipt
-        messagingTemplate.convertAndSendToUser(
-                String.valueOf(request.getOtherUserId()),
-                "/queue/read-receipt",
+        messagingTemplate.convertAndSend(
+                "/topic/chat.read." + request.getOtherUserId(),
                 new ReadReceiptNotification(request.getConversationId(), reader.getId())
         );
     }
