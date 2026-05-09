@@ -19,6 +19,7 @@ public class FeedbackService {
 
     private final FeedbackRepository feedbackRepository;
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
     public FeedbackResponse submitFeedback(Long userId, FeedbackRequest request) {
         User user = userRepository.findById(userId)
@@ -34,6 +35,14 @@ public class FeedbackService {
                 .build();
 
         feedbackRepository.save(feedback);
+
+        // Send confirmation email via MailTrap
+        emailService.sendFeedbackConfirmation(
+                user.getEmail(),
+                user.getFirstName() + " " + user.getLastName(),
+                request.getCategory(),
+                request.getRating()
+        );
 
         return toResponse(feedback);
     }
