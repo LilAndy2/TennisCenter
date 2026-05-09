@@ -2,7 +2,8 @@ import { Add } from "@mui/icons-material";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import styled from "styled-components";
 import CreateTournamentModal from "../components/admin/CreateTournamentModal";
-import LocationCard from "../components/admin/LocationCard";
+import LocationsTable from "../components/admin/LocationsTable";
+import DeleteLocationDialog from "../components/admin/DeleteLocationDialog";
 import LocationModal from "../components/admin/LocationModal";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 import {AnimatedCard, AnimatedPage} from "../components/animated";
@@ -23,6 +24,8 @@ import {
     transition,
     breakpoints,
 } from "../styles/theme";
+import {useState} from "react";
+import type { Location } from "../types/location";
 
 function AdminDashboardPage() {
     const {
@@ -44,6 +47,8 @@ function AdminDashboardPage() {
         handleDeleteLocation,
     } = useAdminDashboard();
 
+    const [locationToDelete, setLocationToDelete] = useState<Location | null>(null);
+
     return (
         <AnimatedPage>
             <AuthenticatedLayout>
@@ -51,10 +56,6 @@ function AdminDashboardPage() {
                     <TopRow>
                         <PageTitle>Admin dashboard</PageTitle>
                         <ButtonsRow>
-                            <CreateButton onClick={openCreateLocation}>
-                                <Add sx={{ fontSize: 20 }} />
-                                <span>Add location</span>
-                            </CreateButton>
                             <CreateButton onClick={() => setIsCreateModalOpen(true)}>
                                 <Add sx={{ fontSize: 20 }} />
                                 <span>Create tournament</span>
@@ -100,23 +101,12 @@ function AdminDashboardPage() {
                                 )}
                             </SectionBlock>
 
-                            <SectionBlock>
-                                <SectionTitle>Locations</SectionTitle>
-                                {locations.length === 0 ? (
-                                    <EmptyText>No locations added yet.</EmptyText>
-                                ) : (
-                                    <LocationsGrid>
-                                        {locations.map(loc => (
-                                            <LocationCard
-                                                key={loc.id}
-                                                location={loc}
-                                                onEdit={openEditLocation}
-                                                onDelete={handleDeleteLocation}
-                                            />
-                                        ))}
-                                    </LocationsGrid>
-                                )}
-                            </SectionBlock>
+                            <LocationsTable
+                                locations={locations}
+                                onAdd={openCreateLocation}
+                                onEdit={openEditLocation}
+                                onDelete={(loc) => setLocationToDelete(loc)}
+                            />
                         </SectionsWrapper>
                     )}
                 </PageWrapper>
@@ -135,6 +125,18 @@ function AdminDashboardPage() {
                     onClose={closeLocationModal}
                     onSave={handleSaveLocation}
                     onChange={setLocationForm}
+                />
+
+                <DeleteLocationDialog
+                    open={Boolean(locationToDelete)}
+                    locationName={locationToDelete?.name}
+                    onClose={() => setLocationToDelete(null)}
+                    onConfirm={async () => {
+                        if (locationToDelete) {
+                            await handleDeleteLocation(locationToDelete.id);
+                            setLocationToDelete(null);
+                        }
+                    }}
                 />
             </AuthenticatedLayout>
         </AnimatedPage>
@@ -233,18 +235,4 @@ const HorizontalCardItem = styled(Box)`
 const EmptyText = styled(Typography)`
     color: ${colors.textHint};
     font-size: ${fontSize.base} !important;
-`;
-
-const LocationsGrid = styled(Box)`
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: ${spacing.md};
-
-    @media (max-width: 72rem) {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    @media (max-width: ${breakpoints.md}) {
-        grid-template-columns: 1fr;
-    }
 `;
