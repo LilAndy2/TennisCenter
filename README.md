@@ -79,23 +79,59 @@ The frontend will start on **http://localhost:5173**.
 
 ## Predefined User Accounts
 
-To see how the features of the application are working, you can use the following accounts:
+The application does not ship with pre-seeded accounts. After startup, accounts are created as follows:
 
-### Player Account (PLAYER role)
+### Creating a Player Account (PLAYER role)
 
-Go to **http://localhost:5173/login** and fill in the login form:
+Go to **http://localhost:5173/register** and fill in the registration form:
+- First name, Last name
+- Username (must be unique)
+- Email (must be unique) — used for login
+- Player level (Entry / Starter / Medium / Master / Expert / Stellar)
+- Password
 
-Email: stellar1@test.com
+### Creating an Admin Account (ADMIN role)
 
-Password: parolaandrei123
+Admin accounts must be created manually in the database. You can either register a normal account through the UI and then update its role, or insert one directly.
 
-### Admin Account (ADMIN role)
+**Option A — Promote an existing account:**
 
-Go to **http://localhost:5173/login** and fill in the login form:
+```sql
+UPDATE users SET role = 'ADMIN' WHERE email = 'admin@tenniscenter.com';
+```
 
-Email: iulian.andrei.manea@gmai.com
+**Option B — Insert an admin directly** (password must be a BCrypt hash):
 
-Password: parola123
+```sql
+INSERT INTO users (first_name, last_name, username, email, password, role, player_level, ranking_points, wins, losses)
+VALUES (
+  'Admin',
+  'TennisCenter',
+  'admin',
+  'admin@tenniscenter.com',
+  '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
+  'ADMIN',
+  'STELLAR',
+  0, 0, 0
+);
+```
+
+> **Note:** The BCrypt hash above corresponds to the password `admin123`. To generate a different hash, use an online BCrypt generator or the application's `passwordEncoder.encode("desired_password")` method.
+
+### Recommended Test Accounts
+
+| Role    | Email                      | Password   | How to Create                     |
+|---------|----------------------------|------------|-----------------------------------|
+| ADMIN   | admin@tenniscenter.com     | admin123   | SQL insert (see above)            |
+| PLAYER  | player@tenniscenter.com    | player123  | Registration form                 |
+
+---
+
+## Authentication
+
+- Login is done with **email** and **password** at **http://localhost:5173/login**
+- Authentication uses **JWT** (JSON Web Tokens)
+- The token is stored in `localStorage` and sent automatically via the `Authorization: Bearer <token>` header
 
 ---
 
