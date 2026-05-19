@@ -17,6 +17,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -54,8 +56,9 @@ public class AuthService {
                 .id(user.getId())
                 .username(user.getDisplayUsername())
                 .email(user.getEmail())
-                .role(user.getRole())
-                .playerLevel(user.getPlayerLevel() != null ? user.getPlayerLevel().getDisplayName() : null)
+                .roles(new ArrayList<>(user.getRoles()))
+                .playerLevel(user.getPlayerLevel() != null ?
+                        user.getPlayerLevel().getDisplayName() : null)
                 .profileImageUrl(null)
                 .build();
     }
@@ -82,8 +85,9 @@ public class AuthService {
                 .id(user.getId())
                 .username(user.getDisplayUsername())
                 .email(user.getEmail())
-                .role(user.getRole())
-                .playerLevel(user.getPlayerLevel() != null ? user.getPlayerLevel().getDisplayName() : null)
+                .roles(new ArrayList<>(user.getRoles()))
+                .playerLevel(user.getPlayerLevel() != null ?
+                        user.getPlayerLevel().getDisplayName() : null)
                 .profileImageUrl(profileImageUrl)
                 .build();
     }

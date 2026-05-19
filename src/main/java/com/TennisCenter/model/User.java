@@ -1,7 +1,10 @@
 package com.TennisCenter.model;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.TennisCenter.model.enums.PlayerLevel;
 import com.TennisCenter.model.enums.Role;
@@ -39,9 +42,25 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    /**
+     * Legacy single-role column — kept for backward compatibility with existing data.
+     * New code should use the 'roles' set instead.
+     * This field is maintained in sync by the register/login flows.
+     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    /**
+     * Multi-role support: a user can have multiple roles (e.g. PLAYER + UMPIRE).
+     * Stored in a separate 'user_roles' join table.
+     */
+    @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    @Builder.Default
+    private Set<Role> roles = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     private PlayerLevel playerLevel;
@@ -60,7 +79,9 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        return roles.stream()
+                .map(r -> new SimpleGrantedAuthority("ROLE_" + r.name()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -68,7 +89,7 @@ public class User implements UserDetails {
         return password;
     }
 
-    // Aici alegem ca login-ul să se facă pe email
+    // Login is done via email
     @Override
     public String getUsername() {
         return email;
@@ -98,11 +119,21 @@ public class User implements UserDetails {
         return true;
     }
 
-    public Role getRole() {
-        return role;
+    /**
+     * Convenience: check if the user has a specific role.
+     */
+    public boolean hasRole(Role r) {
+        return roles.contains(r);
     }
 
-    public Long getId() {
-        return id;
+    /**
+     * Returns the "primary" display role — prioritizes ADMIN > PLAYER > UMPIRE.
+     * Used for display purposes (e.g. feed post author role badge).
+     */
+    public String getPrimaryDisplayRole() {
+        if (roles.contains(Role.ADMIN)) return Role.ADMIN.getDisplayName();
+        if (roles.contains(Role.PLAYER)) return Role.PLAYER.getDisplayName();
+        if (roles.contains(Role.UMPIRE)) return Role.UMPIRE.getDisplayName();
+        return role.getDisplayName(); // fallback to legacy
     }
 }

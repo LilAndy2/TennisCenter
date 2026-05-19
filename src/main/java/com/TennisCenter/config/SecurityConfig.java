@@ -48,6 +48,7 @@ public class SecurityConfig {
                                 "/ws/**"
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/umpire/**").hasRole("UMPIRE")
                         .requestMatchers("/api/player/**").hasAnyRole("PLAYER", "ADMIN")
                         .anyRequest().authenticated()
                 )

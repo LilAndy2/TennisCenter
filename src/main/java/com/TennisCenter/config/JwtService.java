@@ -3,10 +3,12 @@ package com.TennisCenter.config;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 import com.TennisCenter.model.User;
+import com.TennisCenter.model.enums.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -31,11 +33,15 @@ public class JwtService {
     }
 
     public String generateToken(Map<String, Object> extraClaims, User user) {
+        List<String> roleNames = user.getRoles().stream()
+                .map(Role::name)
+                .toList();
+
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
                 .setSubject(user.getUsername())
-                .claim("role", user.getRole().name())
+                .claim("roles", roleNames)
                 .claim("userId", user.getId())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))

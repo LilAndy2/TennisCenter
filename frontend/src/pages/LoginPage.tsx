@@ -25,7 +25,9 @@ type AuthResponse = {
     id: number;
     username: string;
     email: string;
-    role: "ADMIN" | "PLAYER";
+    roles: ("ADMIN" | "PLAYER" | "UMPIRE")[];
+    playerLevel?: string | null;
+    profileImageUrl?: string | null;
 };
 
 function LoginPage() {

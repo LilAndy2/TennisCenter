@@ -20,7 +20,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("""
             SELECT u
             FROM User u
-            WHERE u.role = :role
+            WHERE :role MEMBER OF u.roles
               AND u.playerLevel = :playerLevel
               AND (
                     LOWER(u.firstName) LIKE LOWER(CONCAT('%', :search, '%'))

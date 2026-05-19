@@ -12,6 +12,7 @@ import {
     SportsTennis,
     AdminPanelSettings,
     ChatBubbleOutline,
+    SportsScore,
 } from "@mui/icons-material";
 import {
     Avatar,
@@ -23,7 +24,7 @@ import {
     MenuItem,
     Typography,
 } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { resolveImageUrl } from "../../utils/resolveImageUrl";
@@ -43,9 +44,27 @@ import {
 type StoredUser = {
     username: string;
     email: string;
-    role: string;
+    roles: string[];
     profileImageUrl?: string;
 };
+
+/**
+ * Helper to check if a user has a specific role.
+ */
+function hasRole(user: StoredUser | null, role: string): boolean {
+    return user?.roles?.includes(role) ?? false;
+}
+
+/**
+ * Returns the primary display role for the user badge.
+ */
+function getPrimaryDisplayRole(user: StoredUser | null): string {
+    if (!user?.roles || user.roles.length === 0) return "USER";
+    if (user.roles.includes("ADMIN")) return "Admin";
+    if (user.roles.includes("PLAYER")) return "Player";
+    if (user.roles.includes("UMPIRE")) return "Umpire";
+    return "USER";
+}
 
 function TopNavbar() {
     const navigate = useNavigate();
@@ -62,6 +81,14 @@ function TopNavbar() {
     );
 
     const avatarUrl = resolveImageUrl(parsedUser?.profileImageUrl);
+
+    // Listen for user-updated events (e.g. after avatar upload)
+    const [, forceUpdate] = useState(0);
+    useEffect(() => {
+        const handler = () => forceUpdate((n) => n + 1);
+        window.addEventListener("user-updated", handler);
+        return () => window.removeEventListener("user-updated", handler);
+    }, []);
 
     const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -85,10 +112,14 @@ function TopNavbar() {
         navigate("/login");
     };
 
-    const isAdmin = parsedUser?.role === "ADMIN" || parsedUser?.role === "Admin";
+    const isAdmin = hasRole(parsedUser, "ADMIN");
+    const isPlayer = hasRole(parsedUser, "PLAYER");
+    const isUmpire = hasRole(parsedUser, "UMPIRE");
+    const isPlayerOrAdmin = isAdmin || isPlayer;
 
     const navItems = (
         <>
+            {/* Feed — visible to all */}
             <StyledNavLink to="/feed" onClick={() => setMobileOpen(false)}>
                 <NavItemContent>
                     <SportsTennis sx={{ fontSize: 18 }} />
@@ -96,13 +127,17 @@ function TopNavbar() {
                 </NavItemContent>
             </StyledNavLink>
 
-            <StyledNavLink to="/tournaments" onClick={() => setMobileOpen(false)}>
-                <NavItemContent>
-                    <EmojiEventsOutlined sx={{ fontSize: 18 }} />
-                    <NavItemText>Tournaments</NavItemText>
-                </NavItemContent>
-            </StyledNavLink>
+            {/* Player/Admin pages */}
+            {isPlayerOrAdmin ? (
+                <StyledNavLink to="/tournaments" onClick={() => setMobileOpen(false)}>
+                    <NavItemContent>
+                        <EmojiEventsOutlined sx={{ fontSize: 18 }} />
+                        <NavItemText>Tournaments</NavItemText>
+                    </NavItemContent>
+                </StyledNavLink>
+            ) : null}
 
+            {/* Schedule — visible to all */}
             <StyledNavLink to="/schedule" onClick={() => setMobileOpen(false)}>
                 <NavItemContent>
                     <CalendarMonth sx={{ fontSize: 18 }} />
@@ -110,27 +145,34 @@ function TopNavbar() {
                 </NavItemContent>
             </StyledNavLink>
 
-            <StyledNavLink to="/h2h" onClick={() => setMobileOpen(false)}>
-                <NavItemContent>
-                    <Schedule sx={{ fontSize: 18 }} />
-                    <NavItemText>H2H</NavItemText>
-                </NavItemContent>
-            </StyledNavLink>
+            {isPlayerOrAdmin ? (
+                <StyledNavLink to="/h2h" onClick={() => setMobileOpen(false)}>
+                    <NavItemContent>
+                        <Schedule sx={{ fontSize: 18 }} />
+                        <NavItemText>H2H</NavItemText>
+                    </NavItemContent>
+                </StyledNavLink>
+            ) : null}
 
-            <StyledNavLink to="/leaderboard" onClick={() => setMobileOpen(false)}>
-                <NavItemContent>
-                    <EmojiEventsOutlined sx={{ fontSize: 18 }} />
-                    <NavItemText>Leaderboard</NavItemText>
-                </NavItemContent>
-            </StyledNavLink>
+            {isPlayerOrAdmin ? (
+                <StyledNavLink to="/leaderboard" onClick={() => setMobileOpen(false)}>
+                    <NavItemContent>
+                        <EmojiEventsOutlined sx={{ fontSize: 18 }} />
+                        <NavItemText>Leaderboard</NavItemText>
+                    </NavItemContent>
+                </StyledNavLink>
+            ) : null}
 
-            <StyledNavLink to="/about-us" onClick={() => setMobileOpen(false)}>
-                <NavItemContent>
-                    <InfoOutlined sx={{ fontSize: 18 }} />
-                    <NavItemText>About us</NavItemText>
-                </NavItemContent>
-            </StyledNavLink>
+            {isPlayerOrAdmin ? (
+                <StyledNavLink to="/about-us" onClick={() => setMobileOpen(false)}>
+                    <NavItemContent>
+                        <InfoOutlined sx={{ fontSize: 18 }} />
+                        <NavItemText>About us</NavItemText>
+                    </NavItemContent>
+                </StyledNavLink>
+            ) : null}
 
+            {/* Admin dashboard */}
             {isAdmin ? (
                 <StyledNavLink to="/admin" onClick={() => setMobileOpen(false)}>
                     <NavItemContent>
@@ -166,13 +208,16 @@ function TopNavbar() {
                     </LeftSection>
 
                     <RightSection>
-                        <ChatIconButton onClick={() => navigate("/chat")} aria-label="Open chat">
-                            <ChatBubbleOutline sx={{ fontSize: 20 }} />
-                        </ChatIconButton>
+                        {/* Chat — only for players/admins */}
+                        {isPlayerOrAdmin ? (
+                            <ChatIconButton onClick={() => navigate("/chat")} aria-label="Open chat">
+                                <ChatBubbleOutline sx={{ fontSize: 20 }} />
+                            </ChatIconButton>
+                        ) : null}
 
                         <UserTextSection>
                             <UserNameText>{parsedUser?.username ?? "Player"}</UserNameText>
-                            <UserRoleText>{parsedUser?.role ?? "USER"}</UserRoleText>
+                            <UserRoleText>{getPrimaryDisplayRole(parsedUser)}</UserRoleText>
                         </UserTextSection>
 
                         <IconButton onClick={handleOpenMenu} aria-label="Open user menu">
@@ -212,6 +257,16 @@ function TopNavbar() {
                                     <span>Settings</span>
                                 </MenuItemContent>
                             </MenuItem>
+
+                            {/* Umpire live scoring */}
+                            {isUmpire ? (
+                                <MenuItem onClick={() => handleNavigate("/umpire/live-scoring")}>
+                                    <MenuItemContent>
+                                        <SportsScore sx={{ fontSize: 18 }} />
+                                        <span>Umpire Scores</span>
+                                    </MenuItemContent>
+                                </MenuItem>
+                            ) : null}
 
                             <Divider />
 
@@ -264,7 +319,7 @@ function TopNavbar() {
                 <DrawerFooter>
                     <DrawerUserInfo>
                         <UserNameText>{parsedUser?.username ?? "Player"}</UserNameText>
-                        <UserRoleText>{parsedUser?.role ?? "USER"}</UserRoleText>
+                        <UserRoleText>{getPrimaryDisplayRole(parsedUser)}</UserRoleText>
                     </DrawerUserInfo>
                 </DrawerFooter>
             </Drawer>
@@ -273,8 +328,6 @@ function TopNavbar() {
 }
 
 export default TopNavbar;
-
-/* ─── Styled Components ─── */
 
 const NavbarWrapper = styled(Box)`
     position: sticky;

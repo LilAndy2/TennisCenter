@@ -102,7 +102,7 @@ public class FeedPostService {
         return FeedPostResponse.builder()
                 .id(post.getId())
                 .authorName(post.getAuthor().getFirstName() + " " + post.getAuthor().getLastName())
-                .authorRole(post.getAuthor().getRole().getDisplayName())
+                .authorRole(post.getAuthor().getPrimaryDisplayRole())
                 .authorProfileImageUrl(authorImageUrl)
                 .content(post.getContent())
                 .imageUrl(post.getImageUrl())

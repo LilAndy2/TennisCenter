@@ -13,6 +13,7 @@ import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage.tsx";
 import AdminTournamentDetailsPage from "./pages/AdminTournamentDetailsPage.tsx";
+import UmpireLiveScoringPage from "./pages/UmpireLiveScoringPage.tsx";
 import PrivateRoute from "./routes/PrivateRoute";
 import LeaderboardPage from "./pages/LeaderboardPage.tsx";
 import ChatPage from "./pages/ChatPage.tsx";
@@ -69,25 +70,25 @@ const GlobalStyle = createGlobalStyle`
     button, input, textarea, select {
         font-family: inherit;
     }
-    
+
     html {
         scroll-behavior: smooth;
     }
-    
+
     :focus-visible {
         outline: 2px solid #10b981;
         outline-offset: 2px;
     }
-    
+
     .tabular-nums {
         font-variant-numeric: tabular-nums;
     }
-    
+
     ::selection {
         background: #d1fae5;
         color: #065f46;
     }
-    
+
     ::-webkit-scrollbar {
         width: 0.45rem;
         height: 0.45rem;
@@ -99,7 +100,7 @@ const GlobalStyle = createGlobalStyle`
     ::-webkit-scrollbar-track {
         background: transparent;
     }
-    
+
     @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after {
             animation-duration: 0.01ms !important;
@@ -119,6 +120,7 @@ function AnimatedRoutes() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
 
+                {/* Feed — accessible to all authenticated users */}
                 <Route
                     path="/feed"
                     element={
@@ -128,10 +130,11 @@ function AnimatedRoutes() {
                     }
                 />
 
+                {/* Player-only pages (admins also have PLAYER access) */}
                 <Route
                     path="/tournaments"
                     element={
-                        <PrivateRoute>
+                        <PrivateRoute allowedRoles={["ADMIN", "PLAYER"]}>
                             <TournamentsPage />
                         </PrivateRoute>
                     }
@@ -140,12 +143,13 @@ function AnimatedRoutes() {
                 <Route
                     path="/tournaments/:id"
                     element={
-                        <PrivateRoute>
+                        <PrivateRoute allowedRoles={["ADMIN", "PLAYER"]}>
                             <TournamentDetailsPage />
                         </PrivateRoute>
                     }
                 />
 
+                {/* Schedule — accessible to all authenticated users */}
                 <Route
                     path="/schedule"
                     element={
@@ -158,7 +162,7 @@ function AnimatedRoutes() {
                 <Route
                     path="/h2h"
                     element={
-                        <PrivateRoute>
+                        <PrivateRoute allowedRoles={["ADMIN", "PLAYER"]}>
                             <H2HPage />
                         </PrivateRoute>
                     }
@@ -167,7 +171,7 @@ function AnimatedRoutes() {
                 <Route
                     path="/leaderboard"
                     element={
-                        <PrivateRoute>
+                        <PrivateRoute allowedRoles={["ADMIN", "PLAYER"]}>
                             <LeaderboardPage />
                         </PrivateRoute>
                     }
@@ -176,12 +180,13 @@ function AnimatedRoutes() {
                 <Route
                     path="/about-us"
                     element={
-                        <PrivateRoute>
+                        <PrivateRoute allowedRoles={["ADMIN", "PLAYER"]}>
                             <AboutUsPage />
                         </PrivateRoute>
                     }
                 />
 
+                {/* Profile — accessible to all (umpires see a basic version) */}
                 <Route
                     path="/profile"
                     element={
@@ -200,10 +205,11 @@ function AnimatedRoutes() {
                     }
                 />
 
+                {/* Admin-only */}
                 <Route
                     path="/admin"
                     element={
-                        <PrivateRoute>
+                        <PrivateRoute allowedRoles={["ADMIN"]}>
                             <AdminDashboardPage />
                         </PrivateRoute>
                     }
@@ -212,16 +218,27 @@ function AnimatedRoutes() {
                 <Route
                     path="/admin/tournaments/:id"
                     element={
-                        <PrivateRoute>
+                        <PrivateRoute allowedRoles={["ADMIN"]}>
                             <AdminTournamentDetailsPage />
                         </PrivateRoute>
                     }
                 />
 
+                {/* Umpire-only: live scoring */}
+                <Route
+                    path="/umpire/live-scoring"
+                    element={
+                        <PrivateRoute allowedRoles={["UMPIRE"]}>
+                            <UmpireLiveScoringPage />
+                        </PrivateRoute>
+                    }
+                />
+
+                {/* Chat — accessible to players and admins */}
                 <Route
                     path="/chat"
                     element={
-                        <PrivateRoute>
+                        <PrivateRoute allowedRoles={["ADMIN", "PLAYER"]}>
                             <ChatPage />
                         </PrivateRoute>
                     }
@@ -230,7 +247,7 @@ function AnimatedRoutes() {
                 <Route
                     path="/chat/:conversationId"
                     element={
-                        <PrivateRoute>
+                        <PrivateRoute allowedRoles={["ADMIN", "PLAYER"]}>
                             <ChatPage />
                         </PrivateRoute>
                     }
