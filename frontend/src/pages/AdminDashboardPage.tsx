@@ -5,8 +5,9 @@ import CreateTournamentModal from "../components/admin/CreateTournamentModal";
 import LocationsTable from "../components/admin/LocationsTable";
 import DeleteLocationDialog from "../components/admin/DeleteLocationDialog";
 import LocationModal from "../components/admin/LocationModal";
+import PlayersManagementSection from "../components/admin/PlayersManagementSection";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
-import {AnimatedCard, AnimatedPage} from "../components/animated";
+import { AnimatedCard, AnimatedPage } from "../components/animated";
 import TournamentCard from "../components/tournaments/TournamentCard";
 import {
     PageWrapper as BasePageWrapper,
@@ -24,7 +25,7 @@ import {
     transition,
     breakpoints,
 } from "../styles/theme";
-import {useState} from "react";
+import { useState } from "react";
 import type { Location } from "../types/location";
 
 function AdminDashboardPage() {
@@ -53,53 +54,57 @@ function AdminDashboardPage() {
         <AnimatedPage>
             <AuthenticatedLayout>
                 <PageWrapper>
-                    <TopRow>
-                        <PageTitle>Admin dashboard</PageTitle>
-                        <ButtonsRow>
-                            <CreateButton onClick={() => setIsCreateModalOpen(true)}>
-                                <Add sx={{ fontSize: 20 }} />
-                                <span>Create tournament</span>
-                            </CreateButton>
-                        </ButtonsRow>
-                    </TopRow>
+                    <PageTitle>Admin dashboard</PageTitle>
 
                     {loading ? (
                         <LoadingWrapper><CircularProgress /></LoadingWrapper>
                     ) : (
                         <SectionsWrapper>
-                            <SectionBlock>
-                                <SectionTitle>Ongoing tournaments</SectionTitle>
-                                {ongoingTournaments.length === 0 ? (
-                                    <EmptyText>No ongoing tournaments.</EmptyText>
-                                ) : (
-                                    <HorizontalCardsRow>
-                                        {ongoingTournaments.map((t, index) => (
-                                            <HorizontalCardItem key={t.id}>
-                                                <AnimatedCard index={index}>
-                                                    <TournamentCard tournament={t} detailsPath={`/admin/tournaments/${t.id}`} />
-                                                </AnimatedCard>
-                                            </HorizontalCardItem>
-                                        ))}
-                                    </HorizontalCardsRow>
-                                )}
-                            </SectionBlock>
+                            <SectionCard>
+                                <SectionHeader>
+                                    <SectionTitle>Tournaments</SectionTitle>
+                                    <CreateButton onClick={() => setIsCreateModalOpen(true)}>
+                                        <Add sx={{ fontSize: 18 }} />
+                                        <span>Create tournament</span>
+                                    </CreateButton>
+                                </SectionHeader>
 
-                            <SectionBlock>
-                                <SectionTitle>Upcoming tournaments</SectionTitle>
-                                {upcomingTournaments.length === 0 ? (
-                                    <EmptyText>No upcoming tournaments.</EmptyText>
-                                ) : (
-                                    <HorizontalCardsRow>
-                                        {upcomingTournaments.map((t, index) => (
-                                            <HorizontalCardItem key={t.id}>
-                                                <AnimatedCard index={index}>
-                                                    <TournamentCard tournament={t} detailsPath={`/admin/tournaments/${t.id}`} />
-                                                </AnimatedCard>
-                                            </HorizontalCardItem>
-                                        ))}
-                                    </HorizontalCardsRow>
-                                )}
-                            </SectionBlock>
+                                <SubSectionBlock>
+                                    <SubSectionTitle>Ongoing</SubSectionTitle>
+                                    {ongoingTournaments.length === 0 ? (
+                                        <EmptyText>No ongoing tournaments.</EmptyText>
+                                    ) : (
+                                        <HorizontalCardsRow>
+                                            {ongoingTournaments.map((t, index) => (
+                                                <HorizontalCardItem key={t.id}>
+                                                    <AnimatedCard index={index}>
+                                                        <TournamentCard tournament={t} detailsPath={`/admin/tournaments/${t.id}`} />
+                                                    </AnimatedCard>
+                                                </HorizontalCardItem>
+                                            ))}
+                                        </HorizontalCardsRow>
+                                    )}
+                                </SubSectionBlock>
+
+                                <SectionDivider />
+
+                                <SubSectionBlock>
+                                    <SubSectionTitle>Upcoming</SubSectionTitle>
+                                    {upcomingTournaments.length === 0 ? (
+                                        <EmptyText>No upcoming tournaments.</EmptyText>
+                                    ) : (
+                                        <HorizontalCardsRow>
+                                            {upcomingTournaments.map((t, index) => (
+                                                <HorizontalCardItem key={t.id}>
+                                                    <AnimatedCard index={index}>
+                                                        <TournamentCard tournament={t} detailsPath={`/admin/tournaments/${t.id}`} />
+                                                    </AnimatedCard>
+                                                </HorizontalCardItem>
+                                            ))}
+                                        </HorizontalCardsRow>
+                                    )}
+                                </SubSectionBlock>
+                            </SectionCard>
 
                             <LocationsTable
                                 locations={locations}
@@ -107,6 +112,8 @@ function AdminDashboardPage() {
                                 onEdit={openEditLocation}
                                 onDelete={(loc) => setLocationToDelete(loc)}
                             />
+
+                            <PlayersManagementSection />
                         </SectionsWrapper>
                     )}
                 </PageWrapper>
@@ -149,11 +156,27 @@ const PageWrapper = styled(BasePageWrapper)`
     max-width: 80rem;
 `;
 
-const TopRow = styled(Box)`
+const SectionsWrapper = styled(Box)`
+    display: flex;
+    flex-direction: column;
+    gap: ${spacing.xl};
+    margin-top: ${spacing.lg};
+`;
+
+const SectionCard = styled(Box)`
+    background: ${colors.surface};
+    border: 1px solid ${colors.border};
+    border-radius: ${radius.xl};
+    box-shadow: ${shadow.sm};
+    overflow: hidden;
+    padding: ${spacing.lg};
+`;
+
+const SectionHeader = styled(Box)`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: ${spacing.lg};
+    margin-bottom: ${spacing.md};
     gap: ${spacing.md};
 
     @media (max-width: ${breakpoints.md}) {
@@ -162,13 +185,36 @@ const TopRow = styled(Box)`
     }
 `;
 
-const ButtonsRow = styled(Box)`
+const SectionTitle = styled(Typography)`
+    font-size: ${fontSize.lg} !important;
+    font-weight: ${fontWeight.black} !important;
+    color: ${colors.textPrimary};
+    white-space: nowrap;
+`;
+
+const SubSectionBlock = styled(Box)`
     display: flex;
+    flex-direction: column;
     gap: ${spacing.sm};
 `;
 
+const SubSectionTitle = styled(Typography)`
+    font-size: ${fontSize.base} !important;
+    font-weight: ${fontWeight.bold} !important;
+    color: ${colors.textSecondary};
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: ${fontSize.xs} !important;
+`;
+
+const SectionDivider = styled(Box)`
+    height: 1px;
+    background: ${colors.border};
+    margin: ${spacing.md} 0;
+`;
+
 const CreateButton = styled.button`
-    height: 2.75rem;
+    height: 2.5rem;
     padding: 0 ${spacing.md};
     border: none;
     border-radius: ${radius.pill};
@@ -178,9 +224,10 @@ const CreateButton = styled.button`
     font-weight: ${fontWeight.bold};
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.35rem;
     cursor: pointer;
     transition: all ${transition.normal};
+    white-space: nowrap;
 
     &:hover {
         background: ${colors.primaryHover};
@@ -192,24 +239,6 @@ const CreateButton = styled.button`
     }
 `;
 
-const SectionsWrapper = styled(Box)`
-    display: flex;
-    flex-direction: column;
-    gap: ${spacing.xl};
-`;
-
-const SectionBlock = styled(Box)`
-    display: flex;
-    flex-direction: column;
-    gap: ${spacing.sm};
-`;
-
-const SectionTitle = styled(Typography)`
-    font-size: 1.2rem !important;
-    font-weight: ${fontWeight.black} !important;
-    color: ${colors.textPrimary};
-`;
-
 const HorizontalCardsRow = styled(Box)`
     display: flex;
     gap: ${spacing.md};
@@ -217,7 +246,6 @@ const HorizontalCardsRow = styled(Box)`
     padding-top: 0.35rem;
     padding-bottom: ${spacing.xs};
 
-    /* Scroll fade hint */
     mask-image: linear-gradient(to right, black calc(100% - 2rem), transparent 100%);
     -webkit-mask-image: linear-gradient(to right, black calc(100% - 2rem), transparent 100%);
 `;

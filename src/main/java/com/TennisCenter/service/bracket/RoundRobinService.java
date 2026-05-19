@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RoundRobinService {
 
+    private static final int MAX_GROUP_SIZE = 4;
+
     private final TournamentMatchRepository tournamentMatchRepository;
 
     public void generateGroups(Tournament tournament, List<User> participants) {
@@ -29,10 +31,6 @@ public class RoundRobinService {
             groupIndex++;
         }
     }
-
-    // -------------------------------------------------------------------------
-    // Private helpers
-    // -------------------------------------------------------------------------
 
     private void generateMatchesForGroup(
             Tournament tournament,
@@ -63,15 +61,9 @@ public class RoundRobinService {
 
     private List<List<User>> splitIntoGroups(List<User> participants) {
         int size = participants.size();
+        int groupCount = (int) Math.ceil((double) size / MAX_GROUP_SIZE);
 
-        int groupCount;
-        if (size <= 8) {
-            groupCount = 2;
-        } else if (size <= 16) {
-            groupCount = 4;
-        } else {
-            groupCount = Math.max(4, size / 4);
-        }
+        groupCount = Math.max(2, groupCount);
 
         List<List<User>> groups = new ArrayList<>();
         for (int i = 0; i < groupCount; i++) {
