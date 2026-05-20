@@ -63,6 +63,10 @@ public class TournamentMatchMapper {
                         ? match.getCourt().getLocation().getName() : null)
                 .playerOneSeed(match.getPlayerOneSeed())
                 .playerTwoSeed(match.getPlayerTwoSeed())
+                .umpireId(match.getUmpire() != null ? match.getUmpire().getId() : null)
+                .umpireName(match.getUmpire() != null
+                        ? match.getUmpire().getFirstName() + " " + match.getUmpire().getLastName()
+                        : null)
                 .build();
     }
 

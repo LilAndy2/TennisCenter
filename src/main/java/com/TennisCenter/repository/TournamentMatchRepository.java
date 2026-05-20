@@ -20,4 +20,5 @@ public interface TournamentMatchRepository extends JpaRepository<TournamentMatch
             LocalDate date2,
             Long playerTwoId
     );
+    List<TournamentMatch> findByUmpireIdOrderByScheduledTimeAsc(Long umpireId);
 }

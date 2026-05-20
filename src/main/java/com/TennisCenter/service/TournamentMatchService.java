@@ -12,6 +12,7 @@ import com.TennisCenter.model.enums.*;
 import com.TennisCenter.repository.CourtRepository;
 import com.TennisCenter.repository.MatchSetRepository;
 import com.TennisCenter.repository.TournamentMatchRepository;
+import com.TennisCenter.repository.UserRepository;
 import com.TennisCenter.service.match.SetScoreValidator;
 import com.TennisCenter.service.match.TournamentMatchMapper;
 import jakarta.transaction.Transactional;
@@ -29,6 +30,7 @@ public class TournamentMatchService {
     private final TournamentMatchRepository tournamentMatchRepository;
     private final MatchSetRepository matchSetRepository;
     private final CourtRepository courtRepository;
+    private final UserRepository userRepository;
     private final SetScoreValidator setScoreValidator;
     private final TournamentMatchMapper tournamentMatchMapper;
     private final RankingService rankingService;
@@ -168,5 +170,34 @@ public class TournamentMatchService {
             nextMatch.setPlayerTwo(winner);
         }
         tournamentMatchRepository.save(nextMatch);
+    }
+
+    @Transactional
+    public TournamentMatchResponse assignUmpire(
+            Long matchId,
+            Long umpireId,
+            User currentUser) {
+
+        if (currentUser == null || currentUser.getRole() != Role.ADMIN) {
+            throw new UnauthorizedActionException("Only admins can assign umpires");
+        }
+
+        TournamentMatch match = findMatch(matchId);
+
+        if (umpireId == null) {
+            match.setUmpire(null);
+        } else {
+            User umpire = userRepository.findById(umpireId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Umpire not found"));
+
+            if (!umpire.getRoles().contains(Role.UMPIRE)) {
+                throw new ValidationException("The selected user is not an umpire");
+            }
+
+            match.setUmpire(umpire);
+        }
+
+        TournamentMatch saved = tournamentMatchRepository.save(match);
+        return tournamentMatchMapper.toResponse(saved, currentUser);
     }
 }

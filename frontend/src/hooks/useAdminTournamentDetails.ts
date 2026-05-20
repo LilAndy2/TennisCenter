@@ -65,6 +65,7 @@ function useAdminTournamentDetails(id: string | undefined) {
         ...participantHook,
         ...scoreHook,
         ...scheduleHook,
+        loadMatches: () => dataHook.loadMatches(),
     };
 }
 

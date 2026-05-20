@@ -10,6 +10,7 @@ type KnockoutBracketCardProps = {
     embedded?: boolean;
     onUpdateScore?: (match: TournamentMatch) => void;
     onScheduleMatch?: (match: TournamentMatch) => void;
+    onAssignUmpire?: (match: TournamentMatch) => void;
 };
 
 function getRoundLabel(roundNumber: number, maxRoundNumber: number): string {
@@ -26,6 +27,7 @@ function KnockoutBracketCard({
                                  embedded = false,
                                  onUpdateScore,
                                  onScheduleMatch,
+                                 onAssignUmpire,
                              }: KnockoutBracketCardProps) {
     const knockoutMatches = matches.filter((m) => m.phase === "KNOCKOUT");
 
@@ -59,6 +61,7 @@ function KnockoutBracketCard({
                                         readOnly={readOnly}
                                         onUpdateScore={onUpdateScore}
                                         onScheduleMatch={onScheduleMatch}
+                                        onAssignUmpire={onAssignUmpire}
                                     />
                                 </MatchWrapper>
                             ))}

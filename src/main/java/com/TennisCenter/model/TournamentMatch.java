@@ -73,4 +73,8 @@ public class TournamentMatch {
 
     @Column(name = "player_two_seed")
     private Integer playerTwoSeed;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "umpire_id")
+    private User umpire;
 }

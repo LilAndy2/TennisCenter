@@ -29,6 +29,8 @@ export type TournamentMatch = {
     locationName?: string | null;
     playerOneSeed?: number | null;
     playerTwoSeed?: number | null;
+    umpireId?: number | null;
+    umpireName?: string | null;
 };
 
 export type GroupStandingPlayer = {

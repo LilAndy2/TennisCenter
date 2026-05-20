@@ -11,6 +11,7 @@ type GroupColumnProps = {
     readOnly: boolean;
     onUpdateScore?: (match: TournamentMatch) => void;
     onScheduleMatch?: (match: TournamentMatch) => void;
+    onAssignUmpire?: (match: TournamentMatch) => void;
 };
 
 function GroupColumn({
@@ -20,6 +21,7 @@ function GroupColumn({
                          readOnly,
                          onUpdateScore,
                          onScheduleMatch,
+                         onAssignUmpire,
                      }: GroupColumnProps) {
     const groupMatches = matches.filter(
         (m) => m.phase === "GROUP_STAGE" && m.groupName === standing.groupName
@@ -47,6 +49,7 @@ function GroupColumn({
                             readOnly={readOnly}
                             onUpdateScore={onUpdateScore}
                             onScheduleMatch={onScheduleMatch}
+                            onAssignUmpire={onAssignUmpire}
                         />
                     ))}
                 </MatchesList>

@@ -84,7 +84,12 @@ function ScheduleMatchChip({ match }: ScheduleMatchChipProps) {
                 )}
             </MatchPlayers>
 
-            <TournamentTag $color={colors.text}>{match.tournamentName}</TournamentTag>
+            <MatchFooter>
+                <TournamentLabel $color={colors.text}>{match.tournamentName}</TournamentLabel>
+                {match.umpireName && (
+                    <UmpireLabel>Umpire: {match.umpireName}</UmpireLabel>
+                )}
+            </MatchFooter>
         </MatchChip>
     );
 }
@@ -92,76 +97,88 @@ function ScheduleMatchChip({ match }: ScheduleMatchChipProps) {
 export default ScheduleMatchChip;
 
 const MatchChip = styled(Box)<{ $bg: string; $border: string }>`
-  background: ${({ $bg }) => $bg};
-  border: 1px solid ${({ $border }) => $border};
-  border-radius: 0.85rem;
-  padding: 0.75rem 0.85rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 0.75rem;
+    border: 1.5px solid ${({ $border }) => $border};
+    background: ${({ $bg }) => $bg};
 `;
 
 const MatchTime = styled(Typography)<{ $color: string }>`
-  font-size: 0.82rem !important;
-  font-weight: 800 !important;
-  color: ${({ $color }) => $color};
-  margin-bottom: 0.3rem !important;
+    font-size: 0.78rem !important;
+    font-weight: 800 !important;
+    color: ${({ $color }) => $color};
+    margin-bottom: 0.3rem !important;
 `;
 
 const MatchPlayers = styled(Box)`
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
 `;
 
 const PlayerScoreRow = styled(Box)`
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
 `;
 
 const PlayerNameCell = styled(Typography)<{ $bold: boolean }>`
-  font-size: 0.88rem !important;
-  font-weight: ${({ $bold }) => ($bold ? 700 : 400)} !important;
-  color: #111827;
-  flex: 1;
-  min-width: 0;
-`;
-
-const SetScoresRow = styled(Box)`
-  display: flex;
-  flex-shrink: 0;
-  gap: 0.4rem;
-  align-items: baseline;
-`;
-
-const SetGameColumn = styled.span`
-  display: inline-block;
-  min-width: 1rem;
-  text-align: center;
-`;
-
-const SetGameNumber = styled.span`
-  font-size: 0.88rem !important;
-  font-weight: 600 !important;
-  color: #334155;
-`;
-
-const TiebreakSup = styled.sup`
-  font-size: 0.65em;
-  font-weight: 700;
-  line-height: 0;
-  color: #475569;
+    font-size: 0.82rem !important;
+    font-weight: ${({ $bold }) => ($bold ? 800 : 500)} !important;
+    color: ${({ $bold }) => ($bold ? "#111827" : "#475569")};
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 `;
 
 const VsText = styled(Typography)`
-  font-size: 0.75rem !important;
-  color: #94a3b8;
-  font-weight: 600 !important;
+    font-size: 0.7rem !important;
+    color: #94a3b8;
+    font-weight: 700 !important;
 `;
 
-const TournamentTag = styled(Typography)<{ $color: string }>`
-  font-size: 0.75rem !important;
-  color: ${({ $color }) => $color};
-  font-weight: 600 !important;
-  margin-top: 0.4rem !important;
-  opacity: 0.85;
+const SetScoresRow = styled(Box)`
+    display: flex;
+    gap: 0.3rem;
+`;
+
+const SetGameColumn = styled(Box)`
+    min-width: 1rem;
+    text-align: center;
+`;
+
+const SetGameNumber = styled(Typography)`
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    color: #0f172a;
+`;
+
+const TiebreakSup = styled.sup`
+    font-size: 0.55rem;
+    font-weight: 700;
+    vertical-align: super;
+`;
+
+const MatchFooter = styled(Box)`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.35rem;
+    gap: 0.35rem;
+`;
+
+const TournamentLabel = styled(Typography)<{ $color: string }>`
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    color: ${({ $color }) => $color};
+    opacity: 0.7;
+`;
+
+const UmpireLabel = styled(Typography)`
+    font-size: 0.68rem !important;
+    font-weight: 600 !important;
+    color: #7e22ce;
 `;

@@ -37,4 +37,7 @@ public class TournamentMatchResponse {
 
     private Integer playerOneSeed;
     private Integer playerTwoSeed;
+
+    private Long umpireId;
+    private String umpireName;
 }

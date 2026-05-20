@@ -22,4 +22,6 @@ public class ScheduledMatchResponse {
     private String status;
     private String winnerName;
     private List<MatchSetResponse> sets;
+    private Long umpireId;
+    private String umpireName;
 }

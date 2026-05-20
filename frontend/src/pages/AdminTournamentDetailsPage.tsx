@@ -1,4 +1,4 @@
-import { Box, CircularProgress} from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import CreateTournamentModal from "../components/admin/CreateTournamentModal";
@@ -13,6 +13,8 @@ import useAdminTournamentDetails from "../hooks/useAdminTournamentDetails";
 import AdminTournamentGroupsCard from "../components/admin/tournament-details/AdminTournamentGroupsCard.tsx";
 import UpdateMatchScoreDialog from "../components/admin/tournament-details/UpdateMatchScoreDialog.tsx";
 import ScheduleMatchDialog from "../components/admin/tournament-details/ScheduleMatchDialog.tsx";
+import AssignUmpireDialog from "../components/admin/tournament-details/AssignUmpireDialog.tsx";
+import useUmpireAssignment from "../hooks/useUmpireAssignment.ts";
 import { AnimatedPage } from "../components/animated";
 import {
     NarrowPageWrapper,
@@ -64,7 +66,10 @@ function AdminTournamentDetailsPage() {
         handleCloseScheduleDialog,
         handleScheduleMatch,
         handleGenerateKnockout,
+        loadMatches,
     } = useAdminTournamentDetails(id);
+
+    const umpireAssignment = useUmpireAssignment(loadMatches);
 
     if (loading) {
         return (
@@ -131,6 +136,7 @@ function AdminTournamentDetailsPage() {
                             hasGeneratedBracket={matches.length > 0}
                             onUpdateScore={handleOpenUpdateScoreDialog}
                             onScheduleMatch={handleOpenScheduleDialog}
+                            onAssignUmpire={umpireAssignment.handleOpenUmpireDialog}
                         />
                     </SectionsGrid>
                 </NarrowPageWrapper>
@@ -170,6 +176,15 @@ function AdminTournamentDetailsPage() {
                     locations={locations}
                     onClose={handleCloseScheduleDialog}
                     onSubmit={handleScheduleMatch}
+                />
+
+                <AssignUmpireDialog
+                    open={umpireAssignment.isUmpireDialogOpen}
+                    matchId={umpireAssignment.matchForUmpire?.id ?? null}
+                    currentUmpireId={umpireAssignment.matchForUmpire?.umpireId}
+                    onClose={umpireAssignment.handleCloseUmpireDialog}
+                    onAssign={umpireAssignment.handleAssignUmpire}
+                    onRemove={umpireAssignment.handleRemoveUmpire}
                 />
             </AuthenticatedLayout>
         </AnimatedPage>

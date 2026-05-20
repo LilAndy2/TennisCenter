@@ -1,5 +1,6 @@
 package com.TennisCenter.controller;
 
+import com.TennisCenter.dto.match.AssignUmpireRequest;
 import com.TennisCenter.dto.match.ScheduleMatchRequest;
 import com.TennisCenter.dto.match.SubmitMatchScoreRequest;
 import com.TennisCenter.dto.match.TournamentMatchResponse;
@@ -7,11 +8,7 @@ import com.TennisCenter.model.User;
 import com.TennisCenter.service.TournamentMatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/matches")
@@ -36,5 +33,22 @@ public class AdminMatchController {
             @AuthenticationPrincipal User currentUser
     ) {
         return tournamentMatchService.scheduleMatch(matchId, request, currentUser);
+    }
+
+    @PutMapping("/{matchId}/umpire")
+    public TournamentMatchResponse assignUmpire(
+            @PathVariable Long matchId,
+            @RequestBody AssignUmpireRequest request,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        return tournamentMatchService.assignUmpire(matchId, request.getUmpireId(), currentUser);
+    }
+
+    @DeleteMapping("/{matchId}/umpire")
+    public TournamentMatchResponse removeUmpire(
+            @PathVariable Long matchId,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        return tournamentMatchService.assignUmpire(matchId, null, currentUser);
     }
 }

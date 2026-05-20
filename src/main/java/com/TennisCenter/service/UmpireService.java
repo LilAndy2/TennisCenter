@@ -1,5 +1,6 @@
 package com.TennisCenter.service;
 
+import com.TennisCenter.dto.match.MatchSetResponse;
 import com.TennisCenter.dto.match.ScheduledMatchResponse;
 import com.TennisCenter.model.TournamentMatch;
 import com.TennisCenter.repository.MatchSetRepository;
@@ -12,24 +13,26 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ScheduleService {
+public class UmpireService {
 
     private final TournamentMatchRepository tournamentMatchRepository;
     private final MatchSetRepository matchSetRepository;
 
-    public List<ScheduledMatchResponse> getAllScheduledMatches() {
-        return tournamentMatchRepository.findAll()
+    public List<ScheduledMatchResponse> getMatchesForUmpire(Long umpireId) {
+        return tournamentMatchRepository.findByUmpireIdOrderByScheduledTimeAsc(umpireId)
                 .stream()
-                .filter(match -> match.getScheduledTime() != null)
-                .map(this::toScheduledResponse)
-                .sorted(Comparator.comparing(ScheduledMatchResponse::getScheduledTime))
+                .map(this::toResponse)
+                .sorted(Comparator.comparing(
+                        ScheduledMatchResponse::getScheduledTime,
+                        Comparator.nullsLast(Comparator.naturalOrder())
+                ))
                 .toList();
     }
 
-    private ScheduledMatchResponse toScheduledResponse(TournamentMatch match) {
+    private ScheduledMatchResponse toResponse(TournamentMatch match) {
         var sets = matchSetRepository.findByMatchIdOrderBySetNumberAsc(match.getId())
                 .stream()
-                .map(set -> com.TennisCenter.dto.match.MatchSetResponse.builder()
+                .map(set -> MatchSetResponse.builder()
                         .setNumber(set.getSetNumber())
                         .playerOneGames(set.getPlayerOneGames())
                         .playerTwoGames(set.getPlayerTwoGames())
@@ -40,8 +43,12 @@ public class ScheduleService {
 
         return ScheduledMatchResponse.builder()
                 .matchId(match.getId())
-                .scheduledTime(match.getScheduledTime().toString())
-                .matchDate(match.getScheduledTime().toLocalDate().toString())
+                .scheduledTime(match.getScheduledTime() != null
+                        ? match.getScheduledTime().toString() : null)
+                .matchDate(match.getScheduledTime() != null
+                        ? match.getScheduledTime().toLocalDate().toString()
+                        : match.getMatchDate() != null
+                        ? match.getMatchDate().toString() : null)
                 .playerOneName(match.getPlayerOne() != null
                         ? match.getPlayerOne().getFirstName() + " " + match.getPlayerOne().getLastName()
                         : "TBD")

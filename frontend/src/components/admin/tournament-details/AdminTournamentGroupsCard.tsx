@@ -16,6 +16,7 @@ type AdminTournamentGroupsCardProps = {
     onScheduleMatch?: (match: TournamentMatch) => void;
     tournament?: { bracketType: string };
     onGenerateKnockout?: () => void;
+    onAssignUmpire?: (match: TournamentMatch) => void;
 };
 
 type Tab = "groups" | "knockout";
@@ -30,6 +31,7 @@ function AdminTournamentGroupsCard({
                                        onScheduleMatch,
                                        tournament,
                                        onGenerateKnockout,
+                                       onAssignUmpire,
                                    }: AdminTournamentGroupsCardProps) {
     const [activeTab, setActiveTab] = useState<Tab>("groups");
 
@@ -52,6 +54,7 @@ function AdminTournamentGroupsCard({
                         onUpdateScore={onUpdateScore}
                         onScheduleMatch={onScheduleMatch}
                         embedded
+                        onAssignUmpire={onAssignUmpire}
                     />
                 ) : (
                     <>
@@ -138,6 +141,7 @@ function AdminTournamentGroupsCard({
                                     readOnly={readOnly}
                                     onUpdateScore={onUpdateScore}
                                     onScheduleMatch={onScheduleMatch}
+                                    onAssignUmpire={onAssignUmpire}
                                 />
                             ))}
                         </ScrollableGroupsRow>

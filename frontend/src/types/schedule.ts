@@ -15,4 +15,6 @@ export type ScheduledMatch = {
     status: string;
     winnerName: string | null;
     sets?: MatchSet[];
+    umpireId?: number | null;
+    umpireName?: string | null;
 };
