@@ -77,4 +77,7 @@ public class TournamentMatch {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "umpire_id")
     private User umpire;
+
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
 }

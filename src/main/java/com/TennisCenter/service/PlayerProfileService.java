@@ -13,10 +13,7 @@ import com.TennisCenter.model.enums.PlayerLevel;
 import com.TennisCenter.model.enums.Role;
 import com.TennisCenter.model.enums.TournamentMatchPhase;
 import com.TennisCenter.model.enums.TournamentMatchStatus;
-import com.TennisCenter.repository.MatchSetRepository;
-import com.TennisCenter.repository.PlayerProfileRepository;
-import com.TennisCenter.repository.TournamentMatchRepository;
-import com.TennisCenter.repository.UserRepository;
+import com.TennisCenter.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
@@ -44,6 +41,7 @@ public class PlayerProfileService {
     private final TournamentMatchRepository tournamentMatchRepository;
     private final MatchSetRepository matchSetRepository;
     private final RankingService rankingService;
+    private final MatchPointRepository matchPointRepository;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -92,13 +90,19 @@ public class PlayerProfileService {
         List<TournamentMatch> completedMatches = allMatches.stream()
                 .filter(m -> m.getStatus() == TournamentMatchStatus.COMPLETED)
                 .filter(m -> m.getWinner() != null)
-                .sorted(Comparator.comparing(
-                        (TournamentMatch m) -> {
+                .sorted(Comparator
+                        .comparing((TournamentMatch m) -> m.getTournament().getStartDate(),
+                                Comparator.reverseOrder())
+                        .thenComparing((TournamentMatch m) -> m.getPhase().ordinal(),
+                                Comparator.reverseOrder())
+                        .thenComparing((TournamentMatch m) -> m.getRoundNumber() != null ? m.getRoundNumber() : 0,
+                                Comparator.reverseOrder())
+                        .thenComparing((TournamentMatch m) -> {
                             if (m.getScheduledTime() != null) return m.getScheduledTime();
                             if (m.getMatchDate() != null) return m.getMatchDate().atStartOfDay();
                             return m.getTournament().getStartDate().atStartOfDay();
-                        }
-                ).reversed())
+                        }, Comparator.reverseOrder())
+                )
                 .toList();
 
         List<MatchHistoryResponse> result = new ArrayList<>();
@@ -136,6 +140,7 @@ public class PlayerProfileService {
                             ? match.getTournament().getSurface().getDisplayName()
                             : null)
                     .tournamentStartYear(match.getTournament().getStartDate().getYear())
+                    .hasStats(matchPointRepository.existsByMatchId(match.getId()))
                     .build());
         }
 

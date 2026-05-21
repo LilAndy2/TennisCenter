@@ -36,6 +36,7 @@ export type MatchHistoryEntry = {
     tournamentName: string;
     surface: string | null;
     tournamentStartYear: number;
+    hasStats: boolean;
 };
 
 export type TitleFinal = {

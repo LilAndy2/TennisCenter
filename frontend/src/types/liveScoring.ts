@@ -1,0 +1,80 @@
+export type LiveSetScore = {
+    setNumber: number;
+    playerOneGames: number;
+    playerTwoGames: number;
+    playerOneTiebreakPoints: number | null;
+    playerTwoTiebreakPoints: number | null;
+};
+
+export type LiveScoreState = {
+    matchId: number;
+    playerOneName: string;
+    playerTwoName: string;
+    playerOneId: number;
+    playerTwoId: number;
+    serverId: number;
+    currentGameScore: string;
+    sets: LiveSetScore[];
+    currentSetPlayerOneGames: number;
+    currentSetPlayerTwoGames: number;
+    inTiebreak: boolean;
+    tiebreakPlayerOnePoints: number | null;
+    tiebreakPlayerTwoPoints: number | null;
+    matchFinished: boolean;
+    winnerId: number | null;
+    totalPoints: number;
+    lastPointNumber: number | null;
+};
+
+export type RecordPointPayload = {
+    pointWinnerId: number | null;
+    serveType: "FIRST_SERVE" | "SECOND_SERVE";
+    pointOutcome: "WINNER" | "UNFORCED_ERROR" | "FORCED_ERROR" | "ACE" | "DOUBLE_FAULT" | "POINT_WON";
+    shotType: "FOREHAND" | "BACKHAND" | "VOLLEY" | null;
+};
+
+export type MatchStats = {
+    matchId: number;
+    playerOneName: string;
+    playerTwoName: string;
+    playerOneId: number;
+    playerTwoId: number;
+    playerOneAces: number;
+    playerTwoAces: number;
+    playerOneDoubleFaults: number;
+    playerTwoDoubleFaults: number;
+    playerOneFirstServesIn: string;
+    playerTwoFirstServesIn: string;
+    playerOneFirstServePercentage: string;
+    playerTwoFirstServePercentage: string;
+    playerOneFirstServePointsWon: string;
+    playerTwoFirstServePointsWon: string;
+    playerOneSecondServePointsWon: string;
+    playerTwoSecondServePointsWon: string;
+    playerOneReceivingPointsWon: string;
+    playerTwoReceivingPointsWon: string;
+    playerOneBreakPointsWon: string;
+    playerTwoBreakPointsWon: string;
+    playerOneNetPointsWon: string;
+    playerTwoNetPointsWon: string;
+    playerOneForehandWinners: number;
+    playerTwoForehandWinners: number;
+    playerOneBackhandWinners: number;
+    playerTwoBackhandWinners: number;
+    playerOneVolleyWinners: number;
+    playerTwoVolleyWinners: number;
+    playerOneTotalWinners: number;
+    playerTwoTotalWinners: number;
+    playerOneForehandUnforcedErrors: number;
+    playerTwoForehandUnforcedErrors: number;
+    playerOneBackhandUnforcedErrors: number;
+    playerTwoBackhandUnforcedErrors: number;
+    playerOneTotalUnforcedErrors: number;
+    playerTwoTotalUnforcedErrors: number;
+    playerOneForcedErrors: number;
+    playerTwoForcedErrors: number;
+    playerOneTotalPointsWon: number;
+    playerTwoTotalPointsWon: number;
+    playerOneServiceGamesWon: string;
+    playerTwoServiceGamesWon: string;
+};

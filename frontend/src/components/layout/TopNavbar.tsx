@@ -251,6 +251,15 @@ function TopNavbar() {
                                 </MenuItemContent>
                             </MenuItem>
 
+                            {isPlayerOrAdmin ? (
+                                <MenuItem onClick={() => handleNavigate("/my-matches")}>
+                                    <MenuItemContent>
+                                        <SportsTennis sx={{ fontSize: 18 }} />
+                                        <span>My Matches</span>
+                                    </MenuItemContent>
+                                </MenuItem>
+                            ) : null}
+
                             <MenuItem onClick={() => handleNavigate("/settings")}>
                                 <MenuItemContent>
                                     <Settings sx={{ fontSize: 18 }} />
@@ -258,7 +267,6 @@ function TopNavbar() {
                                 </MenuItemContent>
                             </MenuItem>
 
-                            {/* Umpire live scoring */}
                             {isUmpire ? (
                                 <MenuItem onClick={() => handleNavigate("/umpire/live-scoring")}>
                                     <MenuItemContent>

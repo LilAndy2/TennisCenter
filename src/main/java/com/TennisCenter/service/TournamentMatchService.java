@@ -98,6 +98,7 @@ public class TournamentMatchService {
 
         match.setWinner(winner);
         match.setStatus(TournamentMatchStatus.COMPLETED);
+        match.setCompletedAt(LocalDateTime.now());
         match.setReportedBy(currentUser);
         TournamentMatch saved = tournamentMatchRepository.save(match);
 
@@ -199,5 +200,115 @@ public class TournamentMatchService {
 
         TournamentMatch saved = tournamentMatchRepository.save(match);
         return tournamentMatchMapper.toResponse(saved, currentUser);
+    }
+
+    @Transactional
+    public TournamentMatchResponse playerSubmitMatchScore(
+            Long matchId,
+            SubmitMatchScoreRequest request,
+            User currentUser) {
+
+        if (currentUser == null) {
+            throw new UnauthorizedActionException("You must be logged in");
+        }
+
+        TournamentMatch match = findMatch(matchId);
+
+        boolean isParticipant =
+                (match.getPlayerOne() != null && match.getPlayerOne().getId().equals(currentUser.getId())) ||
+                        (match.getPlayerTwo() != null && match.getPlayerTwo().getId().equals(currentUser.getId()));
+
+        if (!isParticipant) {
+            throw new UnauthorizedActionException("You can only submit scores for your own matches");
+        }
+
+        if (match.getStatus() == TournamentMatchStatus.COMPLETED) {
+            throw new ValidationException("This match already has a score entered");
+        }
+
+        if (request == null || request.getSets() == null || request.getSets().isEmpty()) {
+            throw new ValidationException("At least one set is required");
+        }
+        if (request.getSets().size() > 3) {
+            throw new ValidationException("Maximum 3 sets are allowed");
+        }
+        if (match.getPlayerOne() == null || match.getPlayerTwo() == null) {
+            throw new ValidationException("Cannot submit score for a match without two players");
+        }
+
+        int playerOneSetsWon = 0;
+        int playerTwoSetsWon = 0;
+
+        for (MatchSetScoreRequest setRequest : request.getSets()) {
+            setScoreValidator.validate(setRequest);
+            if (setRequest.getPlayerOneGames() > setRequest.getPlayerTwoGames()) {
+                playerOneSetsWon++;
+            } else if (setRequest.getPlayerTwoGames() > setRequest.getPlayerOneGames()) {
+                playerTwoSetsWon++;
+            }
+        }
+
+        User winner = resolveWinner(match, playerOneSetsWon, playerTwoSetsWon);
+        User loser = winner.getId().equals(match.getPlayerOne().getId())
+                ? match.getPlayerTwo()
+                : match.getPlayerOne();
+
+        matchSetRepository.deleteByMatchId(matchId);
+
+        for (MatchSetScoreRequest setRequest : request.getSets()) {
+            MatchSet set = MatchSet.builder()
+                    .match(match)
+                    .setNumber(setRequest.getSetNumber())
+                    .playerOneGames(setRequest.getPlayerOneGames())
+                    .playerTwoGames(setRequest.getPlayerTwoGames())
+                    .playerOneTiebreakPoints(setRequest.getPlayerOneTiebreakPoints())
+                    .playerTwoTiebreakPoints(setRequest.getPlayerTwoTiebreakPoints())
+                    .build();
+            matchSetRepository.save(set);
+        }
+
+        match.setWinner(winner);
+        match.setStatus(TournamentMatchStatus.COMPLETED);
+        match.setCompletedAt(LocalDateTime.now());
+        match.setReportedBy(currentUser);
+        TournamentMatch saved = tournamentMatchRepository.save(match);
+
+        rankingService.awardMatchPoints(saved, winner, loser);
+
+        advanceWinnerToNextRound(match, winner);
+
+        return tournamentMatchMapper.toResponse(saved, currentUser);
+    }
+
+    /**
+     * Save match sets from the live scoring engine's completed sets.
+     * Used by LiveScoringService when a match finishes via live scoring.
+     */
+    @Transactional
+    public void saveMatchSetsFromEngine(TournamentMatch match,
+                                        java.util.List<com.TennisCenter.service.match.TennisScoreEngine.CompletedSet> completedSets) {
+        matchSetRepository.deleteByMatchId(match.getId());
+
+        int setNum = 1;
+        for (var cs : completedSets) {
+            MatchSet set = MatchSet.builder()
+                    .match(match)
+                    .setNumber(setNum++)
+                    .playerOneGames(cs.getPlayerOneGames())
+                    .playerTwoGames(cs.getPlayerTwoGames())
+                    .playerOneTiebreakPoints(cs.getPlayerOneTiebreakPoints())
+                    .playerTwoTiebreakPoints(cs.getPlayerTwoTiebreakPoints())
+                    .build();
+            matchSetRepository.save(set);
+        }
+
+        advanceWinnerToNextRound(match, match.getWinner());
+    }
+
+    /**
+     * Award ranking points for a match completed via live scoring.
+     */
+    public void awardRankingPointsForMatch(TournamentMatch match, User winner, User loser) {
+        rankingService.awardMatchPoints(match, winner, loser);
     }
 }

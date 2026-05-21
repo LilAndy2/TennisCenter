@@ -1,6 +1,7 @@
 import { SportsScore } from "@mui/icons-material";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import axiosInstance from "../api/axiosInstance";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
@@ -20,11 +21,13 @@ import {
     fontWeight,
     radius,
     shadow,
+    transition,
 } from "../styles/theme";
 
 function UmpireLiveScoringPage() {
     const [matches, setMatches] = useState<ScheduledMatch[]>([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const load = async () => {
@@ -67,20 +70,29 @@ function UmpireLiveScoringPage() {
                         <SectionsWrapper>
                             {upcoming.length > 0 && (
                                 <Section>
-                                    <SectionTitle>Upcoming matches</SectionTitle>
+                                    <SectionTitle>Upcoming Matches</SectionTitle>
                                     <MatchGrid>
-                                        {upcoming.map((m) => (
-                                            <UmpireMatchCard key={m.matchId} match={m} />
+                                        {upcoming.map((match) => (
+                                            <MatchCard
+                                                key={match.matchId}
+                                                match={match}
+                                                onStartScoring={() =>
+                                                    navigate(`/umpire/live-scoring/${match.matchId}`)
+                                                }
+                                            />
                                         ))}
                                     </MatchGrid>
                                 </Section>
                             )}
                             {completed.length > 0 && (
                                 <Section>
-                                    <SectionTitle>Completed matches</SectionTitle>
+                                    <SectionTitle>Completed</SectionTitle>
                                     <MatchGrid>
-                                        {completed.map((m) => (
-                                            <UmpireMatchCard key={m.matchId} match={m} />
+                                        {completed.map((match) => (
+                                            <MatchCard
+                                                key={match.matchId}
+                                                match={match}
+                                            />
                                         ))}
                                     </MatchGrid>
                                 </Section>
@@ -93,18 +105,33 @@ function UmpireLiveScoringPage() {
     );
 }
 
-function UmpireMatchCard({ match }: { match: ScheduledMatch }) {
-    const done = match.status === "COMPLETED";
+// ─── Match Card ───
+
+function MatchCard({
+                       match,
+                       onStartScoring,
+                   }: {
+    match: ScheduledMatch;
+    onStartScoring?: () => void;
+}) {
+    const isCompleted = match.status === "COMPLETED";
+
     return (
-        <CardWrapper $completed={done}>
+        <CardWrapper $completed={isCompleted}>
             <CardHeader>
                 <TournamentBadge>{match.tournamentName}</TournamentBadge>
-                <StatusBadge $completed={done}>{done ? "Completed" : "Scheduled"}</StatusBadge>
+                <StatusBadge $completed={isCompleted}>
+                    {isCompleted ? "Completed" : "Scheduled"}
+                </StatusBadge>
             </CardHeader>
             <PlayersRow>
-                <PlayerName $won={match.winnerName === match.playerOneName}>{match.playerOneName}</PlayerName>
+                <PlayerName $won={match.winnerName === match.playerOneName}>
+                    {match.playerOneName}
+                </PlayerName>
                 <VsText>vs</VsText>
-                <PlayerName $won={match.winnerName === match.playerTwoName}>{match.playerTwoName}</PlayerName>
+                <PlayerName $won={match.winnerName === match.playerTwoName}>
+                    {match.playerTwoName}
+                </PlayerName>
             </PlayersRow>
             {match.sets && match.sets.length > 0 && (
                 <ScoreRow>
@@ -120,18 +147,29 @@ function UmpireMatchCard({ match }: { match: ScheduledMatch }) {
                 {match.scheduledTime && (
                     <MetaItem>
                         {new Date(match.scheduledTime).toLocaleString("en-GB", {
-                            day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
+                            day: "2-digit",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
                         })}
                     </MetaItem>
                 )}
                 {match.locationName && <MetaItem>{match.locationName}</MetaItem>}
                 {match.courtNumber != null && <MetaItem>Court {match.courtNumber}</MetaItem>}
             </MetaRow>
+            {!isCompleted && onStartScoring && (
+                <StartScoringButton onClick={onStartScoring}>
+                    <SportsScore sx={{ fontSize: 16 }} />
+                    Start Live Scoring
+                </StartScoringButton>
+            )}
         </CardWrapper>
     );
 }
 
 export default UmpireLiveScoringPage;
+
+// ─── Styled Components ───
 
 const PageWrapper = styled(BasePageWrapper)`
     max-width: 60rem;
@@ -192,6 +230,7 @@ const CardWrapper = styled(Box)<{ $completed: boolean }>`
     border-radius: ${radius.lg};
     padding: ${spacing.md};
     box-shadow: ${shadow.sm};
+    transition: all ${transition.fast};
 `;
 
 const CardHeader = styled(Box)`
@@ -259,10 +298,37 @@ const MetaRow = styled(Box)`
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
+    margin-bottom: ${spacing.sm};
 `;
 
 const MetaItem = styled(Typography)`
     font-size: ${fontSize.xs} !important;
     color: ${colors.textMuted};
     font-weight: 500 !important;
+`;
+
+const StartScoringButton = styled.button`
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    width: 100%;
+    justify-content: center;
+    padding: 0.6rem;
+    border: 1.5px solid ${colors.primary};
+    border-radius: ${radius.md};
+    background: ${colors.primaryLighter};
+    color: ${colors.primaryDark};
+    font-size: ${fontSize.sm};
+    font-weight: 700;
+    cursor: pointer;
+    transition: all ${transition.fast};
+
+    &:hover {
+        background: ${colors.primary};
+        color: white;
+    }
+
+    &:active {
+        transform: scale(0.98);
+    }
 `;

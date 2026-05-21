@@ -21,6 +21,7 @@ public class MatchHistoryResponse {
     private String tournamentName;
     private String surface;
     private Integer tournamentStartYear;
+    private boolean hasStats;
 
     @Data
     @Builder

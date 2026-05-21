@@ -1,8 +1,10 @@
-import { CheckCircle, Cancel } from "@mui/icons-material";
-import { Box, Typography } from "@mui/material";
+import { CheckCircle, Cancel, BarChart } from "@mui/icons-material";
+import { Box, Typography, Snackbar, Alert } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import styled from "styled-components";
 import type { MatchHistoryEntry } from "../../types/profile";
+import MatchStatsModal from "./MatchStatsModal";
 import {
     colors,
     spacing,
@@ -26,6 +28,19 @@ type TournamentGroup = {
 
 function MatchHistoryTable({ matches, profileUserId }: MatchHistoryTableProps) {
     const navigate = useNavigate();
+
+    const [statsMatchId, setStatsMatchId] = useState<number | null>(null);
+    const [statsModalOpen, setStatsModalOpen] = useState(false);
+    const [noStatsToast, setNoStatsToast] = useState(false);
+
+    const handleStatsClick = (match: MatchHistoryEntry) => {
+        if (match.hasStats) {
+            setStatsMatchId(match.matchId);
+            setStatsModalOpen(true);
+        } else {
+            setNoStatsToast(true);
+        }
+    };
 
     // Group matches by tournament, preserving order (most recent first)
     const tournamentGroups: TournamentGroup[] = [];
@@ -72,6 +87,7 @@ function MatchHistoryTable({ matches, profileUserId }: MatchHistoryTableProps) {
                     <Th>Loser</Th>
                     <Th $width="9rem">Score</Th>
                     <Th $width="3rem" $center>W/L</Th>
+                    <Th $width="3rem" $center>Stats</Th>
                     <Th $width="9rem">Tournament</Th>
                     <Th $width="4rem" $center>Surface</Th>
                 </tr>
@@ -162,6 +178,14 @@ function MatchHistoryTable({ matches, profileUserId }: MatchHistoryTableProps) {
                                         />
                                     )}
                                 </Td>
+                                <Td $center>
+                                    <StatsIconButton
+                                        $available={match.hasStats}
+                                        onClick={() => handleStatsClick(match)}
+                                    >
+                                        <BarChart sx={{ fontSize: 16 }} />
+                                    </StatsIconButton>
+                                </Td>
                                 {isFirstInGroup ? (
                                     <TournamentTd rowSpan={groupSize}>
                                         <TournamentCell>
@@ -190,6 +214,30 @@ function MatchHistoryTable({ matches, profileUserId }: MatchHistoryTableProps) {
                     })
                 ))}
                 </tbody>
+
+                <MatchStatsModal
+                    open={statsModalOpen}
+                    matchId={statsMatchId}
+                    onClose={() => {
+                        setStatsModalOpen(false);
+                        setStatsMatchId(null);
+                    }}
+                />
+
+                <Snackbar
+                    open={noStatsToast}
+                    autoHideDuration={3000}
+                    onClose={() => setNoStatsToast(false)}
+                    anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+                >
+                    <Alert
+                        severity="info"
+                        onClose={() => setNoStatsToast(false)}
+                        variant="filled"
+                    >
+                        Stats not available for this match
+                    </Alert>
+                </Snackbar>
             </StyledTable>
         </TableWrapper>
     );
@@ -374,4 +422,27 @@ const EmptyState = styled(Box)`
 const EmptyText = styled(Typography)`
     color: ${colors.textMuted};
     font-size: ${fontSize.base} !important;
+`;
+
+const StatsIconButton = styled.button<{ $available: boolean }>`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: ${radius.sm};
+    border: none;
+    background: ${({ $available }) => ($available ? colors.primaryLight : colors.surfaceAlt)};
+    color: ${({ $available }) => ($available ? colors.primary : colors.textHint)};
+    cursor: ${({ $available }) => ($available ? "pointer" : "default")};
+    transition: all ${transition.fast};
+
+    ${({ $available }) =>
+    $available &&
+    `
+        &:hover {
+            background: ${colors.primary};
+            color: white;
+        }
+    `}
 `;

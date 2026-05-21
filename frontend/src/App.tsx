@@ -17,6 +17,8 @@ import UmpireLiveScoringPage from "./pages/UmpireLiveScoringPage.tsx";
 import PrivateRoute from "./routes/PrivateRoute";
 import LeaderboardPage from "./pages/LeaderboardPage.tsx";
 import ChatPage from "./pages/ChatPage.tsx";
+import MyMatchesPage from "./pages/MyMatchesPage";
+import UmpireMatchScoringPage from "./pages/UmpireMatchScoringPage.tsx";
 
 const GlobalStyle = createGlobalStyle`
     :root {
@@ -228,7 +230,7 @@ function AnimatedRoutes() {
                 <Route
                     path="/umpire/live-scoring"
                     element={
-                        <PrivateRoute allowedRoles={["UMPIRE"]}>
+                        <PrivateRoute allowedRoles={["UMPIRE", "ADMIN"]}>
                             <UmpireLiveScoringPage />
                         </PrivateRoute>
                     }
@@ -249,6 +251,24 @@ function AnimatedRoutes() {
                     element={
                         <PrivateRoute allowedRoles={["ADMIN", "PLAYER"]}>
                             <ChatPage />
+                        </PrivateRoute>
+                    }
+                />
+
+                <Route
+                    path="/my-matches"
+                    element={
+                        <PrivateRoute allowedRoles={["ADMIN", "PLAYER"]}>
+                            <MyMatchesPage />
+                        </PrivateRoute>
+                    }
+                />
+
+                <Route
+                    path="/umpire/live-scoring/:matchId"
+                    element={
+                        <PrivateRoute allowedRoles={["UMPIRE", "ADMIN"]}>
+                            <UmpireMatchScoringPage />
                         </PrivateRoute>
                     }
                 />
