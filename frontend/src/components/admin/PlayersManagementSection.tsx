@@ -45,8 +45,6 @@ function PlayersManagementSection() {
 
 export default PlayersManagementSection;
 
-/* ─── Players Sub-Tab ─── */
-
 function PlayersSubTab({ hook }: { hook: ReturnType<typeof useAdminPlayers> }) {
     const {
         levels,
@@ -128,8 +126,6 @@ function PlayersSubTab({ hook }: { hook: ReturnType<typeof useAdminPlayers> }) {
     );
 }
 
-/* ─── Single Player Row ─── */
-
 function PlayerRow({
                        player,
                        currentLevel,
@@ -148,7 +144,14 @@ function PlayerRow({
             <td><PlayerName>{player.fullName}</PlayerName></td>
             <td>{player.username}</td>
             <td><EmailText>{player.email}</EmailText></td>
-            <td><LevelBadge>{player.playerLevel}</LevelBadge></td>
+            <td>
+                <LevelBadge
+                    $bg={colors.levels[player.playerLevel ?? ""]?.bg ?? colors.primaryLighter}
+                    $color={colors.levels[player.playerLevel ?? ""]?.text ?? colors.primaryDark}
+                >
+                    {player.playerLevel}
+                </LevelBadge>
+            </td>
             <td>{player.wins} / {player.losses}</td>
             <td><PointsBadge>{player.rankingPoints}</PointsBadge></td>
             <td>
@@ -168,8 +171,6 @@ function PlayerRow({
         </tr>
     );
 }
-
-/* ─── Umpires Sub-Tab ─── */
 
 function UmpiresSubTab({ hook }: { hook: ReturnType<typeof useAdminPlayers> }) {
     const {
@@ -235,13 +236,20 @@ function UmpiresSubTab({ hook }: { hook: ReturnType<typeof useAdminPlayers> }) {
                                     <td><EmailText>{umpire.email}</EmailText></td>
                                     <td>
                                         {umpire.roles.includes("PLAYER") ? (
-                                            <LevelBadge>{umpire.playerLevel ?? "Yes"}</LevelBadge>
+                                            <td>
+                                                <LevelBadge
+                                                    $bg={colors.levels[umpire.playerLevel ?? ""]?.bg ?? colors.primaryLighter}
+                                                    $color={colors.levels[umpire.playerLevel ?? ""]?.text ?? colors.primaryDark}
+                                                >
+                                                    {umpire.playerLevel}
+                                                </LevelBadge>
+                                            </td>
                                         ) : (
                                             <MutedText>No</MutedText>
                                         )}
                                     </td>
                                     <td>
-                                        <ActionsCell>
+                                    <ActionsCell>
                                             <RemoveUmpireButton onClick={() => handleRemoveUmpire(umpire.id)}>
                                                 <PersonRemove sx={{ fontSize: 15 }} />
                                                 <span>Remove</span>
@@ -267,8 +275,6 @@ function UmpiresSubTab({ hook }: { hook: ReturnType<typeof useAdminPlayers> }) {
         </>
     );
 }
-
-/* ─── Add Umpire Dialog ─── */
 
 function AddUmpireDialog({
                              open,
@@ -571,13 +577,13 @@ const MutedText = styled.span`
     font-size: ${fontSize.xs};
 `;
 
-const LevelBadge = styled.span`
+const LevelBadge = styled.span<{ $bg: string; $color: string }>`
     display: inline-flex;
     align-items: center;
     padding: 0.15rem 0.55rem;
     border-radius: ${radius.pill};
-    background: ${colors.primaryLighter};
-    color: ${colors.primaryDark};
+    background: ${({ $bg }) => $bg};
+    color: ${({ $color }) => $color};
     font-size: ${fontSize.xs};
     font-weight: ${fontWeight.bold};
 `;

@@ -783,11 +783,11 @@ const RowLabel = styled(Box)<{ $v: V }>`
     text-align: center;
     white-space: nowrap;
     color: ${({ $v }) => {
-    const map: Record<V, string> = {
-        ace: "#047857", fault: "#b91c1c", winner: "#15803d",
-        net: "#854d0e", error: "#c2410c", forced: "#7e22ce",
-        pointwon: colors.textMuted,
-    };
+        const map: Record<V, string> = {
+            ace: "#047857", fault: "#b91c1c", winner: "#15803d",
+            net: "#0f766e", error: "#166534", forced: "#065f46",
+            pointwon: colors.textMuted,
+        };
     return map[$v];
 }};
 `;
@@ -800,12 +800,12 @@ const Divider = styled(Box)`
 
 const vs: Record<V, { bg: string; border: string; color: string; hover: string }> = {
     ace:      { bg: "#ecfdf5", border: "#a7f3d0", color: "#047857", hover: "#047857" },
-    fault:    { bg: "#fef2f2", border: "#fecaca", color: "#b91c1c", hover: "#b91c1c" },
+    fault:    { bg: "#fef2f2", border: "#fca5a5", color: "#b91c1c", hover: "#b91c1c" },
     winner:   { bg: "#f0fdf4", border: "#bbf7d0", color: "#15803d", hover: "#15803d" },
-    net:      { bg: "#fefce8", border: "#fde68a", color: "#854d0e", hover: "#854d0e" },
-    error:    { bg: "#fff7ed", border: "#fed7aa", color: "#c2410c", hover: "#c2410c" },
-    forced:   { bg: "#faf5ff", border: "#e9d5ff", color: "#7e22ce", hover: "#7e22ce" },
-    pointwon: { bg: "#f1f5f9", border: "#e2e8f0", color: "#475569", hover: "#475569" },
+    net:      { bg: "#ecfdf5", border: "#99f6e4", color: "#0f766e", hover: "#0f766e" },
+    error:    { bg: "#f0fdf4", border: "#a7f3d0", color: "#166534", hover: "#166534" },
+    forced:   { bg: "#ecfdf5", border: "#a7f3d0", color: "#065f46", hover: "#065f46" },
+    pointwon: { bg: "#f8fafc", border: "#e2e8f0", color: "#475569", hover: "#475569" },
 };
 
 const PointBtn = styled.button<{ $v: V }>`
