@@ -9,6 +9,7 @@ import com.TennisCenter.repository.CommentRepository;
 import com.TennisCenter.repository.FeedPostRepository;
 import com.TennisCenter.repository.PlayerProfileRepository;
 import com.TennisCenter.repository.PostLikeRepository;
+import com.TennisCenter.service.social.FeedPostService;
 import com.TennisCenter.util.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

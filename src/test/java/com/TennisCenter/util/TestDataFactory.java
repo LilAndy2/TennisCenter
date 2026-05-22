@@ -21,6 +21,7 @@ public class TestDataFactory {
                 .email(email)
                 .password("encodedPassword")
                 .role(Role.PLAYER)
+                .roles(new java.util.HashSet<>(java.util.Set.of(Role.PLAYER)))  // add this
                 .playerLevel(PlayerLevel.MEDIUM)
                 .rankingPoints(0)
                 .wins(0)
@@ -41,6 +42,7 @@ public class TestDataFactory {
                 .email("admin@test.com")
                 .password("encodedPassword")
                 .role(Role.ADMIN)
+                .roles(new java.util.HashSet<>(java.util.Set.of(Role.ADMIN)))  // add this
                 .playerLevel(null)
                 .rankingPoints(0)
                 .wins(0)

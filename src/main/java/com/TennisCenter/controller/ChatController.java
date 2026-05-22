@@ -2,7 +2,7 @@ package com.TennisCenter.controller;
 
 import com.TennisCenter.dto.chat.*;
 import com.TennisCenter.model.User;
-import com.TennisCenter.service.ChatService;
+import com.TennisCenter.service.social.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

@@ -3,7 +3,7 @@ package com.TennisCenter.controller;
 import com.TennisCenter.dto.feed.FeedPostResponse;
 import com.TennisCenter.exception.ResourceNotFoundException;
 import com.TennisCenter.exception.UnauthorizedActionException;
-import com.TennisCenter.service.FeedPostService;
+import com.TennisCenter.service.social.FeedPostService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

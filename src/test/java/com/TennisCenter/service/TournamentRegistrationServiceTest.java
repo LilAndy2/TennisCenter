@@ -7,6 +7,7 @@ import com.TennisCenter.model.User;
 import com.TennisCenter.model.enums.*;
 import com.TennisCenter.repository.TournamentRegistrationRepository;
 import com.TennisCenter.repository.TournamentRepository;
+import com.TennisCenter.service.tournament.TournamentRegistrationService;
 import com.TennisCenter.service.tournament.TournamentStatusService;
 import com.TennisCenter.util.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;

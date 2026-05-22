@@ -2,8 +2,9 @@ package com.TennisCenter.service;
 
 import com.TennisCenter.dto.match.ScheduledMatchResponse;
 import com.TennisCenter.model.*;
-import com.TennisCenter.repository.MatchSetRepository;
 import com.TennisCenter.repository.TournamentMatchRepository;
+import com.TennisCenter.service.match.ScheduleService;
+import com.TennisCenter.service.match.ScheduledMatchMapper;
 import com.TennisCenter.util.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +24,7 @@ import static org.mockito.Mockito.when;
 class ScheduleServiceTest {
 
     @Mock private TournamentMatchRepository matchRepository;
-    @Mock private MatchSetRepository matchSetRepository;
+    @Mock private ScheduledMatchMapper scheduledMatchMapper;
 
     @InjectMocks private ScheduleService scheduleService;
 
@@ -43,8 +44,16 @@ class ScheduleServiceTest {
         unscheduled.setScheduledTime(null);
 
         when(matchRepository.findAll()).thenReturn(List.of(scheduled, unscheduled));
-        when(matchSetRepository.findByMatchIdOrderBySetNumberAsc(any()))
-                .thenReturn(Collections.emptyList());
+        when(scheduledMatchMapper.toResponse(any())).thenAnswer(invocation -> {
+            TournamentMatch m = invocation.getArgument(0);
+            return ScheduledMatchResponse.builder()
+                    .matchId(m.getId())
+                    .scheduledTime(m.getScheduledTime() != null ? m.getScheduledTime().toString() : null)
+                    .playerOneName(m.getPlayerOne() != null ? m.getPlayerOne().getFullName() : "TBD")
+                    .playerTwoName(m.getPlayerTwo() != null ? m.getPlayerTwo().getFullName() : "TBD")
+                    .tournamentName(m.getTournament().getName())
+                    .build();
+        });
 
         List<ScheduledMatchResponse> result = scheduleService.getAllScheduledMatches();
 
@@ -69,8 +78,16 @@ class ScheduleServiceTest {
         earlier.setScheduledTime(LocalDateTime.now().plusDays(1));
 
         when(matchRepository.findAll()).thenReturn(List.of(later, earlier));
-        when(matchSetRepository.findByMatchIdOrderBySetNumberAsc(any()))
-                .thenReturn(Collections.emptyList());
+        when(scheduledMatchMapper.toResponse(any())).thenAnswer(invocation -> {
+            TournamentMatch m = invocation.getArgument(0);
+            return ScheduledMatchResponse.builder()
+                    .matchId(m.getId())
+                    .scheduledTime(m.getScheduledTime() != null ? m.getScheduledTime().toString() : null)
+                    .playerOneName(m.getPlayerOne() != null ? m.getPlayerOne().getFullName() : "TBD")
+                    .playerTwoName(m.getPlayerTwo() != null ? m.getPlayerTwo().getFullName() : "TBD")
+                    .tournamentName(m.getTournament().getName())
+                    .build();
+        });
 
         List<ScheduledMatchResponse> result = scheduleService.getAllScheduledMatches();
 
@@ -88,8 +105,16 @@ class ScheduleServiceTest {
         match.setScheduledTime(LocalDateTime.now().plusDays(1));
 
         when(matchRepository.findAll()).thenReturn(List.of(match));
-        when(matchSetRepository.findByMatchIdOrderBySetNumberAsc(any()))
-                .thenReturn(Collections.emptyList());
+        when(scheduledMatchMapper.toResponse(any())).thenAnswer(invocation -> {
+            TournamentMatch m = invocation.getArgument(0);
+            return ScheduledMatchResponse.builder()
+                    .matchId(m.getId())
+                    .scheduledTime(m.getScheduledTime() != null ? m.getScheduledTime().toString() : null)
+                    .playerOneName(m.getPlayerOne() != null ? m.getPlayerOne().getFullName() : "TBD")
+                    .playerTwoName(m.getPlayerTwo() != null ? m.getPlayerTwo().getFullName() : "TBD")
+                    .tournamentName(m.getTournament().getName())
+                    .build();
+        });
 
         List<ScheduledMatchResponse> result = scheduleService.getAllScheduledMatches();
 

@@ -5,6 +5,7 @@ import com.TennisCenter.exception.ResourceNotFoundException;
 import com.TennisCenter.model.Location;
 import com.TennisCenter.repository.CourtRepository;
 import com.TennisCenter.repository.LocationRepository;
+import com.TennisCenter.service.tournament.LocationService;
 import com.TennisCenter.util.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

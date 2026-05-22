@@ -7,6 +7,8 @@ import com.TennisCenter.model.PostLike;
 import com.TennisCenter.model.User;
 import com.TennisCenter.repository.FeedPostRepository;
 import com.TennisCenter.repository.PostLikeRepository;
+import com.TennisCenter.service.social.FeedPostService;
+import com.TennisCenter.service.social.PostLikeService;
 import com.TennisCenter.util.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

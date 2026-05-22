@@ -7,6 +7,7 @@ import com.TennisCenter.model.FeedPost;
 import com.TennisCenter.model.User;
 import com.TennisCenter.repository.CommentRepository;
 import com.TennisCenter.repository.FeedPostRepository;
+import com.TennisCenter.service.social.CommentService;
 import com.TennisCenter.util.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

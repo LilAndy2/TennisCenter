@@ -5,6 +5,7 @@ import com.TennisCenter.model.TournamentMatch;
 import com.TennisCenter.model.User;
 import com.TennisCenter.repository.RankingPointRepository;
 import com.TennisCenter.repository.UserRepository;
+import com.TennisCenter.service.ranking.RankingService;
 import com.TennisCenter.util.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

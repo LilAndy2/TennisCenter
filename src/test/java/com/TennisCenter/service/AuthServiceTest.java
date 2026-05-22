@@ -10,6 +10,8 @@ import com.TennisCenter.model.enums.PlayerLevel;
 import com.TennisCenter.model.enums.Role;
 import com.TennisCenter.repository.PlayerProfileRepository;
 import com.TennisCenter.repository.UserRepository;
+import com.TennisCenter.service.user.AuthService;
+import com.TennisCenter.util.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -109,6 +111,7 @@ class AuthServiceTest {
                 .email("john@test.com")
                 .password("encodedPwd")
                 .role(Role.PLAYER)
+                .roles(new java.util.HashSet<>(java.util.Set.of(Role.PLAYER)))  // add this
                 .playerLevel(PlayerLevel.MEDIUM)
                 .rankingPoints(0).wins(0).losses(0)
                 .build();

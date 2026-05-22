@@ -4,7 +4,8 @@ import com.TennisCenter.dto.profile.MatchHistoryResponse;
 import com.TennisCenter.dto.profile.PlayerProfileResponse;
 import com.TennisCenter.dto.profile.TitleFinalsResponse;
 import com.TennisCenter.exception.ResourceNotFoundException;
-import com.TennisCenter.service.PlayerProfileService;
+import com.TennisCenter.service.match.MatchHistoryService;
+import com.TennisCenter.service.user.PlayerProfileService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -28,6 +29,7 @@ class PlayerProfileControllerTest {
     @Autowired private MockMvc mockMvc;
 
     @MockitoBean private PlayerProfileService playerProfileService;
+    @MockitoBean private MatchHistoryService matchHistoryService;
 
     @Test
     void getProfile_shouldReturn200() throws Exception {
@@ -64,7 +66,7 @@ class PlayerProfileControllerTest {
                 .loserName("Bob Jones")
                 .profilePlayerWon(true)
                 .build();
-        when(playerProfileService.getMatchHistory(1L)).thenReturn(List.of(match));
+        when(matchHistoryService.getMatchHistory(1L)).thenReturn(List.of(match));
 
         mockMvc.perform(get("/api/player/profile/1/match-history"))
                 .andExpect(status().isOk())

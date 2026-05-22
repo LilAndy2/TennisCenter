@@ -5,7 +5,8 @@ import com.TennisCenter.dto.profile.PlayerProfileResponse;
 import com.TennisCenter.dto.profile.TitleFinalsResponse;
 import com.TennisCenter.dto.profile.UpdateProfileRequest;
 import com.TennisCenter.model.User;
-import com.TennisCenter.service.PlayerProfileService;
+import com.TennisCenter.service.match.MatchHistoryService;
+import com.TennisCenter.service.user.PlayerProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,7 @@ import java.util.List;
 public class PlayerProfileController {
 
     private final PlayerProfileService playerProfileService;
+    private final MatchHistoryService matchHistoryService;
 
     @GetMapping("/{userId}")
     public PlayerProfileResponse getProfile(@PathVariable Long userId) {
@@ -32,7 +34,7 @@ public class PlayerProfileController {
 
     @GetMapping("/{userId}/match-history")
     public List<MatchHistoryResponse> getMatchHistory(@PathVariable Long userId) {
-        return playerProfileService.getMatchHistory(userId);
+        return matchHistoryService.getMatchHistory(userId);
     }
 
     @GetMapping("/{userId}/titles-finals")

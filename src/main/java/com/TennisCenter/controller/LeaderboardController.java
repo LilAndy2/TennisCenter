@@ -1,7 +1,7 @@
 package com.TennisCenter.controller;
 
 import com.TennisCenter.dto.leaderboard.LeaderboardPlayerResponse;
-import com.TennisCenter.service.LeaderboardService;
+import com.TennisCenter.service.ranking.LeaderboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;

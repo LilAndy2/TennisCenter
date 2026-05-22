@@ -3,7 +3,7 @@ package com.TennisCenter.controller;
 import com.TennisCenter.dto.feedback.FeedbackRequest;
 import com.TennisCenter.dto.feedback.FeedbackResponse;
 import com.TennisCenter.model.User;
-import com.TennisCenter.service.FeedbackService;
+import com.TennisCenter.service.social.FeedbackService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

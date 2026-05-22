@@ -6,6 +6,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -67,12 +69,13 @@ class JwtServiceTest {
     }
 
     @Test
-    void extractClaim_shouldReturnRoleClaim() {
+    void extractClaim_shouldReturnRolesClaim() {
         String token = jwtService.generateToken(user);
 
-        String role = jwtService.extractClaim(token, claims -> claims.get("role", String.class));
+        @SuppressWarnings("unchecked")
+        List<String> roles = (List<String>) jwtService.extractClaim(token, claims -> claims.get("roles", List.class));
 
-        assertThat(role).isEqualTo("PLAYER");
+        assertThat(roles).contains("PLAYER");
     }
 
     @Test

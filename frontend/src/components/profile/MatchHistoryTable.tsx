@@ -5,6 +5,7 @@ import { useState } from "react";
 import styled from "styled-components";
 import type { MatchHistoryEntry } from "../../types/profile";
 import MatchStatsModal from "./MatchStatsModal";
+import SetScoreDisplay from "../common/SetScoreDisplay";
 import {
     colors,
     spacing,
@@ -139,27 +140,7 @@ function MatchHistoryTable({ matches, profileUserId }: MatchHistoryTableProps) {
                                     )}
                                 </Td>
                                 <Td>
-                                    <ScoreText>
-                                        {match.sets.length === 0 ? (
-                                            "W/O"
-                                        ) : (
-                                            match.sets.map((set, idx) => (
-                                                <SetChunk key={idx}>
-                                                    <SetScoreWrapper>
-                                                        {set.winnerGames}-{set.loserGames}
-                                                        {set.loserTiebreakPoints != null && (
-                                                            <TiebreakSuperscript>
-                                                                {set.loserTiebreakPoints}
-                                                            </TiebreakSuperscript>
-                                                        )}
-                                                    </SetScoreWrapper>
-                                                    {idx < match.sets.length - 1 && (
-                                                        <SetSeparator>/</SetSeparator>
-                                                    )}
-                                                </SetChunk>
-                                            ))
-                                        )}
-                                    </ScoreText>
+                                    <SetScoreDisplay sets={match.sets} emptyLabel="W/O" />
                                 </Td>
                                 <Td $center>
                                     {match.profilePlayerWon ? (
@@ -346,40 +327,6 @@ const RoundText = styled.span`
     font-size: ${fontSize.xs};
     color: ${colors.textMuted};
     font-weight: ${fontWeight.medium};
-`;
-
-const ScoreText = styled(Box)`
-    display: inline-flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    column-gap: 0.35rem;
-`;
-
-const SetChunk = styled(Box)`
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.35rem;
-`;
-
-const SetScoreWrapper = styled(Typography)`
-    font-size: ${fontSize.sm} !important;
-    font-weight: ${fontWeight.bold} !important;
-    font-variant-numeric: tabular-nums;
-    color: ${colors.textPrimary};
-`;
-
-const TiebreakSuperscript = styled.sup`
-    font-size: 0.65rem;
-    font-weight: ${fontWeight.bold};
-    line-height: 1;
-    vertical-align: super;
-    color: ${colors.textSecondary};
-`;
-
-const SetSeparator = styled(Typography)`
-    font-size: ${fontSize.sm} !important;
-    font-weight: ${fontWeight.bold} !important;
-    color: ${colors.textHint};
 `;
 
 const TournamentCell = styled(Box)`

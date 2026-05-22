@@ -1,7 +1,7 @@
 package com.TennisCenter.controller;
 
 import com.TennisCenter.dto.match.TournamentMatchResponse;
-import com.TennisCenter.service.TournamentMatchService;
+import com.TennisCenter.service.match.TournamentMatchService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;

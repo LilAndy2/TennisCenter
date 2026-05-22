@@ -11,6 +11,7 @@ import com.TennisCenter.model.*;
 import com.TennisCenter.repository.CourtRepository;
 import com.TennisCenter.repository.TournamentMatchRepository;
 import com.TennisCenter.service.match.TournamentMatchMapper;
+import com.TennisCenter.service.match.TournamentMatchService;
 import com.TennisCenter.util.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

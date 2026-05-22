@@ -8,6 +8,8 @@ import com.TennisCenter.model.enums.*;
 import com.TennisCenter.repository.PlayerProfileRepository;
 import com.TennisCenter.repository.TournamentMatchRepository;
 import com.TennisCenter.repository.UserRepository;
+import com.TennisCenter.service.ranking.RankingService;
+import com.TennisCenter.service.user.PlayerProfileService;
 import com.TennisCenter.util.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -141,26 +143,5 @@ class PlayerProfileServiceTest {
         PlayerProfileResponse result = playerProfileService.updateProfile(1L, request, user);
 
         verify(playerProfileRepository).save(any());
-    }
-
-    @Test
-    void getMatchHistory_shouldReturnEmptyForNoMatches() {
-        User user = TestDataFactory.player();
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(tournamentMatchRepository.findByPlayerOneIdOrPlayerTwoId(1L, 1L))
-                .thenReturn(Collections.emptyList());
-
-        var result = playerProfileService.getMatchHistory(1L);
-
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    void getMatchHistory_shouldThrowWhenUserNotFound() {
-        when(userRepository.findById(99L)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> playerProfileService.getMatchHistory(99L))
-                .isInstanceOf(ResourceNotFoundException.class);
     }
 }

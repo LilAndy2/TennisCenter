@@ -5,6 +5,7 @@ import com.TennisCenter.model.User;
 import com.TennisCenter.model.enums.PlayerLevel;
 import com.TennisCenter.model.enums.Role;
 import com.TennisCenter.repository.UserRepository;
+import com.TennisCenter.service.ranking.LeaderboardService;
 import com.TennisCenter.util.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

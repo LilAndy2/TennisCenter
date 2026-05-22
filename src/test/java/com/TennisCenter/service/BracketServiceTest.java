@@ -9,6 +9,7 @@ import com.TennisCenter.model.enums.*;
 import com.TennisCenter.repository.TournamentMatchRepository;
 import com.TennisCenter.repository.TournamentRegistrationRepository;
 import com.TennisCenter.repository.TournamentRepository;
+import com.TennisCenter.service.tournament.BracketService;
 import com.TennisCenter.util.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

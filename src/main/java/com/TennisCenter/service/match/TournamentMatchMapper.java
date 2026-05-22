@@ -43,15 +43,15 @@ public class TournamentMatchMapper {
                 .matchDate(match.getMatchDate() != null ? match.getMatchDate().toString() : null)
                 .playerOneId(match.getPlayerOne() != null ? match.getPlayerOne().getId() : null)
                 .playerOneName(match.getPlayerOne() != null
-                        ? match.getPlayerOne().getFirstName() + " " + match.getPlayerOne().getLastName()
+                        ? match.getPlayerOne().getFullName()
                         : null)
                 .playerTwoId(match.getPlayerTwo() != null ? match.getPlayerTwo().getId() : null)
                 .playerTwoName(match.getPlayerTwo() != null
-                        ? match.getPlayerTwo().getFirstName() + " " + match.getPlayerTwo().getLastName()
+                        ? match.getPlayerTwo().getFullName()
                         : null)
                 .winnerId(match.getWinner() != null ? match.getWinner().getId() : null)
                 .winnerName(match.getWinner() != null
-                        ? match.getWinner().getFirstName() + " " + match.getWinner().getLastName()
+                        ? match.getWinner().getFullName()
                         : null)
                 .sets(sets)
                 .editableByCurrentUser(editableByCurrentUser)
@@ -65,7 +65,7 @@ public class TournamentMatchMapper {
                 .playerTwoSeed(match.getPlayerTwoSeed())
                 .umpireId(match.getUmpire() != null ? match.getUmpire().getId() : null)
                 .umpireName(match.getUmpire() != null
-                        ? match.getUmpire().getFirstName() + " " + match.getUmpire().getLastName()
+                        ? match.getUmpire().getFullName()
                         : null)
                 .build();
     }

@@ -2,7 +2,7 @@ package com.TennisCenter.controller;
 
 import com.TennisCenter.dto.feed.FeedPostResponse;
 import com.TennisCenter.exception.ResourceNotFoundException;
-import com.TennisCenter.service.PostLikeService;
+import com.TennisCenter.service.social.PostLikeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

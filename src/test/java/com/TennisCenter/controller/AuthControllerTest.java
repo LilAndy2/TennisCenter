@@ -5,7 +5,7 @@ import com.TennisCenter.dto.auth.LoginRequest;
 import com.TennisCenter.dto.auth.RegisterRequest;
 import com.TennisCenter.exception.ConflictException;
 import com.TennisCenter.model.enums.Role;
-import com.TennisCenter.service.AuthService;
+import com.TennisCenter.service.user.AuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,6 +13,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -42,7 +44,7 @@ class AuthControllerTest {
                 .id(1L)
                 .username("johndoe")
                 .email("john@test.com")
-                .role(Role.PLAYER)
+                .roles(List.of(Role.PLAYER))
                 .playerLevel("Medium")
                 .build();
 
@@ -87,7 +89,8 @@ class AuthControllerTest {
                 .id(1L)
                 .username("johndoe")
                 .email("john@test.com")
-                .role(Role.PLAYER)
+                .roles(List.of(Role.PLAYER))
+                .playerLevel("Medium")
                 .build();
 
         when(authService.login(any())).thenReturn(response);

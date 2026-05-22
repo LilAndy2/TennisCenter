@@ -136,4 +136,8 @@ public class User implements UserDetails {
         if (roles.contains(Role.UMPIRE)) return Role.UMPIRE.getDisplayName();
         return role.getDisplayName(); // fallback to legacy
     }
+
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
 }

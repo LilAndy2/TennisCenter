@@ -10,7 +10,7 @@ import {
     PageHeader,
     LoadingWrapper,
 } from "../components/common/PageLayout";
-import UpdateMatchScoreDialog from "../components/admin/tournament-details/UpdateMatchScoreDialog";
+import UpdateMatchScoreDialog from "../components/admin/tournament-details/dialogs/UpdateMatchScoreDialog.tsx";
 import useMyMatches from "../hooks/useMyMatches";
 import type { TournamentMatch } from "../types/match";
 import {

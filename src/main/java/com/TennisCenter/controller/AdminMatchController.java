@@ -5,7 +5,7 @@ import com.TennisCenter.dto.match.ScheduleMatchRequest;
 import com.TennisCenter.dto.match.SubmitMatchScoreRequest;
 import com.TennisCenter.dto.match.TournamentMatchResponse;
 import com.TennisCenter.model.User;
-import com.TennisCenter.service.TournamentMatchService;
+import com.TennisCenter.service.match.TournamentMatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;

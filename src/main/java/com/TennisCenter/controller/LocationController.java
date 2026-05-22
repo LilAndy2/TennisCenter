@@ -2,7 +2,7 @@ package com.TennisCenter.controller;
 
 import com.TennisCenter.dto.location.CreateLocationRequest;
 import com.TennisCenter.dto.location.LocationResponse;
-import com.TennisCenter.service.LocationService;
+import com.TennisCenter.service.tournament.LocationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

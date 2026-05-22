@@ -1,13 +1,12 @@
 package com.TennisCenter.controller;
 
 import com.TennisCenter.dto.match.LiveScoreResponse;
-import com.TennisCenter.dto.match.MatchStatsResponse;
 import com.TennisCenter.dto.match.RecordPointRequest;
 import com.TennisCenter.dto.match.ScheduledMatchResponse;
 import com.TennisCenter.model.User;
-import com.TennisCenter.service.LiveScoringService;
-import com.TennisCenter.service.MatchStatsService;
-import com.TennisCenter.service.UmpireService;
+import com.TennisCenter.service.match.LiveScoringService;
+import com.TennisCenter.service.match.MatchStatsService;
+import com.TennisCenter.service.match.UmpireService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;

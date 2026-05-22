@@ -2,6 +2,7 @@ package com.TennisCenter.service;
 
 import com.TennisCenter.model.User;
 import com.TennisCenter.repository.UserRepository;
+import com.TennisCenter.service.user.CustomUserDetailsService;
 import com.TennisCenter.util.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

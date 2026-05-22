@@ -1,7 +1,7 @@
 package com.TennisCenter.controller;
 
 import com.TennisCenter.dto.match.MatchStatsResponse;
-import com.TennisCenter.service.MatchStatsService;
+import com.TennisCenter.service.match.MatchStatsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

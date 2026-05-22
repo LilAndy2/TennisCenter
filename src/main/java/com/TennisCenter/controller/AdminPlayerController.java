@@ -2,7 +2,7 @@ package com.TennisCenter.controller;
 
 import com.TennisCenter.dto.admin.AdminPlayerResponse;
 import com.TennisCenter.dto.admin.ChangePlayerLevelRequest;
-import com.TennisCenter.service.AdminPlayerService;
+import com.TennisCenter.service.user.AdminPlayerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

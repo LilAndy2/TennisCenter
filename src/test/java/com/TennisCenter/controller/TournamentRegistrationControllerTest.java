@@ -3,7 +3,7 @@ package com.TennisCenter.controller;
 import com.TennisCenter.dto.tournament.TournamentParticipantResponse;
 import com.TennisCenter.dto.tournament.TournamentResponse;
 import com.TennisCenter.exception.ValidationException;
-import com.TennisCenter.service.TournamentRegistrationService;
+import com.TennisCenter.service.tournament.TournamentRegistrationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;

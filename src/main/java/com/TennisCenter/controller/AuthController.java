@@ -3,7 +3,7 @@ package com.TennisCenter.controller;
 import com.TennisCenter.dto.auth.AuthResponse;
 import com.TennisCenter.dto.auth.LoginRequest;
 import com.TennisCenter.dto.auth.RegisterRequest;
-import com.TennisCenter.service.AuthService;
+import com.TennisCenter.service.user.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

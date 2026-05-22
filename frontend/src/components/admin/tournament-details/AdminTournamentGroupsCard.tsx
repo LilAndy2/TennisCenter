@@ -3,8 +3,8 @@ import { useState } from "react";
 import styled from "styled-components";
 import type { GroupStanding, TournamentMatch } from "../../../types/match";
 import { SectionCard, SectionTitle, SectionText, ActionRow } from "../../common/SectionCard";
-import GroupColumn from "./GroupColumn";
-import KnockoutBracketCard from "./KnockoutBracketCard";
+import GroupColumn from "./bracket/GroupColumn.tsx";
+import KnockoutBracketCard from "./bracket/KnockoutBracketCard.tsx";
 
 type AdminTournamentGroupsCardProps = {
     groupStandings: GroupStanding[];

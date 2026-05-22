@@ -4,6 +4,8 @@ import com.TennisCenter.model.RankingPoint;
 import com.TennisCenter.model.User;
 import com.TennisCenter.repository.RankingPointRepository;
 import com.TennisCenter.repository.UserRepository;
+import com.TennisCenter.service.ranking.RankingPointExpiryTask;
+import com.TennisCenter.service.ranking.RankingService;
 import com.TennisCenter.util.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

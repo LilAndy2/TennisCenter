@@ -3,7 +3,7 @@ package com.TennisCenter.controller;
 import com.TennisCenter.dto.feed.CommentResponse;
 import com.TennisCenter.dto.feed.CreateCommentRequest;
 import com.TennisCenter.exception.ResourceNotFoundException;
-import com.TennisCenter.service.CommentService;
+import com.TennisCenter.service.social.CommentService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

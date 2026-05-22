@@ -1,7 +1,7 @@
 package com.TennisCenter.controller;
 
 import com.TennisCenter.dto.leaderboard.LeaderboardPlayerResponse;
-import com.TennisCenter.service.LeaderboardService;
+import com.TennisCenter.service.ranking.LeaderboardService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
