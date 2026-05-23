@@ -1,10 +1,8 @@
 package com.TennisCenter.controller;
 
-import com.TennisCenter.dto.profile.MatchHistoryResponse;
-import com.TennisCenter.dto.profile.PlayerProfileResponse;
-import com.TennisCenter.dto.profile.TitleFinalsResponse;
-import com.TennisCenter.dto.profile.UpdateProfileRequest;
+import com.TennisCenter.dto.profile.*;
 import com.TennisCenter.model.User;
+import com.TennisCenter.service.match.CareerStatsService;
 import com.TennisCenter.service.match.MatchHistoryService;
 import com.TennisCenter.service.user.PlayerProfileService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +19,7 @@ public class PlayerProfileController {
 
     private final PlayerProfileService playerProfileService;
     private final MatchHistoryService matchHistoryService;
+    private final CareerStatsService careerStatsService;
 
     @GetMapping("/{userId}")
     public PlayerProfileResponse getProfile(@PathVariable Long userId) {
@@ -58,5 +57,10 @@ public class PlayerProfileController {
             @AuthenticationPrincipal User currentUser
     ) {
         return playerProfileService.uploadProfileImage(userId, image, currentUser);
+    }
+
+    @GetMapping("/{userId}/career-stats")
+    public CareerStatsResponse getCareerStats(@PathVariable Long userId) {
+        return careerStatsService.getCareerStats(userId);
     }
 }

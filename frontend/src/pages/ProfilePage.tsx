@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 import { useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
@@ -25,6 +25,7 @@ import {
     radius,
     transition,
 } from "../styles/theme";
+import PlayerStatsSection from "../components/profile/PlayerStatsSection.tsx";
 
 function ProfilePage() {
     const { userId: userIdParam } = useParams<{ userId: string }>();
@@ -156,10 +157,7 @@ function ProfilePage() {
 
                         {activeTab === "stats" && (
                             <SectionCard>
-                                <SectionTitle>Personalised Stats</SectionTitle>
-                                <PlaceholderText>
-                                    Detailed statistics and analytics will be available soon.
-                                </PlaceholderText>
+                                <PlayerStatsSection userId={profile.userId} />
                             </SectionCard>
                         )}
                     </ContentSection>
@@ -212,11 +210,4 @@ const YearSelect = styled.select`
     &:focus {
         border-color: ${colors.primary};
     }
-`;
-
-const PlaceholderText = styled(Typography)`
-    color: ${colors.textMuted};
-    font-size: ${fontSize.base} !important;
-    padding: ${spacing.xl} 0;
-    text-align: center;
 `;
