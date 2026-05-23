@@ -77,6 +77,10 @@ public class User implements UserDetails {
     @Builder.Default
     private Integer losses = 0;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer eloRating = 1200;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()

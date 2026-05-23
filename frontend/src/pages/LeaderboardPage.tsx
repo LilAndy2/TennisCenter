@@ -13,6 +13,7 @@ import {
     PageHeader,
     LoadingWrapper,
 } from "../components/common/PageLayout";
+import EloLeaderboardTab from "../components/leaderboard/EloLeaderboardTab";
 import type {
     LeaderboardLevel,
     LeaderboardPlayer,
@@ -52,6 +53,7 @@ function LeaderboardPage() {
     const [size] = useState(8);
     const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [mode, setMode] = useState<"levels" | "elo">("levels");
 
     const loadLeaderboard = async () => {
         try {
@@ -104,121 +106,136 @@ function LeaderboardPage() {
                         </PageSubtitle>
                     </PageHeader>
 
-                    <ControlsCard>
-                        <LevelsRow>
-                            {levels.map((level) => (
-                                <LevelButton
-                                    key={level}
-                                    $active={selectedLevel === level}
-                                    onClick={() => handleLevelChange(level)}
-                                >
-                                    {level.charAt(0) + level.slice(1).toLowerCase()}
-                                </LevelButton>
-                            ))}
-                        </LevelsRow>
+                    <TabRow>
+                        <TabButton $active={mode === "levels"} onClick={() => setMode("levels")}>
+                            Level Rankings
+                        </TabButton>
+                        <TabButton $active={mode === "elo"} onClick={() => setMode("elo")}>
+                            Elo Rankings
+                        </TabButton>
+                    </TabRow>
 
-                        <SearchRow>
-                            <SearchInputWrapper>
-                                <Search sx={{ fontSize: 18, color: colors.textHint }} />
-                                <SearchInput
-                                    placeholder="Search players by name, username or email"
-                                    value={search}
-                                    onChange={(event) => setSearch(event.target.value)}
-                                    onKeyDown={(event) => {
-                                        if (event.key === "Enter") {
-                                            handleSearch();
-                                        }
-                                    }}
-                                />
-                            </SearchInputWrapper>
+                    {mode === "levels" ? (
+                        <>
+                            <ControlsCard>
+                                <LevelsRow>
+                                    {levels.map((level) => (
+                                        <LevelButton
+                                            key={level}
+                                            $active={selectedLevel === level}
+                                            onClick={() => handleLevelChange(level)}
+                                        >
+                                            {level.charAt(0) + level.slice(1).toLowerCase()}
+                                        </LevelButton>
+                                    ))}
+                                </LevelsRow>
 
-                            <SearchButton onClick={handleSearch}>Search</SearchButton>
-                        </SearchRow>
-                    </ControlsCard>
+                                <SearchRow>
+                                    <SearchInputWrapper>
+                                        <Search sx={{ fontSize: 18, color: colors.textHint }} />
+                                        <SearchInput
+                                            placeholder="Search players by name, username or email"
+                                            value={search}
+                                            onChange={(event) => setSearch(event.target.value)}
+                                            onKeyDown={(event) => {
+                                                if (event.key === "Enter") {
+                                                    handleSearch();
+                                                }
+                                            }}
+                                        />
+                                    </SearchInputWrapper>
 
-                    <TableCard>
-                        {loading ? (
-                            <LoadingWrapper>
-                                <CircularProgress />
-                            </LoadingWrapper>
-                        ) : (
-                            <>
-                                <StyledTable>
-                                    <thead>
-                                    <tr>
-                                        <th style={{ width: "4rem" }}>Rank</th>
-                                        <th>Player</th>
-                                        <th>Wins</th>
-                                        <th>Losses</th>
-                                        <th>Win Rate</th>
-                                        <th>Points</th>
-                                    </tr>
-                                    </thead>
+                                    <SearchButton onClick={handleSearch}>Search</SearchButton>
+                                </SearchRow>
+                            </ControlsCard>
 
-                                    <tbody>
-                                    {players.length === 0 ? (
-                                        <tr>
-                                            <EmptyCell colSpan={6}>No players found.</EmptyCell>
-                                        </tr>
-                                    ) : (
-                                        players.map((player) => (
-                                            <tr key={player.id}>
-                                                <td>
-                                                    <RankCell>
-                                                        {player.rank <= 3 ? (
-                                                            <MedalBadge $color={medalColors[player.rank]}>
-                                                                {player.rank}
-                                                            </MedalBadge>
-                                                        ) : (
-                                                            <span className="tabular-nums">{player.rank}</span>
-                                                        )}
-                                                    </RankCell>
-                                                </td>
-                                                <td>
-                                                    <PlayerNameCell>{player.fullName}</PlayerNameCell>
-                                                </td>
-                                                <td className="tabular-nums">{player.wins}</td>
-                                                <td className="tabular-nums">{player.losses}</td>
-                                                <td className="tabular-nums">
-                                                    <AnimatedCounter value={player.winRate} suffix="%" />
-                                                </td>
-                                                <td className="tabular-nums">
-                                                    <strong>
-                                                        <AnimatedCounter value={player.points} suffix=" pts" />
-                                                    </strong>
-                                                </td>
+                            <TableCard>
+                                {loading ? (
+                                    <LoadingWrapper>
+                                        <CircularProgress />
+                                    </LoadingWrapper>
+                                ) : (
+                                    <>
+                                        <StyledTable>
+                                            <thead>
+                                            <tr>
+                                                <th style={{ width: "4rem" }}>Rank</th>
+                                                <th>Player</th>
+                                                <th>Wins</th>
+                                                <th>Losses</th>
+                                                <th>Win Rate</th>
+                                                <th>Points</th>
                                             </tr>
-                                        ))
-                                    )}
-                                    </tbody>
-                                </StyledTable>
+                                            </thead>
 
-                                <PaginationRow>
-                                    <PaginationButton
-                                        onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-                                        disabled={page === 0}
-                                    >
-                                        Previous
-                                    </PaginationButton>
+                                            <tbody>
+                                            {players.length === 0 ? (
+                                                <tr>
+                                                    <EmptyCell colSpan={6}>No players found.</EmptyCell>
+                                                </tr>
+                                            ) : (
+                                                players.map((player) => (
+                                                    <tr key={player.id}>
+                                                        <td>
+                                                            <RankCell>
+                                                                {player.rank <= 3 ? (
+                                                                    <MedalBadge $color={medalColors[player.rank]}>
+                                                                        {player.rank}
+                                                                    </MedalBadge>
+                                                                ) : (
+                                                                    <span className="tabular-nums">{player.rank}</span>
+                                                                )}
+                                                            </RankCell>
+                                                        </td>
+                                                        <td>
+                                                            <PlayerNameCell>{player.fullName}</PlayerNameCell>
+                                                        </td>
+                                                        <td className="tabular-nums">{player.wins}</td>
+                                                        <td className="tabular-nums">{player.losses}</td>
+                                                        <td className="tabular-nums">
+                                                            <AnimatedCounter value={player.winRate} suffix="%" />
+                                                        </td>
+                                                        <td className="tabular-nums">
+                                                            <strong>
+                                                                <AnimatedCounter value={player.points} suffix=" pts" />
+                                                            </strong>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                            </tbody>
+                                        </StyledTable>
 
-                                    <PaginationInfo>
-                                        Page {totalPages === 0 ? 0 : page + 1} of {totalPages}
-                                    </PaginationInfo>
+                                        <PaginationRow>
+                                            <PaginationButton
+                                                onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+                                                disabled={page === 0}
+                                            >
+                                                Previous
+                                            </PaginationButton>
 
-                                    <PaginationButton
-                                        onClick={() =>
-                                            setPage((prev) =>
-                                                totalPages === 0 ? prev : Math.min(prev + 1, totalPages - 1)
-                                            )
-                                        }
-                                        disabled={totalPages === 0 || page >= totalPages - 1}
-                                    >
-                                        Next
-                                    </PaginationButton>
-                                </PaginationRow>
-                            </>
-                        )}
-                    </TableCard>
+                                            <PaginationInfo>
+                                                Page {totalPages === 0 ? 0 : page + 1} of {totalPages}
+                                            </PaginationInfo>
+
+                                            <PaginationButton
+                                                onClick={() =>
+                                                    setPage((prev) =>
+                                                        totalPages === 0 ? prev : Math.min(prev + 1, totalPages - 1)
+                                                    )
+                                                }
+                                                disabled={totalPages === 0 || page >= totalPages - 1}
+                                            >
+                                                Next
+                                            </PaginationButton>
+                                        </PaginationRow>
+                                    </>
+                                )}
+                            </TableCard>
+                        </>
+                    ) : (
+                        <EloLeaderboardTab />
+                    )}
                 </PageWrapper>
             </AuthenticatedLayout>
         </AnimatedPage>
@@ -231,6 +248,33 @@ export default LeaderboardPage;
 
 const PageWrapper = styled(BasePageWrapper)`
     max-width: 80rem;
+`;
+
+const TabRow = styled(Box)`
+    display: flex;
+    gap: ${spacing.xs};
+    margin-bottom: ${spacing.md};
+`;
+
+const TabButton = styled.button<{ $active: boolean }>`
+    height: 2.5rem;
+    padding: 0 ${spacing.lg};
+    border: none;
+    border-radius: ${radius.pill};
+    background: ${({ $active }) => ($active ? colors.primary : colors.surfaceAlt)};
+    color: ${({ $active }) => ($active ? "white" : colors.textSecondary)};
+    font-size: ${fontSize.sm};
+    font-weight: ${fontWeight.bold};
+    cursor: pointer;
+    transition: all ${transition.normal};
+
+    &:hover {
+        background: ${({ $active }) => ($active ? colors.primaryHover : colors.surfaceAltHover)};
+    }
+
+    &:active {
+        transform: scale(0.97);
+    }
 `;
 
 const ControlsCard = styled(Box)`

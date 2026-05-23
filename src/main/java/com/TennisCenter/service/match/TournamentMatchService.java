@@ -13,6 +13,7 @@ import com.TennisCenter.repository.CourtRepository;
 import com.TennisCenter.repository.MatchSetRepository;
 import com.TennisCenter.repository.TournamentMatchRepository;
 import com.TennisCenter.repository.UserRepository;
+import com.TennisCenter.service.ranking.EloService;
 import com.TennisCenter.service.ranking.RankingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ public class TournamentMatchService {
     private final SetScoreValidator setScoreValidator;
     private final TournamentMatchMapper tournamentMatchMapper;
     private final RankingService rankingService;
+    private final EloService eloService;
 
     public List<TournamentMatchResponse> getTournamentMatches(Long tournamentId, User currentUser) {
         return tournamentMatchRepository
@@ -102,6 +104,7 @@ public class TournamentMatchService {
         TournamentMatch saved = tournamentMatchRepository.save(match);
 
         rankingService.awardMatchPoints(saved, winner, loser);
+        eloService.updateEloAfterMatch(saved);
 
         advanceWinnerToNextRound(match, winner);
 
@@ -273,6 +276,7 @@ public class TournamentMatchService {
         TournamentMatch saved = tournamentMatchRepository.save(match);
 
         rankingService.awardMatchPoints(saved, winner, loser);
+        eloService.updateEloAfterMatch(saved);
 
         advanceWinnerToNextRound(match, winner);
 
@@ -309,5 +313,6 @@ public class TournamentMatchService {
      */
     public void awardRankingPointsForMatch(TournamentMatch match, User winner, User loser) {
         rankingService.awardMatchPoints(match, winner, loser);
+        eloService.updateEloAfterMatch(match);
     }
 }
