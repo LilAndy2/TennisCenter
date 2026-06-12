@@ -4,6 +4,11 @@ import styled from "styled-components";
 import axiosInstance from "../api/axiosInstance";
 import AuthenticatedLayout from "../components/layout/AuthenticatedLayout";
 import TournamentCard from "../components/tournaments/TournamentCard";
+import TournamentFilters, {
+    ALL,
+    type LevelFilter,
+    type SurfaceFilter,
+} from "../components/tournaments/TournamentFilters";
 import { AnimatedPage } from "../components/animated";
 import { AnimatedCard } from "../components/animated";
 import {
@@ -30,6 +35,11 @@ const filterOptions: FilterOption[] = ["Ongoing", "Upcoming", "Finished"];
 
 function TournamentsPage() {
     const [selectedFilter, setSelectedFilter] = useState<FilterOption>("Ongoing");
+    const [levelFilter, setLevelFilter] = useState<LevelFilter>(ALL);
+    const [surfaceFilter, setSurfaceFilter] = useState<SurfaceFilter>(ALL);
+    const [periodFrom, setPeriodFrom] = useState("");
+    const [periodTo, setPeriodTo] = useState("");
+
     const [tournaments, setTournaments] = useState<TournamentType[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -48,11 +58,38 @@ function TournamentsPage() {
         loadTournaments();
     }, []);
 
+    const hasActiveFilters =
+        levelFilter !== ALL ||
+        surfaceFilter !== ALL ||
+        periodFrom !== "" ||
+        periodTo !== "";
+
     const filteredTournaments = useMemo(() => {
-        return tournaments.filter(
-            (tournament) => tournament.status === selectedFilter
-        );
-    }, [selectedFilter, tournaments]);
+        return tournaments.filter((tournament) => {
+            // Status (Ongoing / Upcoming / Finished) — applies to all three tabs.
+            if (tournament.status !== selectedFilter) return false;
+
+            // Level
+            if (levelFilter !== ALL && tournament.level !== levelFilter) return false;
+
+            // Surface
+            if (surfaceFilter !== ALL && tournament.surface !== surfaceFilter) return false;
+
+            // Period: keep tournaments whose date range overlaps the selected window.
+            // Dates are ISO strings (YYYY-MM-DD), so lexicographic comparison is safe.
+            if (periodFrom && tournament.endDate < periodFrom) return false;
+            if (periodTo && tournament.startDate > periodTo) return false;
+
+            return true;
+        });
+    }, [selectedFilter, levelFilter, surfaceFilter, periodFrom, periodTo, tournaments]);
+
+    const resetFilters = () => {
+        setLevelFilter(ALL);
+        setSurfaceFilter(ALL);
+        setPeriodFrom("");
+        setPeriodTo("");
+    };
 
     return (
         <AnimatedPage>
@@ -77,13 +114,26 @@ function TournamentsPage() {
                         ))}
                     </FiltersRow>
 
+                    <TournamentFilters
+                        level={levelFilter}
+                        surface={surfaceFilter}
+                        periodFrom={periodFrom}
+                        periodTo={periodTo}
+                        onLevelChange={setLevelFilter}
+                        onSurfaceChange={setSurfaceFilter}
+                        onPeriodFromChange={setPeriodFrom}
+                        onPeriodToChange={setPeriodTo}
+                        onReset={resetFilters}
+                    />
+
                     {loading ? (
                         <LoadingWrapper>
                             <CircularProgress />
                         </LoadingWrapper>
                     ) : filteredTournaments.length === 0 ? (
                         <EmptyText>
-                            No {selectedFilter.toLowerCase()} tournaments found.
+                            No {selectedFilter.toLowerCase()} tournaments{" "}
+                            {hasActiveFilters ? "match your filters" : "found"}.
                         </EmptyText>
                     ) : (
                         <CardsGrid>
@@ -111,7 +161,7 @@ const FiltersRow = styled(Box)`
     align-items: center;
     gap: ${spacing.xs};
     flex-wrap: wrap;
-    margin-bottom: ${spacing.lg};
+    margin-bottom: ${spacing.md};
 `;
 
 const FilterButton = styled.button<{ $active: boolean }>`
