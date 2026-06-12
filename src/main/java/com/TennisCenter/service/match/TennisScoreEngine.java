@@ -136,7 +136,6 @@ public class TennisScoreEngine {
             p2Points++;
         }
 
-        // Check if game is won
         if (p1Points >= 4 || p2Points >= 4) {
             if (p1Points >= 3 && p2Points >= 3) {
                 // Deuce rules
@@ -145,8 +144,6 @@ public class TennisScoreEngine {
                     handleGameWon(gameWinner);
 
                     if (wasBreakPoint && !gameWinner.equals(currentServerId)) {
-                        // Break was converted - but server already switched in handleGameWon
-                        // We need to check who the server was before the switch
                         if (p1Serving && gameWinner.equals(playerTwoId)) {
                             p2BreakPointsConverted++;
                         } else if (!p1Serving && gameWinner.equals(playerOneId)) {
@@ -155,10 +152,8 @@ public class TennisScoreEngine {
                     }
                     return true;
                 }
-                // Still in deuce — no game won yet
                 return false;
             } else {
-                // One player reached 4 and other hasn't reached 3 yet
                 Long gameWinner = p1Points >= 4 ? playerOneId : playerTwoId;
 
                 if (wasBreakPoint) {

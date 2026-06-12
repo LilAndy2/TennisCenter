@@ -148,6 +148,7 @@ public class SingleEliminationService {
         int[] finalSlots = new int[bracketSize];
         Arrays.fill(finalSlots, -1);
 
+        // Etapa 1: plasarea capilor de serie pe pozițiile calculate
         for (int i = 0; i < numSeeds; i++) {
             finalSlots[seededPositions[i]] = i;
         }
@@ -157,6 +158,7 @@ public class SingleEliminationService {
             takenSlots.add(seededPositions[i]);
         }
 
+        // Etapa 2: bye-urile sunt plasate lângă capii de serie
         int byesAgainstSeeds = Math.min(numByes, numSeeds);
         for (int i = 0; i < byesAgainstSeeds; i++) {
             int seedSlot  = seededPositions[i];
@@ -165,6 +167,7 @@ public class SingleEliminationService {
             takenSlots.add(pairedSlot);
         }
 
+        // Etapa 3: bye-urile rămase sunt distribuite aleator
         List<Integer> freeSlots = new ArrayList<>();
         for (int i = 0; i < bracketSize; i++) {
             if (finalSlots[i] == -1) freeSlots.add(i);
